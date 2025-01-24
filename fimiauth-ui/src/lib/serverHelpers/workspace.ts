@@ -1,7 +1,10 @@
 import { db, workspace as workspaceTable } from "@/src/db/schema.js";
 import { kEavEntityType } from "@/src/definitions/eav.js";
 import { IActionSubject } from "@/src/definitions/resource.js";
-import { addWorkspaceSchema } from "@/src/definitions/workspace.js";
+import {
+  addWorkspaceSchema,
+  updateWorkspaceSchema,
+} from "@/src/definitions/workspace.js";
 import { eq, inArray } from "drizzle-orm";
 import { OmitFrom } from "softkave-js-utils";
 import { z } from "zod";
@@ -93,4 +96,28 @@ export async function deleteWorkspace(params: { workspaceId: string }) {
   await db
     .delete(workspaceTable)
     .where(eq(workspaceTable.id, params.workspaceId));
+}
+
+export async function updateWorkspace(params: {
+  data: z.infer<typeof updateWorkspaceSchema> | (unknown & {});
+  workspaceId: string;
+  subject: IActionSubject;
+}) {
+  const input = updateWorkspaceSchema.parse(params.data);
+
+  const workspace = await db
+    .update(workspaceTable)
+    .set({
+      ...input,
+      lastUpdatedAt: new Date(),
+      lastUpdatedBy: params.subject.id,
+      lastUpdatedByType: params.subject.type,
+    })
+    .where(eq(workspaceTable.id, params.workspaceId))
+    .returning()
+    .then(
+      ([workspace]) => workspace as typeof workspaceTable.$inferSelect | null
+    );
+
+  return workspace;
 }

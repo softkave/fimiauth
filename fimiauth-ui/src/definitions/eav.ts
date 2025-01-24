@@ -4,6 +4,7 @@ import { IResource } from "./resource.js";
 export const kEavEntityType = {
   agent: "agent",
   collaborationRequest: "collabReq",
+  permissionGroup: "pg",
 } as const;
 
 export const kEavValueType = {

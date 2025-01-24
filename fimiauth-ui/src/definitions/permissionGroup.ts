@@ -41,9 +41,11 @@ export const getPermissionGroupSchema = z.object({
   spaceId: z.string().min(1).optional(),
 });
 
-export const getPermissionsGroupSchema = z.object({
+export const getPermissionGroupsSchema = z.object({
   workspaceId: z.string().min(1),
   spaceId: z.string().min(1).optional(),
+  agentId: z.string().min(1).optional(),
+  permissionGroupId: z.string().min(1).optional(),
 });
 
 export type IAddPermissionGroupEndpointResponse = IPermissionGroup;
