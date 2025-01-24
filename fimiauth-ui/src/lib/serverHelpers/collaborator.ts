@@ -1,7 +1,14 @@
-import { NextAuthRequest, auth } from "@/auth.js";
+import { auth, NextAuthRequest } from "@/auth.js";
 import { collaborator as collaboratorTable, db } from "@/src/db/schema.js";
+import {
+  addCollaboratorSchema,
+  CollaboratorType,
+} from "@/src/definitions/collaborator.js";
+import { IActionSubject } from "@/src/definitions/resource.js";
 import { and, eq } from "drizzle-orm";
+import { z } from "zod";
 import { OwnServerError } from "../common/error.js";
+import { cleanSpaceInput } from "./space.js";
 import { IRouteContext } from "./wrapRoute.js";
 
 export async function tryGetCollaborator(params: {
@@ -107,4 +114,31 @@ export async function getUserCollaboratorEntries(params: { userId: string }) {
     .from(collaboratorTable)
     .where(eq(collaboratorTable.providedId, params.userId));
   return collaboratorEntries;
+}
+
+export async function createCollaboratorEntry(params: {
+  data: z.infer<typeof addCollaboratorSchema> | (unknown & {});
+  subject: IActionSubject;
+  type: CollaboratorType;
+  workspaceId: string;
+}) {
+  const input = addCollaboratorSchema.parse(params.data);
+  const newCollaborator = {
+    workspaceId: input.workspaceId,
+    providedId: input.providedId,
+    createdAt: new Date(),
+    lastUpdatedAt: new Date(),
+    createdBy: params.subject.id,
+    createdByType: params.subject.type,
+    lastUpdatedBy: params.subject.id,
+    lastUpdatedByType: params.subject.type,
+    type: params.type,
+    ...cleanSpaceInput(input),
+  } satisfies typeof collaboratorTable.$inferInsert;
+
+  const collaborator = await db
+    .insert(collaboratorTable)
+    .values(newCollaborator);
+
+  return collaborator;
 }

@@ -1,5 +1,6 @@
 import { ValueOf } from "type-fest";
 import { z } from "zod";
+import { kAppConstants } from "./appConstants.js";
 import { IResource } from "./resource.js";
 
 export interface ISpace extends IResource {
@@ -22,15 +23,25 @@ export interface ISubSpaceResource extends IResource {
 }
 
 export const addSpaceSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
+  name: z.string().min(1).max(kAppConstants.validation.maxNameLength),
+  description: z
+    .string()
+    .max(kAppConstants.validation.maxDescriptionLength)
+    .optional(),
   workspaceId: z.string().min(1),
   providedId: z.string().min(1).optional(),
 });
 
 export const updateSpaceSchema = z.object({
-  name: z.string().min(1).optional(),
-  description: z.string().optional(),
+  name: z
+    .string()
+    .min(1)
+    .max(kAppConstants.validation.maxNameLength)
+    .optional(),
+  description: z
+    .string()
+    .max(kAppConstants.validation.maxDescriptionLength)
+    .optional(),
   providedId: z.string().min(1).optional(),
 });
 

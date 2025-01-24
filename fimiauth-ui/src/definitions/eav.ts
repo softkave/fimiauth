@@ -25,3 +25,11 @@ export interface IEav extends IResource {
   valueType: EavValueType;
   value: string;
 }
+
+export interface IEavInput {
+  entity: string;
+  entityType: EavEntityType;
+  attribute: EavAttribute;
+  valueType: EavValueType;
+  value: string;
+}

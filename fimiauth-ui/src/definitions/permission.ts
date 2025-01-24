@@ -1,6 +1,7 @@
 import { ValueOf } from "type-fest";
 import { z } from "zod";
 import { ISubSpaceResource } from "./space.js";
+import { kAppConstants } from "./appConstants.js";
 
 export const kEntityType = {
   agent: "agent",
@@ -33,7 +34,10 @@ export interface IPermission extends ISubSpaceResource {
 }
 
 export const addPermissionSchema = z.object({
-  description: z.string().optional(),
+  description: z
+    .string()
+    .max(kAppConstants.validation.maxDescriptionLength)
+    .optional(),
   entityId: z.string().min(1),
   entityType: z.nativeEnum(kEntityType).optional(),
   action: z.string().min(1),

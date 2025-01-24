@@ -1,10 +1,17 @@
 import { db, workspace as workspaceTable } from "@/src/db/schema.js";
+import { kEavEntityType } from "@/src/definitions/eav.js";
 import { IActionSubject } from "@/src/definitions/resource.js";
 import { addWorkspaceSchema } from "@/src/definitions/workspace.js";
 import { eq, inArray } from "drizzle-orm";
 import { OmitFrom } from "softkave-js-utils";
+import { z } from "zod";
 import { OwnServerError } from "../common/error.js";
+import { createAgent } from "./agent.js";
 import { getUserCollaboratorEntries } from "./collaborator.js";
+import {
+  assignPermissionGroup,
+  createAdminPermissionGroup,
+} from "./permissionGroup.js";
 
 export const getWorkspace = async (params: { workspaceId: string }) => {
   const workspace = await db
@@ -23,7 +30,7 @@ export const assertGetWorkspace = async (params: { workspaceId: string }) => {
 };
 
 export async function createWorkspace(params: {
-  data: unknown;
+  data: z.infer<typeof addWorkspaceSchema> | (unknown & {});
   subject: IActionSubject;
 }) {
   const input = addWorkspaceSchema.parse(params.data);
@@ -43,6 +50,29 @@ export async function createWorkspace(params: {
     .values([newWorkspace])
     .returning()
     .then(([workspace]) => workspace);
+
+  const [adminPermissionGroup, agent] = await Promise.all([
+    createAdminPermissionGroup({
+      workspaceId: workspace.id,
+      subject: params.subject,
+    }),
+    createAgent({
+      data: {
+        name: `default agent for user - ${params.subject.id}`,
+        workspaceId: workspace.id,
+        providedId: params.subject.id,
+      },
+      subject: params.subject,
+    }),
+  ]);
+
+  await assignPermissionGroup({
+    pgId: adminPermissionGroup.id,
+    entityId: agent.id,
+    entityType: kEavEntityType.agent,
+    subject: params.subject,
+    workspaceId: workspace.id,
+  });
 
   return workspace;
 }

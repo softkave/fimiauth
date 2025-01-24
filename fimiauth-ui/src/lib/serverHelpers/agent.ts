@@ -1,9 +1,13 @@
 import { NextAuthRequest, auth } from "@/auth.js";
 import { agent as agentTable, db } from "@/src/db/schema.js";
+import { addAgentSchema } from "@/src/definitions/agent.js";
+import { IActionSubject } from "@/src/definitions/resource.js";
 import { kSpaceType } from "@/src/definitions/space.js";
 import { and, eq } from "drizzle-orm";
+import { z } from "zod";
 import { OwnServerError } from "../common/error.js";
 import { tryGetCollaborator } from "./collaborator.js";
+import { cleanSpaceInput } from "./space.js";
 import { IRouteContext } from "./wrapRoute.js";
 
 export async function tryGetAgentByProvidedId(params: {
@@ -113,4 +117,29 @@ export async function tryGetCollaboratorFromRequest(params: {
   });
 
   return collaborator;
+}
+
+export async function createAgent(params: {
+  data: z.infer<typeof addAgentSchema> | (unknown & {});
+  subject: IActionSubject;
+}) {
+  const input = addAgentSchema.parse(params.data);
+  const newAgent = {
+    ...input,
+    ...cleanSpaceInput(input),
+    createdAt: new Date(),
+    lastUpdatedAt: new Date(),
+    createdBy: params.subject.id,
+    createdByType: params.subject.type,
+    lastUpdatedBy: params.subject.id,
+    lastUpdatedByType: params.subject.type,
+  } satisfies typeof agentTable.$inferInsert;
+
+  const agent = await db
+    .insert(agentTable)
+    .values([newAgent])
+    .returning()
+    .then(([agent]) => agent);
+
+  return agent;
 }

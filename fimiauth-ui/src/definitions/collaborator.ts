@@ -1,6 +1,7 @@
 import { ValueOf } from "type-fest";
 import { z } from "zod";
 import { IAgent } from "./agent.js";
+import { kAppConstants } from "./appConstants.js";
 import { ISubSpaceResource } from "./space.js";
 
 export const kCollaboratorType = {
@@ -13,13 +14,17 @@ export type CollaboratorType = ValueOf<typeof kCollaboratorType>;
 export interface ICollaborator extends ISubSpaceResource {
   /** same as user ID when type is user, otherwise it's externally provided */
   providedId: string;
+  description?: string;
   type: CollaboratorType;
   workspaceId: string;
 }
 
 export const addCollaboratorSchema = z.object({
   name: z.string().min(1),
-  description: z.string().optional(),
+  description: z
+    .string()
+    .max(kAppConstants.validation.maxDescriptionLength)
+    .optional(),
   workspaceId: z.string().min(1),
   providedId: z.string().min(1),
   spaceId: z.string().min(1).optional(),
@@ -27,7 +32,10 @@ export const addCollaboratorSchema = z.object({
 
 export const updateAgentSchema = z.object({
   name: z.string().min(1).optional(),
-  description: z.string().optional(),
+  description: z
+    .string()
+    .max(kAppConstants.validation.maxDescriptionLength)
+    .optional(),
   spaceId: z.string().min(1).optional(),
   providedId: z.string().min(1).optional(),
 });

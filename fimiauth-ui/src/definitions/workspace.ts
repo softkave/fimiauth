@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { kAppConstants } from "./appConstants.js";
 import { IResource } from "./resource.js";
 
 export interface IWorkspace extends IResource {
@@ -7,13 +8,23 @@ export interface IWorkspace extends IResource {
 }
 
 export const addWorkspaceSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
+  name: z.string().min(1).max(kAppConstants.validation.maxNameLength),
+  description: z
+    .string()
+    .max(kAppConstants.validation.maxDescriptionLength)
+    .optional(),
 });
 
 export const updateWorkspaceSchema = z.object({
-  name: z.string().min(1).optional(),
-  description: z.string().optional(),
+  name: z
+    .string()
+    .min(1)
+    .max(kAppConstants.validation.maxNameLength)
+    .optional(),
+  description: z
+    .string()
+    .max(kAppConstants.validation.maxDescriptionLength)
+    .optional(),
 });
 
 export const getWorkspaceByIdSchema = z.object({

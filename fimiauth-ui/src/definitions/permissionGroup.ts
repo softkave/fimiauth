@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { kAppConstants } from "./appConstants.js";
 import { ISubSpaceResource } from "./space.js";
 
 export interface IPermissionGroup extends ISubSpaceResource {
@@ -9,16 +10,26 @@ export interface IPermissionGroup extends ISubSpaceResource {
 }
 
 export const addPermissionGroupSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
+  name: z.string().min(1).max(kAppConstants.validation.maxNameLength),
+  description: z
+    .string()
+    .max(kAppConstants.validation.maxDescriptionLength)
+    .optional(),
   workspaceId: z.string().min(1),
   providedId: z.string().min(1).optional(),
   spaceId: z.string().min(1).optional(),
 });
 
 export const updatePermissionGroupSchema = z.object({
-  name: z.string().min(1).optional(),
-  description: z.string().optional(),
+  name: z
+    .string()
+    .min(1)
+    .max(kAppConstants.validation.maxNameLength)
+    .optional(),
+  description: z
+    .string()
+    .max(kAppConstants.validation.maxDescriptionLength)
+    .optional(),
   spaceId: z.string().min(1).optional(),
   providedId: z.string().min(1).optional(),
 });

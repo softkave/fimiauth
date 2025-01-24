@@ -1,6 +1,7 @@
 import { pick } from "lodash-es";
 import { ValueOf } from "type-fest";
 import { z } from "zod";
+import { kAppConstants } from "./appConstants.js";
 import { CollaboratorType } from "./collaborator.js";
 import { ISubSpaceResource } from "./space.js";
 
@@ -25,16 +26,26 @@ export interface ICollaborationRequest extends ISubSpaceResource {
 }
 
 export const addCollaborationRequestSchema = z.object({
-  title: z.string().min(1),
-  message: z.string().optional(),
+  title: z.string().min(1).max(kAppConstants.validation.maxNameLength),
+  message: z
+    .string()
+    .max(kAppConstants.validation.maxDescriptionLength)
+    .optional(),
   workspaceId: z.string().min(1),
   providedId: z.string().min(1),
   spaceId: z.string().min(1).optional(),
 });
 
 export const updateCollaborationRequestSchema = z.object({
-  title: z.string().min(1).optional(),
-  message: z.string().optional(),
+  title: z
+    .string()
+    .min(1)
+    .max(kAppConstants.validation.maxNameLength)
+    .optional(),
+  message: z
+    .string()
+    .max(kAppConstants.validation.maxDescriptionLength)
+    .optional(),
   spaceId: z.string().min(1).optional(),
   providedId: z.string().min(1).optional(),
   status: z.nativeEnum(

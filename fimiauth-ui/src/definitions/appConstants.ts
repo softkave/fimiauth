@@ -1,6 +1,12 @@
 export const kAppConstants = {
   name: "fimipost",
   description: "fimipost",
-  maxPostTitleLength: 160,
-  maxPostSummaryLength: 260,
+  permissionGroup: {
+    adminPermissionGroupName: "Admin",
+    adminPermissionGroupDescription: "Admin permission group",
+  },
+  validation: {
+    maxNameLength: 160,
+    maxDescriptionLength: 260,
+  },
 };

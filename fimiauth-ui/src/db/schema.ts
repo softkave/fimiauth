@@ -135,7 +135,7 @@ export const agent = pgTable("agent", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  name: text("name").notNull(),
+  name: text("name"),
   description: text("description"),
   workspaceId: text("workspaceId")
     .notNull()
@@ -206,6 +206,7 @@ export const collaborator = pgTable("collaborator", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   providedId: text("providedId").notNull(),
+  description: text("description"),
   type: text("type").notNull(),
   workspaceId: text("workspaceId")
     .notNull()
