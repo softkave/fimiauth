@@ -3,6 +3,7 @@ import { ISubSpaceResource } from "./space.js";
 
 export interface IAgent extends ISubSpaceResource {
   id: string;
+  providedId?: string;
   name: string;
   description?: string;
   workspaceId: string;
@@ -17,16 +18,21 @@ export const addAgentSchema = z.object({
   description: z.string().optional(),
   workspaceId: z.string().min(1),
   spaceId: z.string().min(1).optional(),
+  providedId: z.string().min(1).optional(),
 });
 
 export const updateAgentSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().optional(),
   spaceId: z.string().min(1).optional(),
+  providedId: z.string().min(1).optional(),
 });
 
-export const getAgentByIdSchema = z.object({
-  id: z.string().min(1),
+export const getAgentSchema = z.object({
+  id: z.string().min(1).optional(),
+  workspaceId: z.string().min(1).optional(),
+  providedId: z.string().min(1).optional(),
+  spaceId: z.string().min(1).optional(),
 });
 
 export const getAgentsSchema = z.object({

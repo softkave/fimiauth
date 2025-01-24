@@ -36,8 +36,11 @@ export const updateAgentSchema = z.object({
   providedId: z.string().min(1).optional(),
 });
 
-export const getAgentByIdSchema = z.object({
-  id: z.string().min(1),
+export const getCollaboratorSchema = z.object({
+  id: z.string().min(1).optional(),
+  workspaceId: z.string().min(1).optional(),
+  providedId: z.string().min(1).optional(),
+  spaceId: z.string().min(1).optional(),
 });
 
 export const getAgentsSchema = z.object({

@@ -120,6 +120,7 @@ export const space = pgTable("space", {
   workspaceId: text("workspaceId")
     .notNull()
     .references(() => workspace.id, { onDelete: "cascade" }),
+  providedId: text("providedId"),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
   lastUpdatedAt: timestamp("lastUpdatedAt", { mode: "date" }).notNull(),
   lastUpdatedBy: text("lastUpdatedBy").notNull(),
@@ -135,6 +136,7 @@ export const agent = pgTable("agent", {
   workspaceId: text("workspaceId")
     .notNull()
     .references(() => workspace.id, { onDelete: "cascade" }),
+  providedId: text("providedId"),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
   lastUpdatedAt: timestamp("lastUpdatedAt", { mode: "date" }).notNull(),
   lastUpdatedBy: text("lastUpdatedBy").notNull(),
@@ -154,6 +156,7 @@ export const permissionGroup = pgTable("permissionGroup", {
   workspaceId: text("workspaceId")
     .notNull()
     .references(() => workspace.id, { onDelete: "cascade" }),
+  providedId: text("providedId"),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
   lastUpdatedAt: timestamp("lastUpdatedAt", { mode: "date" }).notNull(),
   lastUpdatedBy: text("lastUpdatedBy").notNull(),
@@ -201,6 +204,10 @@ export const collaborator = pgTable("collaborator", {
   lastUpdatedAt: timestamp("lastUpdatedAt", { mode: "date" }).notNull(),
   lastUpdatedBy: text("lastUpdatedBy").notNull(),
   createdBy: text("createdBy").notNull(),
+  spaceId: text("spaceId")
+    .notNull()
+    .references(() => space.id, { onDelete: "cascade" }),
+  spaceType: text("spaceType").notNull(),
 });
 
 export const collaborationRequest = pgTable("collaborationRequest", {
@@ -219,6 +226,10 @@ export const collaborationRequest = pgTable("collaborationRequest", {
   lastUpdatedAt: timestamp("lastUpdatedAt", { mode: "date" }).notNull(),
   lastUpdatedBy: text("lastUpdatedBy").notNull(),
   createdBy: text("createdBy").notNull(),
+  spaceId: text("spaceId")
+    .notNull()
+    .references(() => space.id, { onDelete: "cascade" }),
+  spaceType: text("spaceType").notNull(),
 });
 
 export const eav = pgTable("eav", {

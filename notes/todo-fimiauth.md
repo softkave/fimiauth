@@ -40,3 +40,4 @@
 - assignments, internal
   - of permission group to agent
   - of permission group to collaboration request on accept
+- compound unique constraints

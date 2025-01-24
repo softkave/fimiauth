@@ -52,8 +52,11 @@ export const updateCollaborationRequestSchema = z.object({
   ),
 });
 
-export const getCollaborationRequestByIdSchema = z.object({
-  id: z.string().min(1),
+export const getCollaborationRequestSchema = z.object({
+  id: z.string().min(1).optional(),
+  workspaceId: z.string().min(1).optional(),
+  providedId: z.string().min(1).optional(),
+  spaceId: z.string().min(1).optional(),
 });
 
 export const getCollaborationRequestsSchema = z.object({
