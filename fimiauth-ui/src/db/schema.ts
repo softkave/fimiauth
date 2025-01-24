@@ -111,6 +111,21 @@ export const workspace = pgTable("workspace", {
   createdBy: text("createdBy").notNull(),
 });
 
+export const space = pgTable("space", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  description: text("description"),
+  workspaceId: text("workspaceId")
+    .notNull()
+    .references(() => workspace.id, { onDelete: "cascade" }),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+  lastUpdatedAt: timestamp("lastUpdatedAt", { mode: "date" }).notNull(),
+  lastUpdatedBy: text("lastUpdatedBy").notNull(),
+  createdBy: text("createdBy").notNull(),
+});
+
 export const agent = pgTable("agent", {
   id: text("id")
     .primaryKey()
@@ -124,6 +139,10 @@ export const agent = pgTable("agent", {
   lastUpdatedAt: timestamp("lastUpdatedAt", { mode: "date" }).notNull(),
   lastUpdatedBy: text("lastUpdatedBy").notNull(),
   createdBy: text("createdBy").notNull(),
+  spaceId: text("spaceId")
+    .notNull()
+    .references(() => space.id, { onDelete: "cascade" }),
+  spaceType: text("spaceType").notNull(),
 });
 
 export const permissionGroup = pgTable("permissionGroup", {
@@ -139,6 +158,10 @@ export const permissionGroup = pgTable("permissionGroup", {
   lastUpdatedAt: timestamp("lastUpdatedAt", { mode: "date" }).notNull(),
   lastUpdatedBy: text("lastUpdatedBy").notNull(),
   createdBy: text("createdBy").notNull(),
+  spaceId: text("spaceId")
+    .notNull()
+    .references(() => space.id, { onDelete: "cascade" }),
+  spaceType: text("spaceType").notNull(),
 });
 
 export const permission = pgTable("permission", {
@@ -155,4 +178,60 @@ export const permission = pgTable("permission", {
   workspaceId: text("workspaceId")
     .notNull()
     .references(() => workspace.id, { onDelete: "cascade" }),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+  lastUpdatedAt: timestamp("lastUpdatedAt", { mode: "date" }).notNull(),
+  lastUpdatedBy: text("lastUpdatedBy").notNull(),
+  createdBy: text("createdBy").notNull(),
+  spaceId: text("spaceId")
+    .notNull()
+    .references(() => space.id, { onDelete: "cascade" }),
+  spaceType: text("spaceType").notNull(),
+});
+
+export const collaborator = pgTable("collaborator", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  providedId: text("providedId").notNull(),
+  type: text("type").notNull(),
+  workspaceId: text("workspaceId")
+    .notNull()
+    .references(() => workspace.id, { onDelete: "cascade" }),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+  lastUpdatedAt: timestamp("lastUpdatedAt", { mode: "date" }).notNull(),
+  lastUpdatedBy: text("lastUpdatedBy").notNull(),
+  createdBy: text("createdBy").notNull(),
+});
+
+export const collaborationRequest = pgTable("collaborationRequest", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  providedId: text("providedId").notNull(),
+  type: text("type").notNull(),
+  status: text("status").notNull(),
+  title: text("title").notNull(),
+  message: text("message"),
+  workspaceId: text("workspaceId")
+    .notNull()
+    .references(() => workspace.id, { onDelete: "cascade" }),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+  lastUpdatedAt: timestamp("lastUpdatedAt", { mode: "date" }).notNull(),
+  lastUpdatedBy: text("lastUpdatedBy").notNull(),
+  createdBy: text("createdBy").notNull(),
+});
+
+export const eav = pgTable("eav", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  entity: text("entity").notNull(),
+  entityType: text("entityType").notNull(),
+  attribute: text("attribute").notNull(),
+  valueType: text("valueType").notNull(),
+  value: text("value").notNull(),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+  lastUpdatedAt: timestamp("lastUpdatedAt", { mode: "date" }).notNull(),
+  lastUpdatedBy: text("lastUpdatedBy").notNull(),
+  createdBy: text("createdBy").notNull(),
 });
