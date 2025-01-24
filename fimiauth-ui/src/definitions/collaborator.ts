@@ -11,14 +11,10 @@ export const kCollaboratorType = {
 export type CollaboratorType = ValueOf<typeof kCollaboratorType>;
 
 export interface ICollaborator extends ISubSpaceResource {
-  id: string;
+  /** same as user ID when type is user, otherwise it's externally provided */
   providedId: string;
   type: CollaboratorType;
   workspaceId: string;
-  createdAt: number;
-  lastUpdatedAt: number;
-  lastUpdatedBy: string;
-  createdBy: string;
 }
 
 export const addCollaboratorSchema = z.object({

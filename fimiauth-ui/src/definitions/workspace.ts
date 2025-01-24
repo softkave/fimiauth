@@ -1,13 +1,9 @@
 import { z } from "zod";
+import { IResource } from "./resource.js";
 
-export interface IWorkspace {
-  id: string;
+export interface IWorkspace extends IResource {
   name: string;
   description?: string;
-  createdAt: number;
-  lastUpdatedAt: number;
-  lastUpdatedBy: string;
-  createdBy: string;
 }
 
 export const addWorkspaceSchema = z.object({

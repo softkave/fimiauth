@@ -16,17 +16,12 @@ export type CollaborationRequestStatus = ValueOf<
 >;
 
 export interface ICollaborationRequest extends ISubSpaceResource {
-  id: string;
   providedId: string;
   type: CollaboratorType;
   status: CollaborationRequestStatus;
   title: string;
   message: string;
   workspaceId: string;
-  createdAt: number;
-  lastUpdatedAt: number;
-  lastUpdatedBy: string;
-  createdBy: string;
 }
 
 export const addCollaborationRequestSchema = z.object({

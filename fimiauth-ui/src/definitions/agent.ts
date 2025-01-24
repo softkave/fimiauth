@@ -2,15 +2,10 @@ import { z } from "zod";
 import { ISubSpaceResource } from "./space.js";
 
 export interface IAgent extends ISubSpaceResource {
-  id: string;
   providedId?: string;
   name: string;
   description?: string;
   workspaceId: string;
-  createdAt: number;
-  lastUpdatedAt: number;
-  lastUpdatedBy: string;
-  createdBy: string;
 }
 
 export const addAgentSchema = z.object({

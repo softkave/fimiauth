@@ -1,83 +1,96 @@
 import { NextAuthRequest, auth } from "@/auth.js";
-import { db } from "@/src/db/schema.js";
+import { agent as agentTable, db } from "@/src/db/schema.js";
+import { kSpaceType } from "@/src/definitions/space.js";
 import { and, eq } from "drizzle-orm";
 import { OwnServerError } from "../common/error.js";
-import { IRouteContext } from "./wrapRoute.js";
 import { tryGetCollaborator } from "./collaborator.js";
+import { IRouteContext } from "./wrapRoute.js";
 
-export async function tryGetAgent(params: {
+export async function tryGetAgentByProvidedId(params: {
   workspaceId: string;
   providedId: string;
+  spaceId?: string;
 }) {
   return await db
     .select()
-    .from(collaboratorTable)
+    .from(agentTable)
     .where(
       and(
-        eq(collaboratorTable.workspaceId, params.workspaceId),
-        eq(collaboratorTable.providedId, params.providedId)
+        eq(agentTable.workspaceId, params.workspaceId),
+        eq(agentTable.providedId, params.providedId),
+        ...(params.spaceId ? [eq(agentTable.spaceId, params.spaceId)] : [])
       )
     )
-    .then(
-      ([collaborator]) =>
-        collaborator as typeof collaboratorTable.$inferSelect | null
-    );
+    .then(([agent]) => agent as typeof agentTable.$inferSelect | null);
 }
 
-export async function isCollaboratorInSpace(params: {
-  spaceId: string;
-  providedId: string;
+export async function tryGetAgentById(params: {
+  workspaceId: string;
+  id: string;
 }) {
-  const collaborator = await db
-    .select({
-      id: collaboratorTable.id,
-    })
-    .from(collaboratorTable)
+  return await db
+    .select()
+    .from(agentTable)
     .where(
       and(
-        eq(collaboratorTable.spaceId, params.spaceId),
-        eq(collaboratorTable.providedId, params.providedId)
+        eq(agentTable.workspaceId, params.workspaceId),
+        eq(agentTable.id, params.id)
       )
     )
-    .then(([collaborator]) => collaborator || null);
-  return !!collaborator;
+    .then(([agent]) => agent as typeof agentTable.$inferSelect | null);
 }
 
-export async function assertIsCollaboratorInSpace(params: {
-  spaceId: string;
-  providedId: string;
+export async function tryGetAgent(params: {
+  workspaceId: string;
+  id?: string;
+  providedId?: string;
+  spaceId?: string;
 }) {
-  const isCollaborator = await isCollaboratorInSpace(params);
-  if (!isCollaborator) {
-    throw new OwnServerError("Permission denied", 403);
+  if (params.id) {
+    return await tryGetAgentById({
+      workspaceId: params.workspaceId,
+      id: params.id,
+    });
+  } else if (params.providedId) {
+    return await tryGetAgentByProvidedId({
+      workspaceId: params.workspaceId,
+      providedId: params.providedId,
+      spaceId: params.spaceId,
+    });
   }
+
+  return null;
 }
 
-export async function isCollaboratorInWorkspace(params: {
+export async function isAgentInSpace(params: {
   workspaceId: string;
-  providedId: string;
+  spaceId?: string;
+  providedId?: string;
+  id?: string;
 }) {
-  const collaborator = await db
-    .select({
-      id: collaboratorTable.id,
-    })
-    .from(collaboratorTable)
-    .where(
-      and(
-        eq(collaboratorTable.workspaceId, params.workspaceId),
-        eq(collaboratorTable.providedId, params.providedId)
-      )
-    )
-    .then(([collaborator]) => collaborator || null);
-  return !!collaborator;
+  const agent = await tryGetAgent({
+    workspaceId: params.workspaceId,
+    spaceId: params.spaceId,
+    providedId: params.providedId,
+    id: params.id,
+  });
+
+  return (
+    !!agent &&
+    ((agent.spaceId === params.workspaceId &&
+      agent.spaceType === kSpaceType.workspace) ||
+      agent.spaceId === params.spaceId)
+  );
 }
 
-export async function assertIsCollaboratorInWorkspace(params: {
+export async function assertIsAgentInSpace(params: {
   workspaceId: string;
-  providedId: string;
+  spaceId?: string;
+  providedId?: string;
+  id?: string;
 }) {
-  const isCollaborator = await isCollaboratorInWorkspace(params);
-  if (!isCollaborator) {
+  const isAgent = await isAgentInSpace(params);
+  if (!isAgent) {
     throw new OwnServerError("Permission denied", 403);
   }
 }

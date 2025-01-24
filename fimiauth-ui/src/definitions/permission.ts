@@ -22,7 +22,6 @@ export type IPermissionEntityType = ValueOf<typeof kEntityType> | (string & {});
 export type IPermissionTargetType = ValueOf<typeof kTargetType> | (string & {});
 
 export interface IPermission extends ISubSpaceResource {
-  id: string;
   description?: string;
   entityId: string;
   entityType: IPermissionEntityType;
@@ -31,10 +30,6 @@ export interface IPermission extends ISubSpaceResource {
   target: string;
   targetType: IPermissionTargetType;
   workspaceId: string;
-  createdAt: number;
-  lastUpdatedAt: number;
-  lastUpdatedBy: string;
-  createdBy: string;
 }
 
 export const addPermissionSchema = z.object({

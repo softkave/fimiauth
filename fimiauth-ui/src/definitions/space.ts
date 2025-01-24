@@ -1,16 +1,12 @@
 import { ValueOf } from "type-fest";
 import { z } from "zod";
+import { IResource } from "./resource.js";
 
-export interface ISpace {
-  id: string;
+export interface ISpace extends IResource {
   providedId?: string;
   name: string;
   description?: string;
   workspaceId: string;
-  createdAt: number;
-  lastUpdatedAt: number;
-  lastUpdatedBy: string;
-  createdBy: string;
 }
 
 export const kSpaceType = {
@@ -20,7 +16,7 @@ export const kSpaceType = {
 
 export type SpaceType = ValueOf<typeof kSpaceType>;
 
-export interface ISubSpaceResource {
+export interface ISubSpaceResource extends IResource {
   spaceId: string;
   spaceType: SpaceType;
 }

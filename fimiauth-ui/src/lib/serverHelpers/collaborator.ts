@@ -1,7 +1,7 @@
+import { NextAuthRequest, auth } from "@/auth.js";
 import { collaborator as collaboratorTable, db } from "@/src/db/schema.js";
 import { and, eq } from "drizzle-orm";
 import { OwnServerError } from "../common/error.js";
-import { NextAuthRequest, auth } from "@/auth.js";
 import { IRouteContext } from "./wrapRoute.js";
 
 export async function tryGetCollaborator(params: {
@@ -99,4 +99,12 @@ export async function tryGetCollaboratorFromRequest(params: {
   });
 
   return collaborator;
+}
+
+export async function getUserCollaboratorEntries(params: { userId: string }) {
+  const collaboratorEntries = await db
+    .select()
+    .from(collaboratorTable)
+    .where(eq(collaboratorTable.providedId, params.userId));
+  return collaboratorEntries;
 }
