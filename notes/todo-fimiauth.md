@@ -1,5 +1,7 @@
 # fimipost
 
+## parts
+
 - use ulid or nanoid or cuid for ids
 - allow optional invalidate swr from caller
 - workspace
@@ -41,3 +43,13 @@
   - of permission group to agent
   - of permission group to collaboration request on accept
 - compound unique constraints
+
+## todo
+
+- add collaboration request
+  - email and maybe permission group
+  - get collaboration requests by email
+  - accept collaboration request with provided ID (will be used to create agent)
+  - return workspace and agent token
+- provided id for all resources
+- space

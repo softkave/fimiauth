@@ -1,4 +1,4 @@
-# fimidara server node code
+# fimiauth server node code
 
 ## Server code structure
 

@@ -1,4 +1,4 @@
-# fimidara server node setup
+# fimiauth server node setup
 
 ## Environments
 
