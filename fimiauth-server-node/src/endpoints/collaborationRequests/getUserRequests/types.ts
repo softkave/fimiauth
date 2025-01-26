@@ -1,9 +1,19 @@
 import {PublicCollaborationRequestForUser} from '../../../definitions/collaborationRequest.js';
-import {Endpoint, PaginatedResult, PaginationQuery} from '../../types.js';
+import {
+  Endpoint,
+  EndpointOptionalWorkspaceIDParam,
+  PaginatedResult,
+  PaginationQuery,
+} from '../../types.js';
 
-export interface GetUserCollaborationRequestsEndpointParams extends PaginationQuery {}
+export interface GetUserCollaborationRequestsEndpointParams
+  extends PaginationQuery,
+    EndpointOptionalWorkspaceIDParam {
+  email: string;
+}
 
-export interface GetUserCollaborationRequestsEndpointResult extends PaginatedResult {
+export interface GetUserCollaborationRequestsEndpointResult
+  extends PaginatedResult {
   requests: PublicCollaborationRequestForUser[];
 }
 
