@@ -1,4 +1,5 @@
 import {App} from '../../definitions/app.js';
+import {Collaborator} from '../../definitions/collaborator.js';
 import {PermissionGroup} from '../../definitions/permissionGroups.js';
 import {AppRuntimeState} from '../../definitions/system.js';
 import {DataSemanticBaseProvider} from './DataSemanticDataAccessBaseProvider.js';
@@ -6,6 +7,7 @@ import {DataSemanticWorkspaceResourceProvider} from './DataSemanticDataAccessWor
 import {
   SemanticAppProvider,
   SemanticAppRuntimeStateProvider,
+  SemanticCollaboratorProvider,
   SemanticPermissionGroupProviderType,
 } from './types.js';
 
@@ -20,3 +22,7 @@ export class DataSemanticPermissionGroup
 export class DataSemanticAppRuntimeState
   extends DataSemanticBaseProvider<AppRuntimeState>
   implements SemanticAppRuntimeStateProvider {}
+
+export class DataSemanticCollaborator
+  extends DataSemanticWorkspaceResourceProvider<Collaborator>
+  implements SemanticCollaboratorProvider {}

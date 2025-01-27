@@ -46,10 +46,13 @@
 
 ## todo
 
-- add collaboration request
-  - email and maybe permission group
-  - get collaboration requests by email
-  - accept collaboration request with provided ID (will be used to create agent)
-  - return workspace and agent token
+- go through all endpoints and make sure they are working
+  - agentTokens
+  - collaborationRequests
+  - permissionGroups
+  - permissionItems
+  - workspaces
+  - collaborators
 - provided id for all resources
 - space
+- collaborator

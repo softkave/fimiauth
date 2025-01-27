@@ -59,6 +59,7 @@ export const kFimidaraPublicResourceType = {
   PermissionItem: 'permissionItem',
   Job: 'job',
   Space: 'space',
+  Collaborator: 'collaborator',
 } as const;
 
 export const kFimidaraResourceType = {
@@ -135,7 +136,7 @@ export interface WorkspaceResource extends Resource {
   workspaceId: string;
   lastUpdatedBy: Agent;
   createdBy: Agent;
-  // providedResourceId?: string | null;
+  providedResourceId?: string | null;
 }
 
 export type ToPublicDefinitions<T> = {

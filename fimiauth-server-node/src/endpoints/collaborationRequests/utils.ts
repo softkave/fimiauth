@@ -41,6 +41,7 @@ const userCollaborationRequestForWorkspaceFields =
     status: true,
     statusDate: true,
     permissionGroupIds: true,
+    senderEmail: true,
   });
 
 export async function checkCollaborationRequestAuthorization(

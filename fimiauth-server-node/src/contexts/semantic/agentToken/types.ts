@@ -2,6 +2,8 @@ import {AgentToken} from '../../../definitions/agentToken.js';
 import {TokenAccessScope} from '../../../definitions/system.js';
 import {
   SemanticProviderMutationParams,
+  SemanticProviderOpParams,
+  SemanticProviderQueryListParams,
   SemanticProviderQueryParams,
   SemanticWorkspaceResourceProviderType,
 } from '../types.js';
@@ -18,4 +20,14 @@ export interface SemanticAgentTokenProvider
     tokenScope?: TokenAccessScope | TokenAccessScope[],
     opts?: SemanticProviderQueryParams<AgentToken>
   ): Promise<AgentToken | null>;
+  getManyByUserId(
+    systemAgentId: string,
+    userId: string,
+    opts?: SemanticProviderQueryListParams<AgentToken>
+  ): Promise<AgentToken[]>;
+  countManyByUserId(
+    systemAgentId: string,
+    userId: string,
+    opts?: SemanticProviderOpParams
+  ): Promise<number>;
 }

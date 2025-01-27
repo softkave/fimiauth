@@ -26,6 +26,7 @@ import {
   AppShardDataProvider,
   AssignedItemDataProvider,
   CollaborationRequestDataProvider,
+  CollaboratorDataProvider,
   DataProviderUtils,
   EmailBlocklistDataProvider,
   EmailMessageDataProvider,
@@ -56,6 +57,7 @@ import {SemanticPermissionProviderType} from '../semantic/permission/types.js';
 import {SemanticPermissionItemProviderType} from '../semantic/permissionItem/types.js';
 import {
   SemanticAppProvider,
+  SemanticCollaboratorProvider,
   SemanticPermissionGroupProviderType,
   SemanticProviderUtils,
 } from '../semantic/types.js';
@@ -112,6 +114,10 @@ export const kSemanticModels = {
     container.resolve<SemanticJobHistoryProvider>(
       kInjectionKeys.semantic.jobHistory
     ),
+  collaborator: () =>
+    container.resolve<SemanticCollaboratorProvider>(
+      kInjectionKeys.semantic.collaborator
+    ),
   utils: () =>
     container.resolve<SemanticProviderUtils>(kInjectionKeys.semantic.utils),
 };
@@ -155,6 +161,10 @@ export const kDataModels = {
     container.resolve<AppShardDataProvider>(kInjectionKeys.data.appShard),
   jobHistory: () =>
     container.resolve<JobHistoryDataProvider>(kInjectionKeys.data.jobHistory),
+  collaborator: () =>
+    container.resolve<CollaboratorDataProvider>(
+      kInjectionKeys.data.collaborator
+    ),
   utils: () => container.resolve<DataProviderUtils>(kInjectionKeys.data.utils),
 };
 

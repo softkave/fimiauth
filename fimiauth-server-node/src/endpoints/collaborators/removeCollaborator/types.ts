@@ -1,9 +1,9 @@
 import {LongRunningJobResult} from '../../jobs/types.js';
-import {Endpoint, EndpointOptionalWorkspaceIDParam} from '../../types.js';
+import {Endpoint, EndpointWorkspaceResourceParam} from '../../types.js';
 
 export interface RemoveCollaboratorEndpointParams
-  extends EndpointOptionalWorkspaceIDParam {
-  collaboratorId: string;
+  extends EndpointWorkspaceResourceParam {
+  collaboratorId?: string;
 }
 
 export type RemoveCollaboratorEndpoint = Endpoint<

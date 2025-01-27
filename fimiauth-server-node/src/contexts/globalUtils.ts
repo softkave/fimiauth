@@ -1,7 +1,6 @@
 import {FimidaraSuppliedConfig} from '../resources/config.js';
 import {kUtilsInjectables} from './injection/injectables.js';
 import {clearInjectables, registerInjectables} from './injection/register.js';
-import {startHandleUsageRecordQueue} from './usage/handleUsageOps.js';
 
 export async function globalDispose() {
   kUtilsInjectables.runtimeState().setIsEnded(true);
@@ -45,13 +44,5 @@ export async function globalSetup(
       await kUtilsInjectables.workerPool().startPool();
       logger.log('started worker pool');
     }
-  }
-
-  if (otherConfig.useHandleUsageRecordQueue) {
-    suppliedConfig.addUsageRecordQueueNo?.map(queueNo => {
-      startHandleUsageRecordQueue(queueNo);
-    });
-    kUtilsInjectables.usage().startCommitBatchedUsageL1Interval();
-    kUtilsInjectables.usage().startCommitBatchedUsageL2Interval();
   }
 }

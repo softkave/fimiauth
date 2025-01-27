@@ -20,6 +20,7 @@ import {getAppMongoModel, getAppShardMongoModel} from '../../db/app.js';
 import {getAppRuntimeStateModel} from '../../db/appRuntimeState.js';
 import {getAssignedItemModel} from '../../db/assignedItem.js';
 import {getCollaborationRequestModel} from '../../db/collaborationRequest.js';
+import {getCollaboratorModel} from '../../db/collaborator.js';
 import {
   DbConnection,
   MongoDbConnection,
@@ -65,6 +66,7 @@ import {
   AppShardMongoDataProvider,
   AssignedItemMongoDataProvider,
   CollaborationRequestMongoDataProvider,
+  CollaboratorMongoDataProvider,
   EmailBlocklistMongoDataProvider,
   EmailMessageMongoDataProvider,
   JobHistoryMongoDataProvider,
@@ -80,6 +82,7 @@ import {
   AppShardDataProvider,
   AssignedItemDataProvider,
   CollaborationRequestDataProvider,
+  CollaboratorDataProvider,
   DataProviderUtils,
   EmailBlocklistDataProvider,
   EmailMessageDataProvider,
@@ -123,6 +126,7 @@ import {DataSemanticJobHistory} from '../semantic/jobHistory/model.js';
 import {SemanticJobHistoryProvider} from '../semantic/jobHistory/types.js';
 import {
   DataSemanticApp,
+  DataSemanticCollaborator,
   DataSemanticPermissionGroup,
 } from '../semantic/models.js';
 import {DataSemanticPermission} from '../semantic/permission/model.js';
@@ -131,6 +135,7 @@ import {DataSemanticPermissionItem} from '../semantic/permissionItem/model.js';
 import {SemanticPermissionItemProviderType} from '../semantic/permissionItem/types.js';
 import {
   SemanticAppProvider,
+  SemanticCollaboratorProvider,
   SemanticPermissionGroupProviderType,
   SemanticProviderUtils,
 } from '../semantic/types.js';
@@ -186,6 +191,8 @@ export const kRegisterSemanticModels = {
     registerToken(kInjectionKeys.semantic.appShard, item),
   jobHistory: (item: SemanticJobHistoryProvider) =>
     registerToken(kInjectionKeys.semantic.jobHistory, item),
+  collaborator: (item: SemanticCollaboratorProvider) =>
+    registerToken(kInjectionKeys.semantic.collaborator, item),
   utils: (item: SemanticProviderUtils) =>
     registerToken(kInjectionKeys.semantic.utils, item),
 };
@@ -215,6 +222,8 @@ export const kRegisterDataModels = {
     registerToken(kInjectionKeys.data.appShard, item),
   jobHistory: (item: JobHistoryDataProvider) =>
     registerToken(kInjectionKeys.data.jobHistory, item),
+  collaborator: (item: CollaboratorDataProvider) =>
+    registerToken(kInjectionKeys.data.collaborator, item),
   utils: (item: DataProviderUtils) =>
     registerToken(kInjectionKeys.data.utils, item),
 };
@@ -304,6 +313,9 @@ export function registerDataModelInjectables() {
   kRegisterDataModels.jobHistory(
     new JobHistoryMongoDataProvider(getJobHistoryMongoModel(connection))
   );
+  kRegisterDataModels.collaborator(
+    new CollaboratorMongoDataProvider(getCollaboratorModel(connection))
+  );
   kRegisterDataModels.utils(new MongoDataProviderUtils());
 }
 
@@ -359,6 +371,9 @@ export function registerSemanticModelInjectables() {
   );
   kRegisterSemanticModels.jobHistory(
     new DataSemanticJobHistory(kDataModels.jobHistory(), assertNotFound)
+  );
+  kRegisterSemanticModels.collaborator(
+    new DataSemanticCollaborator(kDataModels.collaborator(), assertNotFound)
   );
   kRegisterSemanticModels.utils(new DataSemanticProviderUtils());
 }

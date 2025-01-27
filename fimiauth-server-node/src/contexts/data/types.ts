@@ -16,6 +16,7 @@ import {
   ResourceWrapper,
 } from '../../definitions/system.js';
 import {Workspace} from '../../definitions/workspace.js';
+import {Collaborator} from '../../definitions/collaborator.js';
 
 export type DataQuerySort<T, K extends keyof T = keyof T> = {
   [P in K]?: SortOrder;
@@ -291,4 +292,8 @@ export type AppShardDataProvider = BaseDataProvider<
 export type JobHistoryDataProvider = BaseDataProvider<
   JobHistory,
   DataQuery<JobHistory>
+>;
+export type CollaboratorDataProvider = BaseDataProvider<
+  Collaborator,
+  DataQuery<Collaborator>
 >;

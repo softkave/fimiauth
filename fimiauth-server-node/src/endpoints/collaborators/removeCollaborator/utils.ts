@@ -18,13 +18,8 @@ export async function beginDeleteCollaborator(props: {
   const jobs = await kSemanticModels.utils().withTxn(async opts => {
     const [, jobs] = await Promise.all([
       kSemanticModels
-        .assignedItem()
-        .softDeleteWorkspaceCollaborators(
-          workspaceId,
-          extractResourceIdList(resources),
-          agent,
-          opts
-        ),
+        .collaborator()
+        .softDeleteManyByIdList(extractResourceIdList(resources), agent, opts),
       queueJobs<DeleteResourceJobParams>(
         workspaceId,
         parentJobId,
@@ -36,8 +31,7 @@ export async function beginDeleteCollaborator(props: {
             params: {
               workspaceId,
               resourceId: resource.resourceId,
-              type: kFimidaraResourceType.User,
-              isRemoveCollaborator: true,
+              type: kFimidaraResourceType.Collaborator,
             },
           };
         })

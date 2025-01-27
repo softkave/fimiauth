@@ -95,8 +95,6 @@ export type DeleteResourceCascadeFnDefaultArgs = {
 
 export type DeleteResourceJobParams = DeleteResourceCascadeFnDefaultArgs & {
   type: FimidaraResourceType;
-  /** to separate from removing a user, which we don't support yet, but soon */
-  isRemoveCollaborator?: true;
 };
 
 export type DeleteFilePartJobParams = DeleteResourceCascadeFnDefaultArgs & {

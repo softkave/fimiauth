@@ -1,10 +1,11 @@
 import {kSessionUtils} from '../../../contexts/SessionContext.js';
+import {checkAuthorizationWithAgent} from '../../../contexts/authorizationChecks/checkAuthorizaton.js';
 import {kUtilsInjectables} from '../../../contexts/injection/injectables.js';
 import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
-import {appAssert} from '../../../utils/assertion.js';
 import {getWorkspaceIdFromSessionAgent} from '../../../utils/sessionUtils.js';
 import {validate} from '../../../utils/validate.js';
-import {checkCollaboratorAuthorization02} from '../utils.js';
+import {checkWorkspaceExists} from '../../workspaces/utils.js';
+import {getCollaborator} from '../getCollaborator.js';
 import {RemoveCollaboratorEndpoint} from './types.js';
 import {beginDeleteCollaborator} from './utils.js';
 import {removeCollaboratorJoiSchema} from './validation.js';
@@ -18,20 +19,30 @@ const removeCollaborator: RemoveCollaboratorEndpoint = async reqData => {
       kSessionUtils.permittedAgentTypes.api,
       kSessionUtils.accessScopes.api
     );
+
   const workspaceId = getWorkspaceIdFromSessionAgent(agent, data.workspaceId);
-  const {collaborator} = await checkCollaboratorAuthorization02(
+  const workspace = await checkWorkspaceExists(workspaceId);
+  await checkAuthorizationWithAgent({
     agent,
+    workspace,
+    workspaceId: workspace.resourceId,
+    target: {
+      targetId: workspace.resourceId,
+      action: kFimidaraPermissionActions.removeCollaborator,
+    },
+  });
+
+  const collaborator = await getCollaborator({
     workspaceId,
-    data.collaboratorId,
-    kFimidaraPermissionActions.removeCollaborator
-  );
+    providedResourceId: data.collaboratorId,
+    collaboratorId: data.collaboratorId,
+  });
 
   const [job] = await beginDeleteCollaborator({
     agent,
     workspaceId,
     resources: [collaborator],
   });
-  appAssert(job);
 
   return {jobId: job.resourceId};
 };

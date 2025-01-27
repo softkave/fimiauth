@@ -2,6 +2,7 @@ import {AgentToken} from '../../definitions/agentToken.js';
 import {App, AppShard} from '../../definitions/app.js';
 import {AssignedItem} from '../../definitions/assignedItem.js';
 import {CollaborationRequest} from '../../definitions/collaborationRequest.js';
+import {Collaborator} from '../../definitions/collaborator.js';
 import {EmailBlocklist, EmailMessage} from '../../definitions/email.js';
 import {Job} from '../../definitions/job.js';
 import {JobHistory} from '../../definitions/jobHistory.js';
@@ -24,6 +25,7 @@ import {
   AppShardDataProvider,
   AssignedItemDataProvider,
   CollaborationRequestDataProvider,
+  CollaboratorDataProvider,
   EmailBlocklistDataProvider,
   EmailMessageDataProvider,
   JobDataProvider,
@@ -128,6 +130,13 @@ export class AppShardMongoDataProvider
 export class JobHistoryMongoDataProvider
   extends BaseMongoDataProvider<JobHistory>
   implements JobHistoryDataProvider
+{
+  throwNotFound = throwNotFound;
+}
+
+export class CollaboratorMongoDataProvider
+  extends BaseMongoDataProvider<Collaborator>
+  implements CollaboratorDataProvider
 {
   throwNotFound = throwNotFound;
 }

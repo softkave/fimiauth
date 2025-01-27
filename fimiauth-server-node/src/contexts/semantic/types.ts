@@ -1,4 +1,5 @@
 import {App} from '../../definitions/app.js';
+import {Collaborator} from '../../definitions/collaborator.js';
 import {PermissionGroup} from '../../definitions/permissionGroups.js';
 import {Agent, AppRuntimeState, Resource} from '../../definitions/system.js';
 import {AnyFn} from '../../utils/types.js';
@@ -155,14 +156,8 @@ export interface SemanticWorkspaceResourceProviderType<
     },
     opts?: SemanticProviderOpParams
   ): Promise<number>;
-  getManyByUserId(
-    systemAgentId: string,
-    userId: string,
-    opts?: SemanticProviderQueryListParams<TResource>
-  ): Promise<TResource[]>;
-  countManyByUserId(
-    systemAgentId: string,
-    userId: string,
+  countByWorkspaceId(
+    workspaceId: string,
     opts?: SemanticProviderOpParams
   ): Promise<number>;
 }
@@ -182,3 +177,6 @@ export interface SemanticPermissionGroupProviderType
 
 export interface SemanticAppRuntimeStateProvider
   extends SemanticBaseProviderType<AppRuntimeState> {}
+
+export interface SemanticCollaboratorProvider
+  extends SemanticWorkspaceResourceProviderType<Collaborator> {}

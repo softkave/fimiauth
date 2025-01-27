@@ -1,4 +1,4 @@
-import {PublicCollaborator} from '../../../definitions/user.js';
+import {PublicCollaborator} from '../../../definitions/collaborator.js';
 import {
   Endpoint,
   EndpointOptionalWorkspaceIDParam,
