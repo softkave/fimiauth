@@ -75,10 +75,12 @@ const pageSize = Joi.number()
 const optionalWorkspaceIdParts: JoiSchemaParts<EndpointOptionalWorkspaceIDParam> =
   {
     workspaceId: kValidationSchemas.resourceId,
+    spaceId: kValidationSchemas.resourceId,
   };
 const workspaceResourceParts: JoiSchemaParts<EndpointWorkspaceResourceParam> = {
   workspaceId: kValidationSchemas.resourceId,
   providedResourceId: kValidationSchemas.resourceId,
+  spaceId: kValidationSchemas.resourceId,
 };
 const paginationParts: JoiSchemaParts<PaginationQuery> = {
   page,

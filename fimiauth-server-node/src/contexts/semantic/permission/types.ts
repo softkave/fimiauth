@@ -14,6 +14,7 @@ import {
 } from '../types.js';
 
 export type SemanticPermissionProviderType_GetPermissionItemsProps = {
+  spaceId: string;
   entityId?: string | string[];
   action?: FimidaraPermissionAction | FimidaraPermissionAction[];
   targetParentId?: string;
@@ -29,6 +30,7 @@ export type SemanticPermissionProviderType_GetPermissionItemsProps = {
 };
 
 export type SemanticPermissionProviderType_CountPermissionItemsProps = {
+  spaceId: string;
   entityId?: string | string[];
   action?: FimidaraPermissionAction | FimidaraPermissionAction[];
   targetId?: string | string[];
@@ -36,14 +38,14 @@ export type SemanticPermissionProviderType_CountPermissionItemsProps = {
 
 export interface SemanticPermissionProviderType {
   getEntityAssignedPermissionGroups(
-    props: {entityId: string; fetchDeep?: boolean},
+    props: {entityId: string; spaceId: string; fetchDeep?: boolean},
     options?: SemanticProviderQueryListParams<PermissionGroup>
   ): Promise<{
     permissionGroups: PermissionGroup[];
     inheritanceMap: PermissionEntityInheritanceMap;
   }>;
   getEntityInheritanceMap(
-    props: {entityId: string; fetchDeep?: boolean},
+    props: {entityId: string; spaceId: string; fetchDeep?: boolean},
     options?: SemanticProviderOpParams
   ): Promise<PermissionEntityInheritanceMap>;
   getEntity(

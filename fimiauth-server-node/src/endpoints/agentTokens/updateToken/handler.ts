@@ -13,7 +13,7 @@ import {
 } from '../../../utils/sessionUtils.js';
 import {validate} from '../../../utils/validate.js';
 import {tryGetWorkspaceFromEndpointInput} from '../../workspaces/utils.js';
-import {checkAgentTokenNameExists} from '../checkAgentTokenNameExists.js';
+import {checkAgentTokenNameAvailable} from '../checkAgentTokenNameAvailable.js';
 import {
   assertAgentToken,
   checkAgentTokenAuthorization02,
@@ -54,7 +54,11 @@ const updateAgentToken: UpdateAgentTokenEndpoint = async reqData => {
     appAssert(token.workspaceId);
     await Promise.all([
       isNameChanged &&
-        checkAgentTokenNameExists(token.workspaceId, tokenUpdate.name!, opts),
+        checkAgentTokenNameAvailable(
+          token.workspaceId,
+          tokenUpdate.name!,
+          opts
+        ),
     ]);
 
     const updatedToken = await kSemanticModels

@@ -128,6 +128,11 @@ export interface SemanticWorkspaceResourceProviderType<
     providedId: string,
     opts?: SemanticProviderQueryParams<TResource>
   ): Promise<TResource | null>;
+  getBySpaceIdAndProvidedId(
+    spaceId: string,
+    providedId: string,
+    opts?: SemanticProviderQueryParams<TResource>
+  ): Promise<TResource | null>;
   existsByProvidedId(
     workspaceId: string,
     providedId: string,

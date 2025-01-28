@@ -5,7 +5,6 @@ import {
   kUtilsInjectables,
 } from '../../../contexts/injection/injectables.js';
 import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
-import {appAssert} from '../../../utils/assertion.js';
 import {validate} from '../../../utils/validate.js';
 import {getWorkspaceFromEndpointInput} from '../../workspaces/utils.js';
 import {getPublicAgentToken} from '../utils.js';
@@ -22,6 +21,7 @@ const addAgentTokenEndpoint: AddAgentTokenEndpoint = async reqData => {
       kSessionUtils.permittedAgentTypes.api,
       kSessionUtils.accessScopes.api
     );
+
   const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
   await checkAuthorizationWithAgent({
     agent,
@@ -34,15 +34,15 @@ const addAgentTokenEndpoint: AddAgentTokenEndpoint = async reqData => {
   });
 
   const token = await kSemanticModels.utils().withTxn(async opts => {
-    return await INTERNAL_createAgentToken(
+    return await INTERNAL_createAgentToken({
       agent,
-      workspace.resourceId,
+      workspaceId: workspace.resourceId,
+      spaceId: data.spaceId,
       data,
-      opts
-    );
+      opts,
+    });
   });
 
-  appAssert(token.workspaceId);
   return {token: await getPublicAgentToken(token, data.shouldEncode ?? false)};
 };
 

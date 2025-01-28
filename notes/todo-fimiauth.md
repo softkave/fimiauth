@@ -57,3 +57,6 @@
 - space
 - collaborator
 - use collaborator for fimiauth workspace collaborators
+- check permissions using space
+- add containerIds to permissions
+- check permissions using containerIds

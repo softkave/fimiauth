@@ -51,6 +51,8 @@ export const kResourceTypeShortNames: Record<FimidaraResourceType, string> = {
   [kFimidaraResourceType.emailBlocklist]: padShortName('emailbl'),
   [kFimidaraResourceType.appShard]: padShortName('appshrd'),
   [kFimidaraResourceType.jobHistory]: padShortName('jbhist'),
+  [kFimidaraResourceType.Space]: padShortName('space'),
+  [kFimidaraResourceType.Collaborator]: padShortName('collab'),
 };
 
 export const kShortNameToResourceType = invert(
@@ -140,12 +142,14 @@ export function newResource<T extends AnyObject>(
   return resource as T & Resource;
 }
 
-export function newWorkspaceResource<T extends AnyObject>(
-  agent: Agent | SessionAgent,
-  type: FimidaraResourceType,
-  workspaceId: string,
-  seed?: Omit<T, keyof WorkspaceResource> & Partial<WorkspaceResource>
-): WorkspaceResource & T {
+export function newWorkspaceResource<T extends AnyObject>(params: {
+  agent: Agent | SessionAgent;
+  type: FimidaraResourceType;
+  workspaceId: string;
+  spaceId: string;
+  seed?: Omit<T, keyof WorkspaceResource> & Partial<WorkspaceResource>;
+}): WorkspaceResource & T {
+  const {agent, type, workspaceId, spaceId, seed} = params;
   const createdBy = isSessionAgent(agent)
     ? getActionAgentFromSessionAgent(agent)
     : agent;
@@ -154,11 +158,13 @@ export function newWorkspaceResource<T extends AnyObject>(
     createdBy,
     createdAt,
     workspaceId,
+    spaceId: spaceId || workspaceId,
     resourceId: getNewIdForResource(type),
     lastUpdatedAt: createdAt,
     lastUpdatedBy: createdBy,
     isDeleted: false,
     ...seed,
   };
+
   return item as T & WorkspaceResource;
 }

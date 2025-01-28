@@ -25,6 +25,7 @@ export interface AccessCheckTarget {
 
 export interface CheckAuthorizationParams {
   workspaceId: string;
+  spaceId: string;
   workspace?: {publicPermissionGroupId: string};
   target: AccessCheckTarget;
   opts?: SemanticProviderOpParams;
@@ -155,8 +156,7 @@ export async function checkAuthorization(params: CheckAuthorizationParams) {
 export async function resolveEntityData(
   params: CheckAuthorizationParams & {fetchEntitiesDeep: boolean}
 ) {
-  const {target} = params;
-
+  const {target, spaceId} = params;
   const workspaceModel = kSemanticModels.workspace();
   const permissionsModel = kSemanticModels.permissions();
 
@@ -167,11 +167,12 @@ export async function resolveEntityData(
 
   const [entityInheritanceMap, publicInheritanceMap] = await Promise.all([
     permissionsModel.getEntityInheritanceMap(
-      {entityId: target.entityId, fetchDeep: params.fetchEntitiesDeep},
+      {entityId: target.entityId, spaceId, fetchDeep: params.fetchEntitiesDeep},
       params.opts
     ),
     permissionsModel.getEntityInheritanceMap(
       {
+        spaceId,
         entityId: workspace.publicPermissionGroupId,
         fetchDeep: params.fetchEntitiesDeep,
       },
@@ -184,6 +185,7 @@ export async function resolveEntityData(
       map: entityInheritanceMap,
       entityId: target.entityId,
     });
+
   const {sortedItemsList: publicSortedItemList} =
     sortPermissionEntityInheritanceMap({
       map: publicInheritanceMap,
@@ -199,17 +201,18 @@ export async function resolveEntityData(
 export async function fetchAgentPermissionItems(
   params: CheckAuthorizationParams & {fetchEntitiesDeep: boolean}
 ) {
-  const {workspaceId, target} = params;
+  const {workspaceId, target, spaceId} = params;
+  const targetId = toUniqArray(target.targetId, workspaceId);
   const action = convertToArray(target.action).concat(
-      kFimidaraPermissionActions.wildcard
-    ),
-    targetId = toUniqArray(target.targetId, workspaceId);
-  const {entityIdList} = await resolveEntityData(params);
+    kFimidaraPermissionActions.wildcard
+  );
 
+  const {entityIdList} = await resolveEntityData(params);
   return await kSemanticModels.permissions().getPermissionItems(
     {
       action,
       targetId,
+      spaceId,
       entityId: entityIdList,
       sortByTarget: true,
       sortByDate: true,
@@ -243,6 +246,7 @@ function sortOutPermissionItems(
       replaceTargetId ?? item.targetId,
       item.action,
     ];
+
     const entries = get(map, key) ?? [];
     entries.push(item);
     set(map, key, entries);
@@ -254,14 +258,14 @@ function sortOutPermissionItems(
 async function resolveTargetChildrenPartialAccessCheck(
   params: OmitFrom<CheckAuthorizationParams, 'nothrow'>
 ) {
-  const {workspaceId, target} = params;
+  const {workspaceId, target, spaceId} = params;
   const action = convertToArray(target.action).concat(
-      kFimidaraPermissionActions.wildcard
-    ),
-    targetParentId = defaultTo(
-      first(toCompactArray(target.targetId)),
-      workspaceId
-    );
+    kFimidaraPermissionActions.wildcard
+  );
+  const targetParentId = defaultTo(
+    first(toCompactArray(target.targetId)),
+    workspaceId
+  );
 
   // TODO: preferrably fetch once cause it's currently fetched twice, in
   // checkAuthorization and in here
@@ -273,6 +277,7 @@ async function resolveTargetChildrenPartialAccessCheck(
     {
       action,
       targetParentId,
+      spaceId,
       entityId: entityIdList,
       sortByDate: true,
       sortByEntity: true,
@@ -352,17 +357,6 @@ export function getWorkspacePermissionContainers(
   return [workspaceId];
 }
 
-export function getFilePermissionContainers(
-  workspaceId: string,
-  resource: {idPath: string[]},
-  includeResourceId: boolean
-) {
-  return resource.idPath
-    .slice(0, includeResourceId ? undefined : -1)
-    .reverse()
-    .concat(getWorkspacePermissionContainers(workspaceId));
-}
-
 export async function checkAuthorizationWithAgent(
   params: Omit<CheckAuthorizationParams, 'target'> & {
     agent: SessionAgent;
@@ -388,8 +382,7 @@ export async function resolveTargetChildrenAccessCheckWithAgent(
     };
   }
 ) {
-  const {agent, target} = params;
-
+  const {agent, target, spaceId} = params;
   const agentId = agent?.agentId;
   appAssert(agentId);
   return await resolveTargetChildrenAccessCheck({

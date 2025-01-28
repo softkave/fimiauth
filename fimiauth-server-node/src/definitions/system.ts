@@ -90,6 +90,7 @@ export const kPermissionEntityTypes: FimidaraResourceType[] = [
 
 export const kPermissionContainerTypes: FimidaraResourceType[] = [
   kFimidaraResourceType.Workspace,
+  kFimidaraResourceType.Space,
 ];
 
 export function getWorkspaceResourceTypeList(): FimidaraResourceType[] {
@@ -101,6 +102,7 @@ export function getWorkspaceResourceTypeList(): FimidaraResourceType[] {
     kFimidaraResourceType.PermissionGroup,
     kFimidaraResourceType.PermissionItem,
     kFimidaraResourceType.Space,
+    kFimidaraResourceType.Collaborator,
   ];
 }
 
@@ -108,12 +110,6 @@ export const kValidAgentTypes: FimidaraResourceType[] = [
   kFimidaraResourceType.AgentToken,
 ];
 export const kFimidaraResourceTypeList = Object.values(kFimidaraResourceType);
-
-export interface AppRuntimeState extends Resource {
-  resourceId: string; // use kAppRuntimeStatsDocId
-  isAppSetup: boolean;
-  appWorkspaceId: string;
-}
 
 export interface Resource {
   resourceId: string;
@@ -137,6 +133,8 @@ export interface WorkspaceResource extends Resource {
   lastUpdatedBy: Agent;
   createdBy: Agent;
   providedResourceId?: string | null;
+  /** same as workspaceId for resources where it's not explicitly set */
+  spaceId: string;
 }
 
 export type ToPublicDefinitions<T> = {
@@ -201,6 +199,7 @@ export const kResourceTypeToPossibleChildren: Record<
   [kFimidaraResourceType.emailBlocklist]: [],
   [kFimidaraResourceType.appShard]: [],
   [kFimidaraResourceType.jobHistory]: [],
+  [kFimidaraResourceType.Collaborator]: [],
 };
 
 export const kFimidaraTypeToTSTypeNotFound = 1_000 as const;

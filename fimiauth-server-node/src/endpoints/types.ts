@@ -64,6 +64,7 @@ export interface CountItemsEndpointResult {
 
 export interface EndpointOptionalWorkspaceIDParam {
   workspaceId?: string;
+  spaceId?: string;
 }
 
 export interface EndpointRequiredWorkspaceIDParam {
@@ -73,6 +74,7 @@ export interface EndpointRequiredWorkspaceIDParam {
 export interface EndpointWorkspaceResourceParam
   extends EndpointOptionalWorkspaceIDParam {
   providedResourceId?: string;
+  spaceId?: string;
 }
 
 export type PaginatedEndpointCountParams<T extends PaginationQuery> = Omit<

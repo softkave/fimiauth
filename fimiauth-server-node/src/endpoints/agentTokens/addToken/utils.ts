@@ -11,24 +11,25 @@ import {
 } from '../../../definitions/system.js';
 import {newWorkspaceResource} from '../../../utils/resource.js';
 import {kReuseableErrors} from '../../../utils/reusableErrors.js';
-import {checkAgentTokenNameExists} from '../checkAgentTokenNameExists.js';
+import {checkAgentTokenNameAvailable} from '../checkAgentTokenNameAvailable.js';
 import {kAgentTokenConstants} from '../constants.js';
+import {getAgentToken} from '../getAgentToken.js';
 import {NewAgentTokenInput} from './types.js';
 
-export const INTERNAL_createAgentToken = async (
-  agent: Agent,
-  workspaceId: string,
-  data: NewAgentTokenInput,
-  opts: SemanticProviderMutationParams,
-  seed?: Partial<AgentToken>
-) => {
-  let token: AgentToken | null = null;
-
-  if (data.providedResourceId) {
-    token = await kSemanticModels
-      .agentToken()
-      .getByProvidedId(workspaceId, data.providedResourceId, opts);
-  }
+export const INTERNAL_createAgentToken = async (params: {
+  agent: Agent;
+  workspaceId: string;
+  spaceId?: string;
+  data: NewAgentTokenInput;
+  opts: SemanticProviderMutationParams;
+  seed?: Partial<AgentToken>;
+}) => {
+  const {agent, workspaceId, spaceId, data, opts, seed} = params;
+  let token = await getAgentToken({
+    workspaceId,
+    spaceId,
+    providedResourceId: data.providedResourceId,
+  });
 
   if (token) {
     throw kReuseableErrors.agentToken.withProvidedIdExists(
@@ -36,11 +37,12 @@ export const INTERNAL_createAgentToken = async (
     );
   }
 
-  token = newWorkspaceResource<AgentToken>(
+  token = newWorkspaceResource<AgentToken>({
     agent,
-    kFimidaraResourceType.AgentToken,
     workspaceId,
-    /** seed */ {
+    spaceId: spaceId || workspaceId,
+    type: kFimidaraResourceType.AgentToken,
+    seed: {
       ...data,
       providedResourceId: defaultTo(data.providedResourceId, null),
       version: kCurrentJWTTokenVersion,
@@ -51,11 +53,11 @@ export const INTERNAL_createAgentToken = async (
       refreshDuration:
         data.refreshDuration || kAgentTokenConstants.refreshDurationMs,
       ...(seed as AnyObject),
-    }
-  );
+    },
+  });
 
   if (data.name) {
-    await checkAgentTokenNameExists(workspaceId, data.name, opts);
+    await checkAgentTokenNameAvailable(workspaceId, data.name, opts);
   }
 
   await kSemanticModels.agentToken().insertItem(token, opts);

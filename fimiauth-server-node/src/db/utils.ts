@@ -33,5 +33,6 @@ export const workspaceResourceSchema = ensureMongoTypeFields<WorkspaceResource>(
     ...resourceSchema,
     workspaceId: {type: String, index: true},
     providedResourceId: {type: String, index: true},
+    spaceId: {type: String, index: true},
   }
 );

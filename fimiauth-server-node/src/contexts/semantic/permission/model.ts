@@ -31,7 +31,7 @@ import {
 
 export class DataSemanticPermission implements SemanticPermissionProviderType {
   async getEntityInheritanceMap(
-    props: {entityId: string; fetchDeep?: boolean | undefined},
+    props: {entityId: string; spaceId: string; fetchDeep?: boolean | undefined},
     options?: SemanticProviderOpParams | undefined
   ): Promise<PermissionEntityInheritanceMap> {
     {
@@ -39,22 +39,25 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
       appAssert(entity, kReuseableErrors.entity.notFound(props.entityId));
 
       let nextIdList = [props.entityId];
+      const maxDepth = props.fetchDeep ? 20 : 1;
       const map: PermissionEntityInheritanceMap = {
         [props.entityId]: {id: props.entityId, items: [], resolvedOrder: 0},
       };
-      const maxDepth = props.fetchDeep ? 20 : 1;
 
       for (let depth = 0; nextIdList.length && depth < maxDepth; depth++) {
         const query = addIsDeletedIntoQuery<DataQuery<AssignedItem>>(
           {
+            spaceId: props.spaceId,
             assigneeId: {$in: nextIdList},
             assignedItemType: kFimidaraResourceType.PermissionGroup,
           },
           options?.includeDeleted || false
         );
+
         const assignedItems = await kSemanticModels
           .assignedItem()
           .getManyByQuery(query, options);
+
         const nextIdMap: Record<string, string> = {};
         assignedItems.forEach(item => {
           nextIdMap[item.assignedItemId] = item.assignedItemId;
@@ -63,6 +66,7 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
             items: [],
             resolvedOrder: depth + 1,
           };
+
           const entry = map[item.assigneeId];
 
           if (entry) {
@@ -84,7 +88,7 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
   }
 
   async getEntityAssignedPermissionGroups(
-    props: {entityId: string; fetchDeep?: boolean | undefined},
+    props: {entityId: string; spaceId: string; fetchDeep?: boolean | undefined},
     options?: SemanticProviderQueryListParams<PermissionGroup> | undefined
   ): Promise<{
     permissionGroups: PermissionGroup[];
@@ -96,9 +100,11 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
       {resourceId: {$in: idList}},
       options?.includeDeleted || false
     );
+
     const permissionGroups = await kSemanticModels
       .permissionGroup()
       .getManyByQuery(query, options);
+
     return {permissionGroups, inheritanceMap: map};
   }
 
@@ -111,6 +117,7 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
       targetItemsQuery,
       options?.includeDeleted || false
     );
+
     const items = await kSemanticModels
       .permissionItem()
       .getManyByQuery(query, options);
@@ -138,6 +145,7 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
       targetItemsQuery,
       options?.includeDeleted || false
     );
+
     return await kSemanticModels.permissionItem().countByQuery(query, options);
   }
 
@@ -205,6 +213,7 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
   }
 
   protected getPermissionItemsQuery(props: {
+    spaceId: string;
     entityId?: string | string[];
     action?: FimidaraPermissionAction | FimidaraPermissionAction[];
     targetId?: string | string[];
@@ -214,6 +223,7 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
 
     if (props.targetId) {
       targetItemsQuery = {
+        spaceId: props.spaceId,
         ...getInAndNinQuery<PermissionItem>('targetId', props.targetId),
         ...getInAndNinQuery<PermissionItem>('entityId', props.entityId),
         ...getInAndNinQuery<PermissionItem>('action', props.action),
@@ -224,6 +234,7 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
     // or target
     if (!targetItemsQuery && props.entityId) {
       targetItemsQuery = {
+        spaceId: props.spaceId,
         targetParentId: props.targetParentId,
         ...getInAndNinQuery<PermissionItem>('entityId', props.entityId),
         ...getInAndNinQuery<PermissionItem>('action', props.action),
