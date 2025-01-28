@@ -33,6 +33,11 @@ export const kFimidaraPermissionActions = {
   readAgentToken: 'readAgentToken',
   updateAgentToken: 'updateAgentToken',
   deleteAgentToken: 'deleteAgentToken',
+
+  addSpace: 'addSpace',
+  readSpace: 'readSpace',
+  updateSpace: 'updateSpace',
+  deleteSpace: 'deleteSpace',
 } as const;
 
 export type FimidaraPermissionAction =

@@ -175,4 +175,9 @@ export const kAppMessages = {
     // TODO: add support email address they can reach out to
     emailIsInBlocklist: 'Email address in blocklist',
   },
+  space: {
+    notFound(id?: string) {
+      return id ? `Space with ID ${id} not found` : 'Space not found';
+    },
+  },
 };

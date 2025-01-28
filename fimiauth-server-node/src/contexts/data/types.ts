@@ -5,6 +5,7 @@ import {AgentToken} from '../../definitions/agentToken.js';
 import {App, AppShard} from '../../definitions/app.js';
 import {AssignedItem} from '../../definitions/assignedItem.js';
 import {CollaborationRequest} from '../../definitions/collaborationRequest.js';
+import {Collaborator} from '../../definitions/collaborator.js';
 import {EmailBlocklist, EmailMessage} from '../../definitions/email.js';
 import {Job} from '../../definitions/job.js';
 import {JobHistory} from '../../definitions/jobHistory.js';
@@ -16,7 +17,7 @@ import {
   ResourceWrapper,
 } from '../../definitions/system.js';
 import {Workspace} from '../../definitions/workspace.js';
-import {Collaborator} from '../../definitions/collaborator.js';
+import {Space} from '../../definitions/space.js';
 
 export type DataQuerySort<T, K extends keyof T = keyof T> = {
   [P in K]?: SortOrder;
@@ -297,3 +298,4 @@ export type CollaboratorDataProvider = BaseDataProvider<
   Collaborator,
   DataQuery<Collaborator>
 >;
+export type SpaceDataProvider = BaseDataProvider<Space, DataQuery<Space>>;

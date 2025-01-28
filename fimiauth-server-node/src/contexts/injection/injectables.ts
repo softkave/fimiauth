@@ -34,6 +34,7 @@ import {
   JobHistoryDataProvider,
   PermissionGroupDataProvider,
   PermissionItemDataProvider,
+  SpaceDataProvider,
   WorkspaceDataProvider,
 } from '../data/types.js';
 import {IDSetContext} from '../dset/types.js';
@@ -60,6 +61,7 @@ import {
   SemanticCollaboratorProvider,
   SemanticPermissionGroupProviderType,
   SemanticProviderUtils,
+  SemanticSpaceProvider,
 } from '../semantic/types.js';
 import {SemanticWorkspaceProviderType} from '../semantic/workspace/types.js';
 import {IUsageContext} from '../usage/types.js';
@@ -118,6 +120,8 @@ export const kSemanticModels = {
     container.resolve<SemanticCollaboratorProvider>(
       kInjectionKeys.semantic.collaborator
     ),
+  space: () =>
+    container.resolve<SemanticSpaceProvider>(kInjectionKeys.semantic.space),
   utils: () =>
     container.resolve<SemanticProviderUtils>(kInjectionKeys.semantic.utils),
 };
@@ -165,6 +169,7 @@ export const kDataModels = {
     container.resolve<CollaboratorDataProvider>(
       kInjectionKeys.data.collaborator
     ),
+  space: () => container.resolve<SpaceDataProvider>(kInjectionKeys.data.space),
   utils: () => container.resolve<DataProviderUtils>(kInjectionKeys.data.utils),
 };
 

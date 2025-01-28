@@ -8,6 +8,7 @@ import {Job} from '../../definitions/job.js';
 import {JobHistory} from '../../definitions/jobHistory.js';
 import {PermissionGroup} from '../../definitions/permissionGroups.js';
 import {PermissionItem} from '../../definitions/permissionItem.js';
+import {Space} from '../../definitions/space.js';
 import {AppRuntimeState, ResourceWrapper} from '../../definitions/system.js';
 import {Workspace} from '../../definitions/workspace.js';
 import {throwAgentTokenNotFound} from '../../endpoints/agentTokens/utils.js';
@@ -33,6 +34,7 @@ import {
   PermissionGroupDataProvider,
   PermissionItemDataProvider,
   ResourceDataProvider,
+  SpaceDataProvider,
   WorkspaceDataProvider,
 } from './types.js';
 
@@ -137,6 +139,13 @@ export class JobHistoryMongoDataProvider
 export class CollaboratorMongoDataProvider
   extends BaseMongoDataProvider<Collaborator>
   implements CollaboratorDataProvider
+{
+  throwNotFound = throwNotFound;
+}
+
+export class SpaceMongoDataProvider
+  extends BaseMongoDataProvider<Space>
+  implements SpaceDataProvider
 {
   throwNotFound = throwNotFound;
 }

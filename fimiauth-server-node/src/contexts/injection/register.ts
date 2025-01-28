@@ -73,6 +73,7 @@ import {
   JobMongoDataProvider,
   PermissionGroupMongoDataProvider,
   PermissionItemMongoDataProvider,
+  SpaceMongoDataProvider,
   WorkspaceMongoDataProvider,
 } from '../data/models.js';
 import {
@@ -90,6 +91,7 @@ import {
   JobHistoryDataProvider,
   PermissionGroupDataProvider,
   PermissionItemDataProvider,
+  SpaceDataProvider,
   WorkspaceDataProvider,
 } from '../data/types.js';
 import {IDSetContext} from '../dset/types.js';
@@ -128,6 +130,7 @@ import {
   DataSemanticApp,
   DataSemanticCollaborator,
   DataSemanticPermissionGroup,
+  DataSemanticSpace,
 } from '../semantic/models.js';
 import {DataSemanticPermission} from '../semantic/permission/model.js';
 import {SemanticPermissionProviderType} from '../semantic/permission/types.js';
@@ -138,6 +141,7 @@ import {
   SemanticCollaboratorProvider,
   SemanticPermissionGroupProviderType,
   SemanticProviderUtils,
+  SemanticSpaceProvider,
 } from '../semantic/types.js';
 import {DataSemanticProviderUtils} from '../semantic/utils.js';
 import {DataSemanticWorkspace} from '../semantic/workspace/model.js';
@@ -146,6 +150,7 @@ import {UsageProvider} from '../usage/UsageProvider.js';
 import {IUsageContext} from '../usage/types.js';
 import {kDataModels, kUtilsInjectables} from './injectables.js';
 import {kInjectionKeys} from './keys.js';
+import {getSpaceModel} from '../../db/space.js';
 
 function registerToken(
   token: string,
@@ -193,6 +198,8 @@ export const kRegisterSemanticModels = {
     registerToken(kInjectionKeys.semantic.jobHistory, item),
   collaborator: (item: SemanticCollaboratorProvider) =>
     registerToken(kInjectionKeys.semantic.collaborator, item),
+  space: (item: SemanticSpaceProvider) =>
+    registerToken(kInjectionKeys.semantic.space, item),
   utils: (item: SemanticProviderUtils) =>
     registerToken(kInjectionKeys.semantic.utils, item),
 };
@@ -224,6 +231,8 @@ export const kRegisterDataModels = {
     registerToken(kInjectionKeys.data.jobHistory, item),
   collaborator: (item: CollaboratorDataProvider) =>
     registerToken(kInjectionKeys.data.collaborator, item),
+  space: (item: SpaceDataProvider) =>
+    registerToken(kInjectionKeys.data.space, item),
   utils: (item: DataProviderUtils) =>
     registerToken(kInjectionKeys.data.utils, item),
 };
@@ -316,6 +325,9 @@ export function registerDataModelInjectables() {
   kRegisterDataModels.collaborator(
     new CollaboratorMongoDataProvider(getCollaboratorModel(connection))
   );
+  kRegisterDataModels.space(
+    new SpaceMongoDataProvider(getSpaceModel(connection))
+  );
   kRegisterDataModels.utils(new MongoDataProviderUtils());
 }
 
@@ -374,6 +386,9 @@ export function registerSemanticModelInjectables() {
   );
   kRegisterSemanticModels.collaborator(
     new DataSemanticCollaborator(kDataModels.collaborator(), assertNotFound)
+  );
+  kRegisterSemanticModels.space(
+    new DataSemanticSpace(kDataModels.space(), assertNotFound)
   );
   kRegisterSemanticModels.utils(new DataSemanticProviderUtils());
 }

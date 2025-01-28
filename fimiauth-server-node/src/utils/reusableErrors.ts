@@ -41,6 +41,11 @@ export const kReuseableErrors = {
       return new NotFoundError(kAppMessages.permissionGroup.notFound(id));
     },
   },
+  space: {
+    notFound(id?: string) {
+      return new NotFoundError(kAppMessages.space.notFound(id));
+    },
+  },
   permissionItem: {
     notFound(id?: string) {
       return new NotFoundError(kAppMessages.permissionItem.notFound(id));

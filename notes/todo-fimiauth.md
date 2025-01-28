@@ -56,3 +56,4 @@
 - provided id for all resources
 - space
 - collaborator
+- use collaborator for fimiauth workspace collaborators
