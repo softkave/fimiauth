@@ -33,7 +33,7 @@ import {AddPermissionItemsEndpointParams} from './types.js';
 /**
  * - separate entities, separate targets
  * - fetch entities, fetch targets
- * - confirm entities and targets belong to workspace
+ * - confirm entities and targets belong to space
  * - fetch permissions for entity + target
  * - fold permissions into wildcard for access and no access
  * - save remaining permissions
@@ -62,13 +62,19 @@ export const INTERNAL_addPermissionItems = async (
   );
 
   const [entities, targets] = await Promise.all([
-    getPermissionItemEntities(agent, workspace.resourceId, inputEntities),
-    getPermissionItemTargets(
+    getPermissionItemEntities({
+      agent,
+      workspaceId: workspace.resourceId,
+      spaceId: data.spaceId ?? workspace.resourceId,
+      entityIds: inputEntities,
+    }),
+    getPermissionItemTargets({
       agent,
       workspace,
-      inputTargets,
-      kFimidaraPermissionActions.updatePermission
-    ),
+      spaceId: data.spaceId ?? workspace.resourceId,
+      target: inputTargets,
+      action: kFimidaraPermissionActions.updatePermission,
+    }),
   ]);
 
   const entitiesMapById = indexArray(entities, {path: 'resourceId'});
@@ -133,11 +139,12 @@ export const INTERNAL_addPermissionItems = async (
     const targetType = getTargetType(item);
     const targetParentId = workspace.resourceId;
 
-    return newWorkspaceResource(
+    return newWorkspaceResource({
       agent,
-      kFimidaraResourceType.PermissionItem,
-      workspace.resourceId,
-      {
+      type: kFimidaraResourceType.PermissionItem,
+      workspaceId: workspace.resourceId,
+      spaceId: data.spaceId ?? workspace.resourceId,
+      seed: {
         targetType,
         targetParentId,
         targetId: item.target.resourceId,
@@ -145,8 +152,8 @@ export const INTERNAL_addPermissionItems = async (
         entityId: item.entity.resourceId,
         entityType: item.entity.resourceType,
         access: item.access,
-      }
-    );
+      },
+    });
   });
 
   // Not using transaction read because heavy computation may happen next to
@@ -156,6 +163,7 @@ export const INTERNAL_addPermissionItems = async (
     .permissions()
     .getPermissionItems({
       entityId: extractResourceIdList(entities),
+      spaceId: data.spaceId ?? workspace.resourceId,
       sortByDate: true,
     });
 

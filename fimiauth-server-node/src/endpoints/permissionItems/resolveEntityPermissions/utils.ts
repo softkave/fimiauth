@@ -58,24 +58,28 @@ async function getArtifacts(
     inputEntities.length,
     new InvalidRequestError('No permission entity provided')
   );
+
   const [entities, targets] = await Promise.all([
-    getPermissionItemEntities(agent, workspace.resourceId, inputEntities),
-    getPermissionItemTargets(
+    getPermissionItemEntities({
+      agent,
+      workspaceId: workspace.resourceId,
+      spaceId: data.spaceId ?? workspace.resourceId,
+      entityIds: inputEntities,
+    }),
+    getPermissionItemTargets({
       agent,
       workspace,
-      inputTargets,
-      kFimidaraPermissionActions.readPermission
-    ),
+      spaceId: data.spaceId ?? workspace.resourceId,
+      target: inputTargets,
+      action: kFimidaraPermissionActions.readPermission,
+    }),
   ]);
 
   return {entities, targets};
 }
 
 /** Index artifacts for quick retrieval. */
-function indexArtifacts(
-  workspace: Workspace,
-  entities: ResourceWrapper<Resource>[]
-) {
+function indexArtifacts(entities: ResourceWrapper<Resource>[]) {
   const entitiesMapById = indexArray(entities, {path: 'resourceId'});
   const getEntities = (inputEntity: string | string[]) => {
     const eMap: Record<string, ResourceWrapper> = {};
@@ -97,7 +101,7 @@ export const INTERNAL_resolveEntityPermissions = async (
   data: ResolveEntityPermissionsEndpointParams
 ) => {
   const {entities, targets} = await getArtifacts(agent, workspace, data);
-  const {getEntities} = indexArtifacts(workspace, entities);
+  const {getEntities} = indexArtifacts(entities);
 
   // Requested permissions flattened to individual items, for example, list of
   // entity IDs, target IDs, target type, appliesTo, etc. flattened into
@@ -155,12 +159,9 @@ export const INTERNAL_resolveEntityPermissions = async (
       getAuthorizationAccessChecker({
         workspace,
         workspaceId: workspace.resourceId,
+        spaceId: data.spaceId ?? workspace.resourceId,
         target: {
-          targetId: getResourcePermissionContainers(
-            workspace.resourceId,
-            nextItem.target.resource,
-            true
-          ),
+          targetId: workspace.resourceId,
           action: nextItem.action,
           entityId: nextItem.entity.resourceId,
         },
@@ -208,6 +209,7 @@ export async function checkResolveEntityPermissionsAuth(
       workspace,
       opts,
       workspaceId: workspace.resourceId,
+      spaceId: data.spaceId ?? workspace.resourceId,
       target: {targetId: workspace.resourceId, action: 'updatePermission'},
     });
   }

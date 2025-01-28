@@ -4,6 +4,7 @@ import {
   kSemanticModels,
   kUtilsInjectables,
 } from '../../../contexts/injection/injectables.js';
+import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {getWorkspaceIdFromSessionAgent} from '../../../utils/sessionUtils.js';
 import {validate} from '../../../utils/validate.js';
 import {checkWorkspaceExists} from '../../workspaces/utils.js';
@@ -20,6 +21,7 @@ const addPermissionItems: AddPermissionItemsEndpoint = async reqData => {
       kSessionUtils.permittedAgentTypes.api,
       kSessionUtils.accessScopes.api
     );
+
   const workspaceId = await getWorkspaceIdFromSessionAgent(
     agent,
     data.workspaceId
@@ -29,8 +31,13 @@ const addPermissionItems: AddPermissionItemsEndpoint = async reqData => {
     agent,
     workspace,
     workspaceId: workspace.resourceId,
-    target: {targetId: workspace.resourceId, action: 'updatePermission'},
+    spaceId: data.spaceId ?? workspace.resourceId,
+    target: {
+      targetId: workspace.resourceId,
+      action: kFimidaraPermissionActions.updatePermission,
+    },
   });
+
   await kSemanticModels
     .utils()
     .withTxn(

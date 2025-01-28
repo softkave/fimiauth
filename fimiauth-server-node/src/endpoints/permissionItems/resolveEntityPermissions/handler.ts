@@ -19,6 +19,7 @@ const resolveEntityPermissions: ResolveEntityPermissionsEndpoint =
         kSessionUtils.permittedAgentTypes.api,
         kSessionUtils.accessScopes.api
       );
+
     const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
     await checkResolveEntityPermissionsAuth(agent, workspace, data);
     const checkResult = await INTERNAL_resolveEntityPermissions(
@@ -26,6 +27,7 @@ const resolveEntityPermissions: ResolveEntityPermissionsEndpoint =
       workspace,
       data
     );
+
     return {items: checkResult};
   };
 

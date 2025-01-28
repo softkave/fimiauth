@@ -19,12 +19,14 @@ const deletePermissionItems: DeletePermissionItemsEndpoint = async reqData => {
       kSessionUtils.permittedAgentTypes.api,
       kSessionUtils.accessScopes.api
     );
+
   const workspaceId = getWorkspaceIdFromSessionAgent(agent, data.workspaceId);
   const workspace = await checkWorkspaceExists(workspaceId);
   await checkAuthorizationWithAgent({
     agent,
     workspaceId,
     workspace,
+    spaceId: data.spaceId ?? workspace.resourceId,
     target: {
       targetId: workspaceId,
       action: kFimidaraPermissionActions.updatePermission,

@@ -55,17 +55,20 @@ export class PermissionItemTargets {
   }
 }
 
-export async function getPermissionItemTargets(
-  agent: SessionAgent,
-  workspace: Workspace,
+export async function getPermissionItemTargets(params: {
+  agent: SessionAgent;
+  workspace: Workspace;
+  spaceId: string;
   target:
     | Partial<PermissionItemInputTarget>
-    | Partial<PermissionItemInputTarget>[],
-  action: FimidaraPermissionAction
-) {
+    | Partial<PermissionItemInputTarget>[];
+  action: FimidaraPermissionAction;
+}) {
+  const {agent, workspace, spaceId, target, action} = params;
   const resources = await INTERNAL_getResources({
     agent,
     workspaceId: workspace.resourceId,
+    spaceId,
     allowedTypes: getWorkspaceResourceTypeList(),
     inputResources: convertToArray(target).map(
       (nextTarget): FetchResourceItem => {
@@ -76,7 +79,7 @@ export async function getPermissionItemTargets(
       }
     ),
     checkAuth: true,
-    checkBelongsToWorkspace: true,
+    checkBelongsToSpace: true,
   });
 
   return new PermissionItemTargets(resources);

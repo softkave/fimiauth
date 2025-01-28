@@ -1,11 +1,12 @@
 import {
+  kFimidaraPermissionActions,
   PermissionItem,
   PublicPermissionItem,
 } from '../../definitions/permissionItem.js';
 import {
   FimidaraResourceType,
-  SessionAgent,
   kFimidaraResourceType,
+  SessionAgent,
 } from '../../definitions/system.js';
 import {appAssert} from '../../utils/assertion.js';
 import {getFields, makeExtract, makeListExtract} from '../../utils/extract.js';
@@ -14,7 +15,6 @@ import {getResourceTypeFromId} from '../../utils/resource.js';
 import {kReuseableErrors} from '../../utils/reusableErrors.js';
 import {InvalidRequestError} from '../errors.js';
 import {workspaceResourceFields} from '../extractors.js';
-import {checkResourcesBelongsToWorkspace} from '../resources/containerCheckFns.js';
 import {INTERNAL_getResources} from '../resources/getResources.js';
 
 const permissionItemFields = getFields<PublicPermissionItem>({
@@ -44,10 +44,12 @@ export function getTargetType(data: {
     : data.targetId
       ? getResourceTypeFromId(data.targetId)
       : null;
+
   appAssert(
     targetType,
     new InvalidRequestError('Target ID or target type must be present')
   );
+
   return targetType;
 }
 
@@ -57,26 +59,28 @@ export function assertPermissionItem(
   appAssert(item, kReuseableErrors.permissionItem.notFound());
 }
 
-export async function getPermissionItemEntities(
-  agent: SessionAgent,
-  workspaceId: string,
-  entityIds: string | string[]
-) {
-  let resources = await INTERNAL_getResources({
+export async function getPermissionItemEntities(params: {
+  agent: SessionAgent;
+  workspaceId: string;
+  spaceId: string;
+  entityIds: string | string[];
+}) {
+  const {agent, workspaceId, spaceId, entityIds} = params;
+  const resources = await INTERNAL_getResources({
     agent,
     allowedTypes: [
       kFimidaraResourceType.PermissionGroup,
       kFimidaraResourceType.AgentToken,
     ],
     workspaceId,
+    spaceId,
     inputResources: convertToArray(entityIds).map(entityId => ({
       resourceId: entityId,
-      action: 'updatePermission',
+      action: kFimidaraPermissionActions.updatePermission,
     })),
     checkAuth: true,
-    checkBelongsToWorkspace: true,
+    checkBelongsToSpace: true,
   });
 
-  checkResourcesBelongsToWorkspace(workspaceId, resources);
   return resources;
 }
