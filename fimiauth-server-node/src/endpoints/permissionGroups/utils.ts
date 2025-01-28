@@ -1,9 +1,6 @@
 import {checkAuthorizationWithAgent} from '../../contexts/authorizationChecks/checkAuthorizaton.js';
 import {kSemanticModels} from '../../contexts/injection/injectables.js';
-import {
-  SemanticProviderMutationParams,
-  SemanticProviderOpParams,
-} from '../../contexts/semantic/types.js';
+import {SemanticProviderOpParams} from '../../contexts/semantic/types.js';
 import {
   AssignedPermissionGroupMeta,
   PermissionGroup,
@@ -108,15 +105,17 @@ export async function checkPermissionGroupAuthorization03(
   return checkPermissionGroupAuthorization(agent, permissionGroup, action);
 }
 
-export async function checkPermissionGroupsExist(
-  workspaceId: string,
-  idList: string[],
-  opts?: SemanticProviderMutationParams
-) {
+export async function checkPermissionGroupsExist(params: {
+  spaceId: string;
+  idList: string[];
+  opts?: SemanticProviderOpParams;
+}) {
+  const {spaceId, idList, opts} = params;
+
   // TODO: use exists with $or or implement bulk ops
   const permissionGroups = await kSemanticModels
     .permissionGroup()
-    .getManyByWorkspaceAndIdList({workspaceId, resourceIdList: idList}, opts);
+    .getManyBySpaceAndIdList({spaceId, resourceIdList: idList, opts});
 
   if (idList.length !== permissionGroups.length) {
     const map = indexArray(permissionGroups, {indexer: getResourceId});

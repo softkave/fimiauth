@@ -5,6 +5,7 @@ import {
   kSemanticModels,
   kUtilsInjectables,
 } from '../../../contexts/injection/injectables.js';
+import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {validate} from '../../../utils/validate.js';
 import {addAssignedPermissionGroupList} from '../../assignedItems/addAssignedItems.js';
 import {checkPermissionEntitiesExist} from '../../permissionItems/checkPermissionArtifacts.js';
@@ -23,25 +24,34 @@ const assignPermissionGroups: AssignPermissionGroupsEndpoint =
         kSessionUtils.permittedAgentTypes.api,
         kSessionUtils.accessScopes.api
       );
+
     const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
     await checkAuthorizationWithAgent({
       agent,
       workspace,
       workspaceId: workspace.resourceId,
-      target: {targetId: workspace.resourceId, action: 'updatePermission'},
+      spaceId: data.spaceId ?? workspace.resourceId,
+      target: {
+        targetId: workspace.resourceId,
+        action: kFimidaraPermissionActions.updatePermission,
+      },
     });
 
     const entityIdList = convertToArray(data.entityId);
     const pgIdList = convertToArray(data.permissionGroupId);
 
     await Promise.all([
-      await checkPermissionEntitiesExist(
+      checkPermissionEntitiesExist({
         agent,
-        workspace.resourceId,
-        entityIdList,
-        'updatePermission'
-      ),
-      await checkPermissionGroupsExist(workspace.resourceId, pgIdList),
+        workspaceId: workspace.resourceId,
+        spaceId: data.spaceId ?? workspace.resourceId,
+        entities: entityIdList,
+        action: kFimidaraPermissionActions.updatePermission,
+      }),
+      checkPermissionGroupsExist({
+        spaceId: data.spaceId ?? workspace.resourceId,
+        idList: pgIdList,
+      }),
     ]);
 
     await kSemanticModels.utils().withTxn(async opts => {
@@ -51,12 +61,14 @@ const assignPermissionGroups: AssignPermissionGroupsEndpoint =
       // twice
       const existingPermissionGroups = await Promise.all(
         entityIdList.map(entityId =>
-          kSemanticModels
-            .permissions()
-            .getEntityAssignedPermissionGroups(
-              {entityId, fetchDeep: false},
-              opts
-            )
+          kSemanticModels.permissions().getEntityAssignedPermissionGroups(
+            {
+              entityId,
+              spaceId: data.spaceId ?? workspace.resourceId,
+              fetchDeep: false,
+            },
+            opts
+          )
         )
       );
 
@@ -71,7 +83,10 @@ const assignPermissionGroups: AssignPermissionGroupsEndpoint =
       await Promise.all(
         unassignedPermissionGroupsByEntity.map((permissionGroupList, i) => {
           const entityId = entityIdList[i];
-          if (!permissionGroupList.length) return;
+
+          if (!permissionGroupList.length) {
+            return;
+          }
 
           // Assign permission groups to entity
           return addAssignedPermissionGroupList(

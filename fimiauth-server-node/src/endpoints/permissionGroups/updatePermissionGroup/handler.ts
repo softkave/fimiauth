@@ -8,7 +8,7 @@ import {PermissionGroup} from '../../../definitions/permissionGroups.js';
 import {getTimestamp} from '../../../utils/dateFns.js';
 import {getActionAgentFromSessionAgent} from '../../../utils/sessionUtils.js';
 import {validate} from '../../../utils/validate.js';
-import {checkPermissionGroupNameExists} from '../checkPermissionGroupNameExists.js';
+import {checkPermissionGroupNameAvailable} from '../checkPermissionGroupNameAvailable.js';
 import {
   assertPermissionGroup,
   checkPermissionGroupAuthorization03,
@@ -41,7 +41,7 @@ const updatePermissionGroup: UpdatePermissionGroupEndpoint = async reqData => {
     };
 
     if (update.name && update.name !== permissionGroup.name) {
-      await checkPermissionGroupNameExists(
+      await checkPermissionGroupNameAvailable(
         workspace.resourceId,
         update.name,
         opts

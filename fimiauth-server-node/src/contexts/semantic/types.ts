@@ -113,59 +113,55 @@ export type SemanticWorkspaceResourceProviderBaseType = Resource & {
 export interface SemanticWorkspaceResourceProviderType<
   TResource extends SemanticWorkspaceResourceProviderBaseType,
 > extends SemanticBaseProviderType<TResource> {
-  getByName(
-    workspaceId: string,
-    name: string,
-    opts?: SemanticProviderQueryParams<TResource>
-  ): Promise<TResource | null>;
-  existsByName(
-    workspaceId: string,
-    name: string,
-    opts?: SemanticProviderOpParams
-  ): Promise<boolean>;
-  getByProvidedId(
-    workspaceId: string,
-    providedId: string,
-    opts?: SemanticProviderQueryParams<TResource>
-  ): Promise<TResource | null>;
-  getBySpaceIdAndProvidedId(
-    spaceId: string,
-    providedId: string,
-    opts?: SemanticProviderQueryParams<TResource>
-  ): Promise<TResource | null>;
-  existsByProvidedId(
-    workspaceId: string,
-    providedId: string,
-    opts?: SemanticProviderOpParams
-  ): Promise<boolean>;
-  getManyByWorkspaceId(
-    workspaceId: string,
-    opts?: SemanticProviderQueryListParams<TResource>
-  ): Promise<TResource[]>;
-  deleteManyByWorkspaceId(
-    workspaceId: string,
-    opts: SemanticProviderMutationParams
-  ): Promise<void>;
-  getManyByWorkspaceAndIdList(
-    query: {
-      workspaceId: string;
-      resourceIdList?: string[];
-      excludeResourceIdList?: string[];
-    },
-    options?: SemanticProviderQueryListParams<TResource>
-  ): Promise<TResource[]>;
-  countManyByWorkspaceAndIdList(
-    query: {
-      workspaceId: string;
-      resourceIdList?: string[];
-      excludeResourceIdList?: string[];
-    },
-    opts?: SemanticProviderOpParams
-  ): Promise<number>;
-  countByWorkspaceId(
-    workspaceId: string,
-    opts?: SemanticProviderOpParams
-  ): Promise<number>;
+  getByName(params: {
+    spaceId: string;
+    name: string;
+    opts?: SemanticProviderQueryParams<TResource>;
+  }): Promise<TResource | null>;
+  existsByName(params: {
+    spaceId: string;
+    name: string;
+    opts?: SemanticProviderOpParams;
+  }): Promise<boolean>;
+  getByProvidedId(params: {
+    spaceId: string;
+    providedId: string;
+    opts?: SemanticProviderQueryParams<TResource>;
+  }): Promise<TResource | null>;
+  getBySpaceIdAndProvidedId(params: {
+    spaceId: string;
+    providedId: string;
+    opts?: SemanticProviderQueryParams<TResource>;
+  }): Promise<TResource | null>;
+  existsByProvidedId(params: {
+    spaceId: string;
+    providedId: string;
+    opts?: SemanticProviderOpParams;
+  }): Promise<boolean>;
+  getManyBySpaceId(params: {
+    spaceId: string;
+    opts?: SemanticProviderQueryListParams<TResource>;
+  }): Promise<TResource[]>;
+  deleteManyBySpaceId(params: {
+    spaceId: string;
+    opts: SemanticProviderMutationParams;
+  }): Promise<void>;
+  getManyBySpaceAndIdList(params: {
+    spaceId: string;
+    resourceIdList?: string[];
+    excludeResourceIdList?: string[];
+    opts?: SemanticProviderQueryListParams<TResource>;
+  }): Promise<TResource[]>;
+  countManyByWorkspaceAndIdList(query: {
+    spaceId: string;
+    resourceIdList?: string[];
+    excludeResourceIdList?: string[];
+    opts?: SemanticProviderOpParams;
+  }): Promise<number>;
+  countBySpaceId(params: {
+    spaceId: string;
+    opts?: SemanticProviderOpParams;
+  }): Promise<number>;
 }
 
 export interface SemanticProviderUtils {

@@ -5,12 +5,13 @@ import {
   kUtilsInjectables,
 } from '../../../contexts/injection/injectables.js';
 import {PermissionGroup} from '../../../definitions/permissionGroups.js';
+import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {kFimidaraResourceType} from '../../../definitions/system.js';
 import {newWorkspaceResource} from '../../../utils/resource.js';
 import {getWorkspaceIdFromSessionAgent} from '../../../utils/sessionUtils.js';
 import {validate} from '../../../utils/validate.js';
 import {checkWorkspaceExists} from '../../workspaces/utils.js';
-import {checkPermissionGroupNameExists} from '../checkPermissionGroupNameExists.js';
+import {checkPermissionGroupNameAvailable} from '../checkPermissionGroupNameAvailable.js';
 import {permissionGroupExtractor} from '../utils.js';
 import {AddPermissionGroupEndpoint} from './types.js';
 import {addPermissionGroupJoiSchema} from './validation.js';
@@ -24,23 +25,35 @@ const addPermissionGroup: AddPermissionGroupEndpoint = async reqData => {
       kSessionUtils.permittedAgentTypes.api,
       kSessionUtils.accessScopes.api
     );
+
   const workspaceId = getWorkspaceIdFromSessionAgent(agent, data.workspaceId);
   const workspace = await checkWorkspaceExists(workspaceId);
   await checkAuthorizationWithAgent({
     agent,
     workspace,
     workspaceId: workspace.resourceId,
-    target: {targetId: workspace.resourceId, action: 'updatePermission'},
+    spaceId: data.spaceId ?? workspace.resourceId,
+    target: {
+      targetId: workspace.resourceId,
+      action: kFimidaraPermissionActions.updatePermission,
+    },
   });
 
-  let permissionGroup = await kSemanticModels.utils().withTxn(async opts => {
-    await checkPermissionGroupNameExists(workspace.resourceId, data.name, opts);
-    const permissionGroup = newWorkspaceResource<PermissionGroup>(
+  const permissionGroup = await kSemanticModels.utils().withTxn(async opts => {
+    await checkPermissionGroupNameAvailable({
+      spaceId: data.spaceId ?? workspace.resourceId,
+      name: data.name,
+      opts,
+    });
+
+    const permissionGroup = newWorkspaceResource<PermissionGroup>({
       agent,
-      kFimidaraResourceType.PermissionGroup,
-      workspace.resourceId,
-      {...data, workspaceId: workspace.resourceId}
-    );
+      type: kFimidaraResourceType.PermissionGroup,
+      workspaceId: workspace.resourceId,
+      spaceId: data.spaceId ?? workspace.resourceId,
+      seed: {...data, workspaceId: workspace.resourceId},
+    });
+
     await kSemanticModels.permissionGroup().insertItem(permissionGroup, opts);
     return permissionGroup;
   });

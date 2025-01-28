@@ -3,7 +3,6 @@ import {
   AssignedItemMainFieldsMatcher,
 } from '../../definitions/assignedItem.js';
 import {AssignedPermissionGroupMeta} from '../../definitions/permissionGroups.js';
-import {WorkspaceResource} from '../../definitions/system.js';
 import {makeKey} from '../../utils/fns.js';
 import {NotFoundError} from '../errors.js';
 
@@ -22,28 +21,6 @@ export function assignedItemsToAssignedPermissionGroupList(
   items: AssignedItem[]
 ): AssignedPermissionGroupMeta[] {
   return items.map(assignedItemToAssignedPermissionGroup);
-}
-
-export function assignedItemToAssignedWorkspace(
-  item: AssignedItem
-): WorkspaceResource {
-  return {
-    workspaceId: item.assignedItemId,
-    resourceId: item.assigneeId,
-    createdAt: item.createdAt,
-    createdBy: item.createdBy,
-    lastUpdatedAt: item.lastUpdatedAt,
-    lastUpdatedBy: item.lastUpdatedBy,
-    deletedAt: item.deletedAt,
-    deletedBy: item.deletedBy,
-    isDeleted: item.isDeleted,
-  };
-}
-
-export function assignedItemsToAssignedWorkspaceList(
-  items: AssignedItem[]
-): WorkspaceResource[] {
-  return items.map(item => assignedItemToAssignedWorkspace(item));
 }
 
 export function throwAssignedItemNotFound() {

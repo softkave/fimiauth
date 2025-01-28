@@ -2,6 +2,7 @@ import {format} from 'util';
 import {FimidaraPermissionAction} from '../../definitions/permissionItem.js';
 import {
   SessionAgent,
+  WorkspaceResource,
   getWorkspaceResourceTypeList,
   kFimidaraResourceType,
   kPermissionContainerTypes,
@@ -9,18 +10,17 @@ import {
 } from '../../definitions/system.js';
 import {getResourceTypeFromId} from '../../utils/resource.js';
 import {InvalidRequestError} from '../errors.js';
-import {
-  checkResourcesBelongToContainer,
-  checkResourcesBelongsToWorkspace,
-} from '../resources/containerCheckFns.js';
+import {checkResourcesBelongToSpace} from '../resources/containerCheckFns.js';
 import {INTERNAL_getResources} from '../resources/getResources.js';
 
-export async function checkPermissionEntitiesExist(
-  agent: SessionAgent,
-  workspaceId: string,
-  entities: Array<string>,
-  action: FimidaraPermissionAction
-) {
+export async function checkPermissionEntitiesExist(params: {
+  agent: SessionAgent;
+  workspaceId: string;
+  spaceId: string;
+  entities: Array<string>;
+  action: FimidaraPermissionAction;
+}) {
+  const {agent, workspaceId, spaceId, entities, action} = params;
   if (entities.length === 0) {
     return;
   }
@@ -37,26 +37,32 @@ export async function checkPermissionEntitiesExist(
   return await INTERNAL_getResources({
     agent,
     workspaceId,
+    spaceId,
     allowedTypes: kPermissionEntityTypes,
     inputResources: entities.map(id => ({action, resourceId: id})),
     checkAuth: true,
-    checkBelongsToWorkspace: true,
+    checkBelongsToSpace: true,
   });
 }
 
-export async function checkPermissionContainersExist(
-  agent: SessionAgent,
-  workspaceId: string,
-  items: Array<string>,
-  action: FimidaraPermissionAction
-) {
+export async function checkPermissionContainersExist(params: {
+  agent: SessionAgent;
+  workspaceId: string;
+  spaceId: string;
+  items: Array<string>;
+  action: FimidaraPermissionAction;
+}) {
+  const {agent, workspaceId, spaceId, items, action} = params;
+
   items.forEach(id => {
     const containerType = getResourceTypeFromId(id);
+
     if (!kPermissionContainerTypes.includes(containerType)) {
       const message = format(
         'Invalid permission container type %s',
         containerType
       );
+
       throw new InvalidRequestError(message);
     }
   });
@@ -65,6 +71,7 @@ export async function checkPermissionContainersExist(
   const resources = await INTERNAL_getResources({
     agent,
     workspaceId,
+    spaceId,
     allowedTypes: kPermissionContainerTypes,
     inputResources: items.map(id => {
       const containerType = getResourceTypeFromId(id);
@@ -72,7 +79,12 @@ export async function checkPermissionContainersExist(
     }),
     checkAuth: true,
   });
-  checkResourcesBelongsToWorkspace(workspaceId, resources);
+
+  checkResourcesBelongToSpace(
+    spaceId,
+    resources.map(r => r.resource as WorkspaceResource)
+  );
+
   return {resources};
 }
 
@@ -80,13 +92,15 @@ const targetTypes = getWorkspaceResourceTypeList().filter(
   type => type !== kFimidaraResourceType.All
 );
 
-export async function checkPermissionTargetsExist(
-  agent: SessionAgent,
-  workspaceId: string,
-  items: Array<string>,
-  action: FimidaraPermissionAction,
-  containerId?: string
-) {
+export async function checkPermissionTargetsExist(params: {
+  agent: SessionAgent;
+  workspaceId: string;
+  spaceId: string;
+  items: Array<string>;
+  action: FimidaraPermissionAction;
+}) {
+  const {agent, workspaceId, spaceId, items, action} = params;
+
   /**
    * TODO:
    * - check that they belong to the containers and unique container, action, resource
@@ -97,18 +111,19 @@ export async function checkPermissionTargetsExist(
   }
 
   // Intentionally not using transaction read for performance.
-  let resources = await INTERNAL_getResources({
+  const resources = await INTERNAL_getResources({
     agent,
     workspaceId,
+    spaceId,
     allowedTypes: targetTypes,
     inputResources: items.map(id => ({action, resourceId: id})),
     checkAuth: true,
   });
 
-  checkResourcesBelongsToWorkspace(workspaceId, resources);
-  if (containerId) {
-    checkResourcesBelongToContainer(containerId, resources);
-  }
+  checkResourcesBelongToSpace(
+    spaceId,
+    resources.map(r => r.resource as WorkspaceResource)
+  );
 
   return {resources};
 }

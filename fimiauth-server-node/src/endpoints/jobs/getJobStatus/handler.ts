@@ -1,7 +1,6 @@
 import {kSessionUtils} from '../../../contexts/SessionContext.js';
 import {
   kSemanticModels,
-  kSemanticModels,
   kUtilsInjectables,
 } from '../../../contexts/injection/injectables.js';
 import {
@@ -35,11 +34,10 @@ const getJobStatus: GetJobStatusEndpoint = async reqData => {
 
   const resource: ResourceWrapper = {
     resourceId: agent.agentId,
-    resource: (agent.user || agent.agentToken)!,
-    resourceType: agent.user
-      ? kFimidaraResourceType.User
-      : kFimidaraResourceType.AgentToken,
+    resource: agent.agentToken,
+    resourceType: kFimidaraResourceType.AgentToken,
   };
+
   checkResourcesBelongsToWorkspace(job.workspaceId, [resource], () =>
     kReuseableErrors.job.notFound()
   );
