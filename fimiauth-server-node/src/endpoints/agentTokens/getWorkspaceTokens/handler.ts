@@ -35,7 +35,7 @@ const getWorkspaceAgentTokens: GetWorkspaceAgentTokensEndpoint =
     applyDefaultEndpointPaginationOptions(data);
     const tokens = await kSemanticModels
       .agentToken()
-      .getManyByWorkspaceAndIdList(q, data);
+      .getManyBySpaceAndIdList(q, data);
 
     return {
       page: getEndpointPageFromInput(data),

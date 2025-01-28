@@ -39,10 +39,12 @@ type PartialPermissionItem = Pick<PermissionItem, 'resourceId'>;
 type FetchArgs = {
   query: DataQuery<PermissionItem>;
   workspaceId: string;
+  spaceId: string;
   agent: Agent;
   jobId: string;
   shard: AppShardId;
 };
+
 type FetchResult = PartialPermissionItem[];
 
 function deletePermissionItemInputToQuery(
@@ -113,10 +115,11 @@ const processPermissionItems: PaginatedFetchProcessFn<
   FetchResult
 > = async props => {
   const {args, data} = props;
-  await queueJobs<DeleteResourceJobParams>(
-    args.workspaceId,
-    args.jobId,
-    data.map(item => {
+  await queueJobs<DeleteResourceJobParams>({
+    workspaceId: args.workspaceId,
+    spaceId: args.spaceId,
+    parentJobId: args.jobId,
+    jobsInput: data.map(item => {
       return {
         shard: args.shard,
         createdBy: args.agent,
@@ -128,8 +131,8 @@ const processPermissionItems: PaginatedFetchProcessFn<
           type: kFimidaraResourceType.PermissionItem,
         },
       };
-    })
-  );
+    }),
+  });
 };
 
 export async function runDeletePermissionItemsJob(
@@ -151,12 +154,13 @@ export async function runDeletePermissionItemsJob(
   ]);
   appAssert(workspace, 'workspace not found');
 
-  const targets = await getPermissionItemTargets(
+  const targets = await getPermissionItemTargets({
     agent,
     workspace,
-    item,
-    kFimidaraPermissionActions.updatePermission
-  );
+    spaceId: job.spaceId ?? workspace.spaceId,
+    target: item,
+    action: kFimidaraPermissionActions.updatePermission,
+  });
 
   const query = deletePermissionItemInputToQuery(workspaceId, item, targets);
 
@@ -164,6 +168,7 @@ export async function runDeletePermissionItemsJob(
     await paginatedFetch<FetchArgs, FetchResult>({
       args: {
         workspaceId,
+        spaceId: job.spaceId ?? workspace.spaceId,
         query,
         agent,
         jobId: job.resourceId,

@@ -5,21 +5,23 @@ import {DeletePermissionItemInput} from './types.js';
 
 export async function beginDeletePermissionItemByInput(props: {
   workspaceId: string;
+  spaceId: string;
   items: DeletePermissionItemInput[];
   agent: Agent;
   parentJobId?: string;
 }) {
-  const {workspaceId, items, agent, parentJobId} = props;
-  return queueJobs<DeletePermissionItemInput>(
+  const {workspaceId, spaceId, items, agent, parentJobId} = props;
+  return queueJobs<DeletePermissionItemInput>({
     workspaceId,
     parentJobId,
-    items.map(item => {
+    spaceId,
+    jobsInput: items.map(item => {
       return {
         type: kJobType.deletePermissionItem,
         params: item,
         createdBy: agent,
         idempotencyToken: Date.now().toString(),
       };
-    })
-  );
+    }),
+  });
 }

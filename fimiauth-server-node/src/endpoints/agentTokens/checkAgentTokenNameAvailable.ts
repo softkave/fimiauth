@@ -10,7 +10,7 @@ export async function checkAgentTokenNameAvailable(params: {
   const {spaceId, name, opts} = params;
   const itemExists = await kSemanticModels
     .agentToken()
-    .existsByName({spaceId, name, opts});
+    .existsByName({spaceId, name}, opts);
 
   if (itemExists) {
     throw new ResourceExistsError('Agent token exists');

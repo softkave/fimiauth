@@ -19,7 +19,7 @@ import {NewAgentTokenInput} from './types.js';
 export const INTERNAL_createAgentToken = async (params: {
   agent: Agent;
   workspaceId: string;
-  spaceId?: string;
+  spaceId: string;
   data: NewAgentTokenInput;
   opts: SemanticProviderMutationParams;
   seed?: Partial<AgentToken>;
@@ -40,7 +40,7 @@ export const INTERNAL_createAgentToken = async (params: {
   token = newWorkspaceResource<AgentToken>({
     agent,
     workspaceId,
-    spaceId: spaceId || workspaceId,
+    spaceId,
     type: kFimidaraResourceType.AgentToken,
     seed: {
       ...data,
@@ -57,7 +57,11 @@ export const INTERNAL_createAgentToken = async (params: {
   });
 
   if (data.name) {
-    await checkAgentTokenNameAvailable(workspaceId, data.name, opts);
+    await checkAgentTokenNameAvailable({
+      name: data.name,
+      spaceId,
+      opts,
+    });
   }
 
   await kSemanticModels.agentToken().insertItem(token, opts);

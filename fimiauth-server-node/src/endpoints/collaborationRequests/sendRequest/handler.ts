@@ -87,15 +87,20 @@ const sendCollaborationRequest: SendCollaborationRequestEndpoint =
     });
 
     kUtilsInjectables.promises().callAndForget(() =>
-      queueJobs<EmailJobParams>(workspace.resourceId, undefined, {
-        createdBy: agent,
-        type: kJobType.email,
-        idempotencyToken: Date.now().toString(),
-        params: {
-          type: kEmailJobType.collaborationRequest,
-          emailAddress: [request.recipientEmail],
-          userId: [],
-          params: {requestId: request.resourceId},
+      queueJobs<EmailJobParams>({
+        workspaceId: workspace.resourceId,
+        spaceId: data.spaceId ?? workspace.spaceId,
+        parentJobId: undefined,
+        jobsInput: {
+          createdBy: agent,
+          type: kJobType.email,
+          idempotencyToken: Date.now().toString(),
+          params: {
+            type: kEmailJobType.collaborationRequest,
+            emailAddress: [request.recipientEmail],
+            userId: [],
+            params: {requestId: request.resourceId},
+          },
         },
       })
     );

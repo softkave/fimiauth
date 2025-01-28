@@ -59,7 +59,11 @@ const updateAgentToken: UpdateAgentTokenEndpoint = async reqData => {
     await Promise.all([
       isNameChanged &&
         tokenUpdate.name &&
-        checkAgentTokenNameAvailable(token.workspaceId, tokenUpdate.name, opts),
+        checkAgentTokenNameAvailable({
+          spaceId: data.spaceId ?? token.spaceId,
+          name: tokenUpdate.name,
+          opts,
+        }),
     ]);
 
     const updatedToken = await kSemanticModels

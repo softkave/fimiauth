@@ -35,16 +35,20 @@ export interface JobInput<
 export async function queueJobs<
   TParams extends AnyObject = AnyObject,
   TMeta extends AnyObject = AnyObject,
->(
-  workspaceId: string | undefined,
-  parentJobId: string | undefined,
-  jobsInput: JobInput<TParams, TMeta> | Array<JobInput<TParams, TMeta>>,
-  insertOptions: {
+>(params: {
+  workspaceId: string | undefined;
+  spaceId: string | undefined;
+  parentJobId: string | undefined;
+  jobsInput: JobInput<TParams, TMeta> | Array<JobInput<TParams, TMeta>>;
+  insertOptions?: {
     jobsToReturn?: 'all' | 'new';
     seed?: Partial<Job<TParams, TMeta>>;
     opts?: SemanticProviderMutationParams;
-  } = {}
-): Promise<Array<Job<TParams, TMeta>>> {
+  };
+}): Promise<Array<Job<TParams, TMeta>>> {
+  const {spaceId, workspaceId, parentJobId, insertOptions = {}} = params;
+  let {jobsInput} = params;
+
   const {opts, jobsToReturn = 'all'} = insertOptions;
 
   if (!isArray(jobsInput)) {
@@ -71,6 +75,7 @@ export async function queueJobs<
 
     idempotencyTokens.push(idempotencyToken);
     return newResource<Job<TParams, TMeta>>(kFimidaraResourceType.Job, {
+      spaceId,
       workspaceId,
       parentJobId,
       idempotencyToken,
@@ -92,6 +97,7 @@ export async function queueJobs<
     const existingJobs = await kSemanticModels
       .job()
       .getManyByQuery({idempotencyToken: {$in: idempotencyTokens}}, opts);
+
     const existingJobsByIdempotencyToken = keyBy(
       existingJobs,
       job => job.idempotencyToken

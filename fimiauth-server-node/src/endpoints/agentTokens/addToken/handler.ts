@@ -38,7 +38,7 @@ const addAgentTokenEndpoint: AddAgentTokenEndpoint = async reqData => {
     return await INTERNAL_createAgentToken({
       agent,
       workspaceId: workspace.resourceId,
-      spaceId: data.spaceId,
+      spaceId: data.spaceId ?? workspace.resourceId,
       data,
       opts,
     });

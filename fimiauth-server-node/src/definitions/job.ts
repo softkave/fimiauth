@@ -64,6 +64,7 @@ export interface Job<
   params: TParams;
   meta?: TMeta;
   workspaceId?: string;
+  spaceId?: string;
   status: JobStatus;
   statusLastUpdatedAt: number;
   minRunnerVersion: number;

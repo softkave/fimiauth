@@ -20,5 +20,5 @@ export async function getWorkspaceAgentTokensQuery(
     },
   });
 
-  return getSpaceResourceListQuery00(workspace, report);
+  return getSpaceResourceListQuery00(spaceId, report);
 }

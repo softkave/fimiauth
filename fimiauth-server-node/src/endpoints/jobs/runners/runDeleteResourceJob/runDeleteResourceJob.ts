@@ -15,7 +15,6 @@ import {
 import {
   FimidaraResourceType,
   Resource,
-  kFimidaraResourceType,
 } from '../../../../definitions/system.js';
 import {AnyFn} from '../../../../utils/types.js';
 import {JobInput, queueJobs} from '../../queueJobs.js';
@@ -72,19 +71,16 @@ async function getArtifactsAndQueueDeleteJobs(
   do {
     artifacts =
       (await getFn({args, helpers, preRunMeta, opts: {page, pageSize}})) || [];
-    await queueJobs(
+    await queueJobs({
       workspaceId,
-      helpers.job.resourceId,
-      artifacts.map((artifact): JobInput => {
-        const params: DeleteResourceJobParams =
-          type === kFimidaraResourceType.User
-            ? {
-                workspaceId,
-                type: kFimidaraResourceType.User,
-                resourceId: artifact.resourceId,
-                isRemoveCollaborator: true,
-              }
-            : {type, workspaceId, resourceId: artifact.resourceId};
+      spaceId: helpers.job.spaceId,
+      parentJobId: helpers.job.resourceId,
+      jobsInput: artifacts.map((artifact): JobInput => {
+        const params: DeleteResourceJobParams = {
+          type,
+          workspaceId,
+          resourceId: artifact.resourceId,
+        };
 
         return {
           params,
@@ -94,8 +90,8 @@ async function getArtifactsAndQueueDeleteJobs(
           priority: helpers.job.priority,
           idempotencyToken: Date.now().toString(),
         };
-      })
-    );
+      }),
+    });
 
     page += 1;
     kUtilsInjectables

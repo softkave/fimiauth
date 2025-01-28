@@ -40,16 +40,17 @@ async function addFimiauthUserToWorkspace(params: {
   });
 
   if (request.permissionGroupIds.length > 0) {
-    await addAssignedPermissionGroupList(
+    await addAssignedPermissionGroupList({
       agent,
       workspaceId,
-      request.permissionGroupIds,
-      agentToken.resourceId,
-      /** deleteExisting */ false,
-      /** skipPermissionGroupsExistCheck */ true,
-      /** skip auth check */ true,
-      opts
-    );
+      spaceId: request.spaceId,
+      permissionGroupsInput: request.permissionGroupIds,
+      assigneeId: agentToken.resourceId,
+      deleteExisting: false,
+      skipPermissionGroupsExistCheck: true,
+      skipAuthCheck: true,
+      opts,
+    });
   }
 }
 
@@ -101,20 +102,26 @@ export async function notifySenderOnCollaborationRequestResponse(
   const workspace = await kSemanticModels
     .workspace()
     .getOneById(request.workspaceId);
+
   assertWorkspace(workspace);
   const sender = request.senderEmail;
 
   if (sender) {
     kUtilsInjectables.promises().callAndForget(() =>
-      queueJobs<EmailJobParams>(workspace.resourceId, undefined, {
-        createdBy: kSystemSessionAgent,
-        type: kJobType.email,
-        idempotencyToken: Date.now().toString(),
-        params: {
-          type: kEmailJobType.collaborationRequestResponse,
-          emailAddress: [sender],
-          userId: [],
-          params: {requestId: request.resourceId},
+      queueJobs<EmailJobParams>({
+        workspaceId: workspace.resourceId,
+        spaceId: request.spaceId,
+        parentJobId: undefined,
+        jobsInput: {
+          createdBy: kSystemSessionAgent,
+          type: kJobType.email,
+          idempotencyToken: Date.now().toString(),
+          params: {
+            type: kEmailJobType.collaborationRequestResponse,
+            emailAddress: [sender],
+            userId: [],
+            params: {requestId: request.resourceId},
+          },
         },
       })
     );

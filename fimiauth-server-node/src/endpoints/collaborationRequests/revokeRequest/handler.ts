@@ -68,15 +68,20 @@ const revokeCollaborationRequest: RevokeCollaborationRequestEndpoint =
       });
 
     kUtilsInjectables.promises().callAndForget(() =>
-      queueJobs<EmailJobParams>(workspace.resourceId, undefined, {
-        type: kJobType.email,
-        createdBy: agent,
-        idempotencyToken: Date.now().toString(),
-        params: {
-          type: kEmailJobType.collaborationRequestRevoked,
-          emailAddress: [request.recipientEmail],
-          userId: [],
-          params: {requestId: request.resourceId},
+      queueJobs<EmailJobParams>({
+        workspaceId: workspace.resourceId,
+        parentJobId: undefined,
+        spaceId: request.spaceId,
+        jobsInput: {
+          type: kJobType.email,
+          createdBy: agent,
+          idempotencyToken: Date.now().toString(),
+          params: {
+            type: kEmailJobType.collaborationRequestRevoked,
+            emailAddress: [request.recipientEmail],
+            userId: [],
+            params: {requestId: request.resourceId},
+          },
         },
       })
     );

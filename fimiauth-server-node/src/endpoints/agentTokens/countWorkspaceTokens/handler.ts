@@ -29,7 +29,7 @@ const countWorkspaceAgentTokens: CountWorkspaceAgentTokensEndpoint =
 
     const count = await kSemanticModels
       .agentToken()
-      .countManyByWorkspaceAndIdList(q);
+      .countManyBySpaceAndIdList(q);
 
     return {count};
   };

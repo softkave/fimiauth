@@ -64,4 +64,3 @@
 - logic around delete space
 - send email if request description changed
 - targetId should be spaceId or workspaceId
-- add spaceId to queueJobs
