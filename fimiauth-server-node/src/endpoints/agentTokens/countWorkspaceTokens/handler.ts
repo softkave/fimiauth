@@ -19,11 +19,18 @@ const countWorkspaceAgentTokens: CountWorkspaceAgentTokensEndpoint =
         kSessionUtils.permittedAgentTypes.api,
         kSessionUtils.accessScopes.api
       );
+
     const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
-    const q = await getWorkspaceAgentTokensQuery(agent, workspace);
+    const q = await getWorkspaceAgentTokensQuery(
+      agent,
+      workspace,
+      data.spaceId ?? workspace.resourceId
+    );
+
     const count = await kSemanticModels
       .agentToken()
       .countManyByWorkspaceAndIdList(q);
+
     return {count};
   };
 

@@ -26,7 +26,12 @@ const getWorkspaceAgentTokens: GetWorkspaceAgentTokensEndpoint =
       );
 
     const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
-    const q = await getWorkspaceAgentTokensQuery(agent, workspace);
+    const q = await getWorkspaceAgentTokensQuery(
+      agent,
+      workspace,
+      data.spaceId ?? workspace.resourceId
+    );
+
     applyDefaultEndpointPaginationOptions(data);
     const tokens = await kSemanticModels
       .agentToken()

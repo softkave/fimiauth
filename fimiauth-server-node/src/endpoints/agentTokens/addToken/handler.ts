@@ -26,6 +26,7 @@ const addAgentTokenEndpoint: AddAgentTokenEndpoint = async reqData => {
   await checkAuthorizationWithAgent({
     agent,
     workspace,
+    spaceId: data.spaceId ?? workspace.resourceId,
     workspaceId: workspace.resourceId,
     target: {
       action: kFimidaraPermissionActions.addAgentToken,

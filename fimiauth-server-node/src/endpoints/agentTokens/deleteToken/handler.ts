@@ -19,25 +19,25 @@ const deleteAgentToken: DeleteAgentTokenEndpoint = async reqData => {
       kSessionUtils.permittedAgentTypes.api,
       kSessionUtils.accessScopes.api
     );
+
   const tokenId = tryGetAgentTokenId(agent, data.tokenId, data.onReferenced);
   const {workspace} = await tryGetWorkspaceFromEndpointInput(agent, data);
-  const {token} = await checkAgentTokenAuthorization02(
+  const {token} = await checkAgentTokenAuthorization02({
     agent,
-    workspace?.resourceId,
     tokenId,
-    data.providedResourceId,
-    kFimidaraPermissionActions.deleteAgentToken
-  );
-  const workspaceId = token.workspaceId;
-  appAssert(workspaceId);
+    workspaceId: workspace?.resourceId,
+    spaceId: data.spaceId ?? workspace?.spaceId,
+    providedResourceId: data.providedResourceId,
+    action: kFimidaraPermissionActions.deleteAgentToken,
+  });
 
   const [job] = await beginDeleteAgentToken({
     agent,
-    workspaceId,
+    workspaceId: token.workspaceId,
     resources: [token],
   });
-  appAssert(job);
 
+  appAssert(job);
   return {jobId: job.resourceId};
 };
 

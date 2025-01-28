@@ -23,13 +23,14 @@ const encodeAgentToken: EncodeAgentTokenEndpoint = async reqData => {
 
   const {workspace} = await tryGetWorkspaceFromEndpointInput(agent, data);
   const tokenId = tryGetAgentTokenId(agent, data.tokenId, data.onReferenced);
-  const {token} = await checkAgentTokenAuthorization02(
+  const {token} = await checkAgentTokenAuthorization02({
     agent,
-    workspace?.resourceId,
     tokenId,
-    data.providedResourceId,
-    kFimidaraPermissionActions.readAgentToken
-  );
+    workspaceId: workspace?.resourceId,
+    spaceId: data.spaceId ?? workspace?.spaceId,
+    providedResourceId: data.providedResourceId,
+    action: kFimidaraPermissionActions.readAgentToken,
+  });
 
   return await encodePublicAgentToken(token);
 };

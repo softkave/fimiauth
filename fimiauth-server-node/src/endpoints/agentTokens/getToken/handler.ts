@@ -1,7 +1,6 @@
 import {kSessionUtils} from '../../../contexts/SessionContext.js';
 import {kUtilsInjectables} from '../../../contexts/injection/injectables.js';
 import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
-import {appAssert} from '../../../utils/assertion.js';
 import {tryGetAgentTokenId} from '../../../utils/sessionUtils.js';
 import {validate} from '../../../utils/validate.js';
 import {tryGetWorkspaceFromEndpointInput} from '../../workspaces/utils.js';
@@ -21,15 +20,14 @@ const getAgentToken: GetAgentTokenEndpoint = async reqData => {
 
   const {workspace} = await tryGetWorkspaceFromEndpointInput(agent, data);
   const tokenId = tryGetAgentTokenId(agent, data.tokenId, data.onReferenced);
-  let {token} = await checkAgentTokenAuthorization02(
+  const {token} = await checkAgentTokenAuthorization02({
     agent,
-    workspace?.resourceId,
+    workspaceId: workspace?.resourceId,
+    spaceId: data.spaceId ?? workspace?.spaceId,
     tokenId,
-    data.providedResourceId,
-    kFimidaraPermissionActions.readAgentToken
-  );
-
-  appAssert(token.workspaceId);
+    providedResourceId: data.providedResourceId,
+    action: kFimidaraPermissionActions.readAgentToken,
+  });
 
   return {token: await getPublicAgentToken(token, data.shouldEncode ?? false)};
 };

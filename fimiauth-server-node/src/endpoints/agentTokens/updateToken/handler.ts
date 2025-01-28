@@ -5,6 +5,7 @@ import {
   kUtilsInjectables,
 } from '../../../contexts/injection/injectables.js';
 import {AgentToken} from '../../../definitions/agentToken.js';
+import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {appAssert} from '../../../utils/assertion.js';
 import {getTimestamp} from '../../../utils/dateFns.js';
 import {
@@ -31,15 +32,17 @@ const updateAgentToken: UpdateAgentTokenEndpoint = async reqData => {
       kSessionUtils.permittedAgentTypes.api,
       kSessionUtils.accessScopes.api
     );
+
   const {workspace} = await tryGetWorkspaceFromEndpointInput(agent, data);
   const tokenId = tryGetAgentTokenId(agent, data.tokenId, data.onReferenced);
-  const {token} = await checkAgentTokenAuthorization02(
+  const {token} = await checkAgentTokenAuthorization02({
     agent,
-    workspace?.resourceId,
+    workspaceId: workspace?.resourceId,
+    spaceId: data.spaceId ?? workspace?.spaceId,
     tokenId,
-    data.providedResourceId,
-    'updateAgentToken'
-  );
+    providedResourceId: data.providedResourceId,
+    action: kFimidaraPermissionActions.updateAgentToken,
+  });
 
   const updatedToken = await kSemanticModels.utils().withTxn(async opts => {
     const tokenUpdate: Partial<AgentToken> = {
@@ -47,6 +50,7 @@ const updateAgentToken: UpdateAgentTokenEndpoint = async reqData => {
       lastUpdatedAt: getTimestamp(),
       lastUpdatedBy: getActionAgentFromSessionAgent(agent),
     };
+
     const isNameChanged =
       tokenUpdate.name &&
       tokenUpdate.name.toLowerCase() !== token.name?.toLowerCase();
@@ -54,11 +58,8 @@ const updateAgentToken: UpdateAgentTokenEndpoint = async reqData => {
     appAssert(token.workspaceId);
     await Promise.all([
       isNameChanged &&
-        checkAgentTokenNameAvailable(
-          token.workspaceId,
-          tokenUpdate.name!,
-          opts
-        ),
+        tokenUpdate.name &&
+        checkAgentTokenNameAvailable(token.workspaceId, tokenUpdate.name, opts),
     ]);
 
     const updatedToken = await kSemanticModels
@@ -70,7 +71,6 @@ const updateAgentToken: UpdateAgentTokenEndpoint = async reqData => {
   });
 
   appAssert(updatedToken.workspaceId);
-
   return {
     token: await getPublicAgentToken(updatedToken, data.shouldEncode ?? false),
   };

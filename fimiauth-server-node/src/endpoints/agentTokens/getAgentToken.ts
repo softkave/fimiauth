@@ -4,8 +4,8 @@ import {AgentToken} from '../../definitions/agentToken.js';
 export async function getAgentToken(params: {
   workspaceId?: string;
   spaceId?: string;
-  providedResourceId?: string;
-  resourceId?: string;
+  providedResourceId?: string | null;
+  resourceId?: string | null;
 }) {
   let agentToken: AgentToken | null = null;
 

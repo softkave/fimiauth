@@ -1,8 +1,5 @@
 import {checkAuthorizationWithAgent} from '../../contexts/authorizationChecks/checkAuthorizaton.js';
-import {
-  kSemanticModels,
-  kUtilsInjectables,
-} from '../../contexts/injection/injectables.js';
+import {kUtilsInjectables} from '../../contexts/injection/injectables.js';
 import {SemanticProviderOpParams} from '../../contexts/semantic/types.js';
 import {
   AgentToken,
@@ -15,9 +12,9 @@ import {appAssert} from '../../utils/assertion.js';
 import {getFields, makeExtract, makeListExtract} from '../../utils/extract.js';
 import {cast} from '../../utils/fns.js';
 import {kReuseableErrors} from '../../utils/reusableErrors.js';
-import {InvalidRequestError} from '../errors.js';
 import {workspaceResourceFields} from '../extractors.js';
 import {kAgentTokenConstants} from './constants.js';
+import {getAgentToken} from './getAgentToken.js';
 
 const agentTokenFields = getFields<PublicAgentToken>({
   ...workspaceResourceFields,
@@ -34,59 +31,44 @@ const agentTokenFields = getFields<PublicAgentToken>({
 export const agentTokenExtractor = makeExtract(agentTokenFields);
 export const agentTokenListExtractor = makeListExtract(agentTokenFields);
 
-export async function checkAgentTokenAuthorization(
-  agent: SessionAgent,
-  token: AgentToken,
-  action: FimidaraPermissionAction,
-  opts?: SemanticProviderOpParams
-) {
+export async function checkAgentTokenAuthorization(params: {
+  agent: SessionAgent;
+  token: AgentToken;
+  action: FimidaraPermissionAction;
+  opts?: SemanticProviderOpParams;
+}) {
+  const {agent, token, action, opts} = params;
   appAssert(token.workspaceId);
   await checkAuthorizationWithAgent({
     agent,
     opts,
     workspaceId: token.workspaceId,
+    spaceId: token.spaceId,
     target: {action, targetId: token.resourceId},
   });
+
   return {token};
 }
 
-export async function getAgentTokenByIdOrProvidedId(
-  workspaceId: string | undefined,
-  tokenId: string | undefined | null,
-  providedResourceId: string | undefined | null
-) {
-  let token: AgentToken | null = null;
-
-  if (tokenId) {
-    token = await kSemanticModels.agentToken().getOneById(tokenId);
-  } else if (providedResourceId) {
-    appAssert(
-      workspaceId,
-      new InvalidRequestError('Workspace ID not provided')
-    );
-    token = await kSemanticModels
-      .agentToken()
-      .getByProvidedId(workspaceId, providedResourceId);
-  }
+export async function checkAgentTokenAuthorization02(params: {
+  agent: SessionAgent;
+  workspaceId: string | undefined;
+  spaceId: string | undefined;
+  tokenId: string | undefined | null;
+  providedResourceId: string | undefined | null;
+  action: FimidaraPermissionAction;
+}) {
+  const {agent, workspaceId, spaceId, tokenId, providedResourceId, action} =
+    params;
+  const token = await getAgentToken({
+    workspaceId,
+    resourceId: tokenId,
+    providedResourceId,
+    spaceId,
+  });
 
   assertAgentToken(token);
-  return token;
-}
-
-export async function checkAgentTokenAuthorization02(
-  agent: SessionAgent,
-  workspaceId: string | undefined,
-  tokenId: string | undefined | null,
-  providedResourceId: string | undefined | null,
-  action: FimidaraPermissionAction
-) {
-  const token = await getAgentTokenByIdOrProvidedId(
-    workspaceId,
-    tokenId,
-    providedResourceId
-  );
-
-  return await checkAgentTokenAuthorization(agent, token, action);
+  return await checkAgentTokenAuthorization({agent, token, action});
 }
 
 export function throwAgentTokenNotFound() {

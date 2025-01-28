@@ -6,11 +6,13 @@ import {getWorkspaceResourceListQuery00} from '../../utils.js';
 
 export async function getWorkspaceAgentTokensQuery(
   agent: SessionAgent,
-  workspace: Workspace
+  workspace: Workspace,
+  spaceId: string
 ) {
   const report = await resolveTargetChildrenAccessCheckWithAgent({
     agent,
     workspace,
+    spaceId,
     workspaceId: workspace.resourceId,
     target: {
       action: kFimidaraPermissionActions.readAgentToken,
