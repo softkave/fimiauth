@@ -40,6 +40,7 @@ const sendCollaborationRequest: SendCollaborationRequestEndpoint =
     await checkAuthorizationWithAgent({
       agent,
       workspaceId: workspace.resourceId,
+      spaceId: data.spaceId ?? workspace.spaceId,
       workspace: workspace,
       target: {
         targetId: workspace.resourceId,
@@ -48,11 +49,10 @@ const sendCollaborationRequest: SendCollaborationRequestEndpoint =
     });
 
     const {request} = await kSemanticModels.utils().withTxn(async opts => {
-      const existingRequest = await kSemanticModels
+      const [existingRequest] = await kSemanticModels
         .collaborationRequest()
-        .getOneByWorkspaceIdEmail(
-          workspace.resourceId,
-          data.recipientEmail,
+        .getManyByFilter(
+          {workspaceId: workspace.resourceId, email: data.recipientEmail},
           opts
         );
 
@@ -66,11 +66,12 @@ const sendCollaborationRequest: SendCollaborationRequestEndpoint =
         );
       }
 
-      const request: CollaborationRequest = newWorkspaceResource(
+      const request: CollaborationRequest = newWorkspaceResource({
         agent,
-        kFimidaraResourceType.CollaborationRequest,
-        workspace.resourceId,
-        {
+        type: kFimidaraResourceType.CollaborationRequest,
+        workspaceId: workspace.resourceId,
+        spaceId: data.spaceId ?? workspace.spaceId,
+        seed: {
           message: data.message,
           workspaceName: workspace.name,
           recipientEmail: data.recipientEmail,
@@ -78,8 +79,8 @@ const sendCollaborationRequest: SendCollaborationRequestEndpoint =
           status: kCollaborationRequestStatusTypeMap.Pending,
           statusDate: getTimestamp(),
           permissionGroupIds: data.permissionGroupIds ?? [],
-        }
-      );
+        },
+      });
 
       await kSemanticModels.collaborationRequest().insertItem(request, opts);
       return {request};

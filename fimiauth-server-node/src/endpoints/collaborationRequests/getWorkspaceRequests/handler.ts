@@ -27,12 +27,20 @@ const getWorkspaceCollaborationRequests: GetWorkspaceCollaborationRequestsEndpoi
         kSessionUtils.permittedAgentTypes.api,
         kSessionUtils.accessScopes.api
       );
+
     const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
-    const q = await getWorkspaceCollaborationRequestsQuery(agent, workspace);
+    const q = await getWorkspaceCollaborationRequestsQuery(
+      agent,
+      workspace,
+      data.spaceId ?? workspace.resourceId,
+      data.email
+    );
+
     applyDefaultEndpointPaginationOptions(data);
     const requests = await kSemanticModels
       .collaborationRequest()
-      .getManyByWorkspaceAndIdList(q, data);
+      .getManyByFilter(q, data);
+
     return {
       page: getEndpointPageFromInput(data),
       requests: collaborationRequestForWorkspaceListExtractor(requests),

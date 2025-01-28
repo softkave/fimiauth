@@ -4,7 +4,7 @@ import {Endpoint} from '../../types.js';
 export interface UpdateCollaborationRequestInput {
   message?: string;
   expires?: number;
-  // permissionGroupsAssignedOnAcceptingRequest?: AssignPermissionGroupInput[];
+  permissionGroupIds?: string[];
 }
 
 export interface UpdateCollaborationRequestEndpointParams {

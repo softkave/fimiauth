@@ -7,13 +7,16 @@ import {
 } from '../../types.js';
 
 export interface GetWorkspaceCollaborationRequestsEndpointParamsBase
-  extends EndpointOptionalWorkspaceIDParam {}
+  extends EndpointOptionalWorkspaceIDParam {
+  email?: string;
+}
 
 export interface GetWorkspaceCollaborationRequestsEndpointParams
   extends GetWorkspaceCollaborationRequestsEndpointParamsBase,
     PaginationQuery {}
 
-export interface GetWorkspaceCollaborationRequestsEndpointResult extends PaginatedResult {
+export interface GetWorkspaceCollaborationRequestsEndpointResult
+  extends PaginatedResult {
   requests: PublicCollaborationRequestForWorkspace[];
 }
 

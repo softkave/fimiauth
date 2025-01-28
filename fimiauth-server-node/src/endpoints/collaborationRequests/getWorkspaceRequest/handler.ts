@@ -1,5 +1,6 @@
 import {kSessionUtils} from '../../../contexts/SessionContext.js';
 import {kUtilsInjectables} from '../../../contexts/injection/injectables.js';
+import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {validate} from '../../../utils/validate.js';
 import {
   checkCollaborationRequestAuthorization02,
@@ -21,11 +22,13 @@ const getWorkspaceCollaborationRequest: GetWorkspaceCollaborationRequestEndpoint
         kSessionUtils.permittedAgentTypes.api,
         kSessionUtils.accessScopes.api
       );
+
     const {request} = await checkCollaborationRequestAuthorization02(
       agent,
       data.requestId,
-      'readAgentToken'
+      kFimidaraPermissionActions.readCollaborationRequest
     );
+
     return {request: collaborationRequestForWorkspaceExtractor(request)};
   };
 

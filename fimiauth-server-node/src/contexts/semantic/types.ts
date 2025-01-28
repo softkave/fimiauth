@@ -2,7 +2,7 @@ import {App} from '../../definitions/app.js';
 import {Collaborator} from '../../definitions/collaborator.js';
 import {PermissionGroup} from '../../definitions/permissionGroups.js';
 import {Space} from '../../definitions/space.js';
-import {Agent, AppRuntimeState, Resource} from '../../definitions/system.js';
+import {Agent, Resource} from '../../definitions/system.js';
 import {AnyFn} from '../../utils/types.js';
 import {
   DataProviderOpParams,
@@ -180,9 +180,6 @@ export type SemanticAppProvider = SemanticWorkspaceResourceProviderType<App>;
 
 export interface SemanticPermissionGroupProviderType
   extends SemanticWorkspaceResourceProviderType<PermissionGroup> {}
-
-export interface SemanticAppRuntimeStateProvider
-  extends SemanticBaseProviderType<AppRuntimeState> {}
 
 export interface SemanticCollaboratorProvider
   extends SemanticWorkspaceResourceProviderType<Collaborator> {}

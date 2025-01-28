@@ -31,12 +31,13 @@ async function addFimiauthUserToWorkspace(params: {
   request: CollaborationRequest;
 }) {
   const {agent, workspaceId, userId, opts, request} = params;
-  const agentToken = await INTERNAL_createAgentToken(
+  const agentToken = await INTERNAL_createAgentToken({
     agent,
     workspaceId,
-    {name: `Agent token for ${userId}`, providedResourceId: userId},
-    opts
-  );
+    spaceId: request.spaceId,
+    data: {name: `Agent token for ${userId}`, providedResourceId: userId},
+    opts,
+  });
 
   if (request.permissionGroupIds.length > 0) {
     await addAssignedPermissionGroupList(
@@ -56,12 +57,9 @@ export const INTERNAL_respondToCollaborationRequest = async (params: {
   agent: SessionAgent;
   data: RespondToCollaborationRequestEndpointParams;
   opts: SemanticProviderMutationParams;
+  request: CollaborationRequest;
 }) => {
-  const {agent, data, opts} = params;
-  const request = await kSemanticModels
-    .collaborationRequest()
-    .getOneById(data.requestId, opts);
-  assertCollaborationRequest(request);
+  const {agent, data, opts, request} = params;
 
   const isExpired =
     request.expiresAt && new Date(request.expiresAt).valueOf() < Date.now();

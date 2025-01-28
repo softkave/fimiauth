@@ -22,11 +22,19 @@ const countWorkspaceCollaborationRequests: CountWorkspaceCollaborationRequestsEn
         kSessionUtils.permittedAgentTypes.api,
         kSessionUtils.accessScopes.api
       );
+
     const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
-    const q = await getWorkspaceCollaborationRequestsQuery(agent, workspace);
+    const q = await getWorkspaceCollaborationRequestsQuery(
+      agent,
+      workspace,
+      data.spaceId ?? workspace.resourceId,
+      data.email
+    );
+
     const count = await kSemanticModels
       .collaborationRequest()
-      .countManyByWorkspaceAndIdList(q);
+      .countManyByFilter(q);
+
     return {count};
   };
 

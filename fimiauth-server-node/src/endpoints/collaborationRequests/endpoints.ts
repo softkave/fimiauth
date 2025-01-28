@@ -1,13 +1,9 @@
 import {kEndpointTag} from '../types.js';
-import countUserCollaborationRequests from './countUserRequests/handler.js';
 import countWorkspaceCollaborationRequests from './countWorkspaceRequests/handler.js';
 import deleteCollaborationRequest from './deleteRequest/handler.js';
 import {
-  countUserCollaborationRequestsEndpointDefinition,
   countWorkspaceCollaborationRequestsEndpointDefinition,
   deleteCollaborationRequestEndpointDefinition,
-  getUserCollaborationRequestEndpointDefinition,
-  getUserCollaborationRequestsEndpointDefinition,
   getWorkspaceCollaborationRequestEndpointDefinition,
   getWorkspaceCollaborationRequestsEndpointDefinition,
   respondToCollaborationRequestEndpointDefinition,
@@ -15,8 +11,6 @@ import {
   sendCollaborationRequestEndpointDefinition,
   updateCollaborationRequestEndpointDefinition,
 } from './endpoints.mddoc.js';
-import getUserCollaborationRequest from './getUserRequest/handler.js';
-import getUserCollaborationRequests from './getUserRequests/handler.js';
 import getWorkspaceCollaborationRequest from './getWorkspaceRequest/handler.js';
 import getWorkspaceCollaborationRequests from './getWorkspaceRequests/handler.js';
 import respondToCollaborationRequest from './respondToRequest/handler.js';
@@ -32,21 +26,6 @@ export function getCollaborationRequestsHttpEndpoints() {
         tag: [kEndpointTag.public],
         fn: deleteCollaborationRequest,
         mddocHttpDefinition: deleteCollaborationRequestEndpointDefinition,
-      },
-      getUserRequest: {
-        tag: [kEndpointTag.private],
-        fn: getUserCollaborationRequest,
-        mddocHttpDefinition: getUserCollaborationRequestEndpointDefinition,
-      },
-      getUserRequests: {
-        tag: [kEndpointTag.private],
-        fn: getUserCollaborationRequests,
-        mddocHttpDefinition: getUserCollaborationRequestsEndpointDefinition,
-      },
-      countUserRequests: {
-        tag: [kEndpointTag.private],
-        fn: countUserCollaborationRequests,
-        mddocHttpDefinition: countUserCollaborationRequestsEndpointDefinition,
       },
       getWorkspaceRequest: {
         tag: [kEndpointTag.public],
@@ -86,5 +65,6 @@ export function getCollaborationRequestsHttpEndpoints() {
         mddocHttpDefinition: updateCollaborationRequestEndpointDefinition,
       },
     };
+
   return collaborationRequestsExportedEndpoints;
 }

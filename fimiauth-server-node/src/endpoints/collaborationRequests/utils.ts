@@ -6,7 +6,6 @@ import {
   PublicCollaborationRequestForUser,
   PublicCollaborationRequestForWorkspace,
 } from '../../definitions/collaborationRequest.js';
-import {AssignedPermissionGroupMeta} from '../../definitions/permissionGroups.js';
 import {FimidaraPermissionAction} from '../../definitions/permissionItem.js';
 import {SessionAgent} from '../../definitions/system.js';
 import {appAssert} from '../../utils/assertion.js';
@@ -55,9 +54,11 @@ export async function checkCollaborationRequestAuthorization(
     agent,
     opts,
     workspaceId: workspace.resourceId,
+    spaceId: workspace.spaceId,
     workspace: workspace,
     target: {action, targetId: request.resourceId},
   });
+
   return {agent, request, workspace};
 }
 
@@ -70,6 +71,7 @@ export async function checkCollaborationRequestAuthorization02(
   const request = await kSemanticModels
     .collaborationRequest()
     .getOneById(requestId, opts);
+
   assertCollaborationRequest(request);
   return checkCollaborationRequestAuthorization(agent, request, action);
 }
@@ -89,34 +91,6 @@ export const collaborationRequestForWorkspaceListExtractor = makeListExtract(
 
 export function throwCollaborationRequestNotFound() {
   throw new NotFoundError('Collaboration request not found');
-}
-
-export async function populateRequestAssignedPermissionGroups(
-  request: CollaborationRequest
-): Promise<
-  CollaborationRequest & {
-    permissionGroupsAssignedOnAcceptingRequest: AssignedPermissionGroupMeta[];
-  }
-> {
-  const inheritanceMap = await kSemanticModels
-    .permissions()
-    .getEntityInheritanceMap({
-      entityId: request.resourceId,
-      fetchDeep: false,
-    });
-  return {
-    ...request,
-    permissionGroupsAssignedOnAcceptingRequest:
-      inheritanceMap[request.resourceId].items,
-  };
-}
-
-export async function populateRequestListPermissionGroups(
-  requests: CollaborationRequest[]
-) {
-  return await Promise.all(
-    requests.map(request => populateRequestAssignedPermissionGroups(request))
-  );
 }
 
 export function assertCollaborationRequest(

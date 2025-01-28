@@ -25,6 +25,7 @@ export const kFimidaraPermissionActions = {
   revokeCollaborationRequest: 'revokeCollaborationRequest',
   updateCollaborationRequest: 'updateCollaborationRequest',
   deleteCollaborationRequest: 'deleteCollaborationRequest',
+  respondToCollaborationRequest: 'respondToCollaborationRequest',
 
   updatePermission: 'updatePermission',
   readPermission: 'readPermission',

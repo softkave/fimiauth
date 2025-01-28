@@ -9,6 +9,7 @@ import {
   kEmailJobType,
   kJobType,
 } from '../../../definitions/job.js';
+import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {appAssert} from '../../../utils/assertion.js';
 import {getTimestamp} from '../../../utils/dateFns.js';
 import {validate} from '../../../utils/validate.js';
@@ -40,7 +41,7 @@ const revokeCollaborationRequest: RevokeCollaborationRequestEndpoint =
           await checkCollaborationRequestAuthorization02(
             agent,
             data.requestId,
-            'revokeCollaborationRequest',
+            kFimidaraPermissionActions.revokeCollaborationRequest,
             opts
           );
 
@@ -50,6 +51,7 @@ const revokeCollaborationRequest: RevokeCollaborationRequestEndpoint =
           isRevoked === false,
           new InvalidRequestError('Collaboration request already revoked')
         );
+
         const updatedRequest = await kSemanticModels
           .collaborationRequest()
           .getAndUpdateOneById(

@@ -3,6 +3,7 @@ import {
   kSemanticModels,
   kUtilsInjectables,
 } from '../../../contexts/injection/injectables.js';
+import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {getTimestamp} from '../../../utils/dateFns.js';
 import {getActionAgentFromSessionAgent} from '../../../utils/sessionUtils.js';
 import {validate} from '../../../utils/validate.js';
@@ -32,7 +33,7 @@ const updateCollaborationRequest: UpdateCollaborationRequestEndpoint =
         await checkCollaborationRequestAuthorization02(
           agent,
           data.requestId,
-          'updateCollaborationRequest',
+          kFimidaraPermissionActions.updateCollaborationRequest,
           opts
         );
 
@@ -42,7 +43,9 @@ const updateCollaborationRequest: UpdateCollaborationRequestEndpoint =
           data.requestId,
           {
             message: data.request.message ?? request.message,
-            expiresAt: data.request.expires,
+            expiresAt: data.request.expires ?? request.expiresAt,
+            permissionGroupIds:
+              data.request.permissionGroupIds ?? request.permissionGroupIds,
             lastUpdatedAt: getTimestamp(),
             lastUpdatedBy: getActionAgentFromSessionAgent(agent),
           },

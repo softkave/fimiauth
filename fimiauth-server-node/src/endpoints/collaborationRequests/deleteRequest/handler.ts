@@ -18,6 +18,7 @@ const deleteCollaborationRequest: DeleteCollaborationRequestEndpoint =
         kSessionUtils.permittedAgentTypes.api,
         kSessionUtils.accessScopes.api
       );
+
     const {request} = await checkCollaborationRequestAuthorization02(
       agent,
       data.requestId,
@@ -29,8 +30,8 @@ const deleteCollaborationRequest: DeleteCollaborationRequestEndpoint =
       workspaceId: request.workspaceId,
       resources: [request],
     });
-    appAssert(job);
 
+    appAssert(job);
     return {jobId: job.resourceId};
   };
 

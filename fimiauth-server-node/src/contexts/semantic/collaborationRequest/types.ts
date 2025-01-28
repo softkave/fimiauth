@@ -6,6 +6,13 @@ import {
   SemanticWorkspaceResourceProviderType,
 } from '../types.js';
 
+export interface SemanticCollaborationRequestProviderFilter {
+  workspaceId: string;
+  resourceIdList?: string[];
+  excludeResourceIdList?: string[];
+  email?: string;
+}
+
 export interface SemanticCollaborationRequestProvider
   extends SemanticWorkspaceResourceProviderType<CollaborationRequest> {
   getManyByEmail(
@@ -21,6 +28,14 @@ export interface SemanticCollaborationRequestProvider
   countByEmail(
     workspaceId: string,
     email: string,
+    opts?: SemanticProviderOpParams
+  ): Promise<number>;
+  getManyByFilter(
+    query: SemanticCollaborationRequestProviderFilter,
+    options?: SemanticProviderQueryListParams<CollaborationRequest>
+  ): Promise<CollaborationRequest[]>;
+  countManyByFilter(
+    query: SemanticCollaborationRequestProviderFilter,
     opts?: SemanticProviderOpParams
   ): Promise<number>;
 }
