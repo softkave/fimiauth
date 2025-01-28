@@ -1,8 +1,6 @@
 import {kSessionUtils} from '../../../contexts/SessionContext.js';
 import {kUtilsInjectables} from '../../../contexts/injection/injectables.js';
 import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
-import {appAssert} from '../../../utils/assertion.js';
-import {ServerError} from '../../../utils/errors.js';
 import {validate} from '../../../utils/validate.js';
 import {InvalidRequestError} from '../../errors.js';
 import {checkPermissionGroupAuthorization03} from '../utils.js';
@@ -19,6 +17,7 @@ const deletePermissionGroup: DeletePermissionGroupEndpoint = async reqData => {
       kSessionUtils.permittedAgentTypes.api,
       kSessionUtils.accessScopes.api
     );
+
   const {permissionGroup, workspace} =
     await checkPermissionGroupAuthorization03(
       agent,
@@ -37,11 +36,6 @@ const deletePermissionGroup: DeletePermissionGroupEndpoint = async reqData => {
     workspaceId: workspace.resourceId,
     resources: [permissionGroup],
   });
-  appAssert(
-    job,
-    new ServerError(),
-    'Could not create delete permission group job'
-  );
 
   return {jobId: job.resourceId};
 };

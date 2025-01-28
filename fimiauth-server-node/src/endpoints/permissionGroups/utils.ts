@@ -16,11 +16,9 @@ import {getFields, makeExtract, makeListExtract} from '../../utils/extract.js';
 import {getResourceId} from '../../utils/fns.js';
 import {indexArray} from '../../utils/indexArray.js';
 import {kReuseableErrors} from '../../utils/reusableErrors.js';
-import {assertGetWorkspaceIdFromAgent} from '../../utils/sessionUtils.js';
 import {InvalidRequestError, NotFoundError} from '../errors.js';
 import {agentExtractor, workspaceResourceFields} from '../extractors.js';
 import {checkWorkspaceExists} from '../workspaces/utils.js';
-import {PermissionGroupDoesNotExistError} from './errors.js';
 
 const assignedPermissionGroupsFields =
   getFields<PublicAssignedPermissionGroupMeta>({
@@ -60,8 +58,10 @@ export async function checkPermissionGroupAuthorization(
     workspace,
     opts,
     workspaceId: workspace.resourceId,
+    spaceId: permissionGroup.spaceId,
     target: {action, targetId: permissionGroup.resourceId},
   });
+
   return {agent, permissionGroup, workspace};
 }
 
@@ -73,35 +73,23 @@ export async function checkPermissionGroupAuthorization02(
   const permissionGroup = await kSemanticModels
     .permissionGroup()
     .getOneById(id);
+
   assertPermissionGroup(permissionGroup);
   return checkPermissionGroupAuthorization(agent, permissionGroup, action);
 }
 
 export async function checkPermissionGroupAuthorization03(
   agent: SessionAgent,
-  input: PermissionGroupMatcher,
+  matcher: PermissionGroupMatcher,
   action: FimidaraPermissionAction,
   opts?: SemanticProviderOpParams
 ) {
-  let permissionGroup: PermissionGroup | null = null;
+  const permissionGroup = await getPermissionGroupWithMatcher({
+    matcher,
+    opts,
+  });
 
-  if (!input.permissionGroupId && !input.name) {
-    throw new InvalidRequestError('PermissionGroup ID or name not set');
-  }
-
-  if (input.permissionGroupId) {
-    permissionGroup = await kSemanticModels
-      .permissionGroup()
-      .getOneById(input.permissionGroupId, opts);
-  } else if (input.name) {
-    const workspaceId =
-      input.workspaceId ?? assertGetWorkspaceIdFromAgent(agent);
-    permissionGroup = await kSemanticModels
-      .permissionGroup()
-      .getByName(workspaceId, input.name, opts);
-  }
-
-  appAssert(permissionGroup, new PermissionGroupDoesNotExistError());
+  appAssert(permissionGroup, kReuseableErrors.permissionGroup.notFound());
   return checkPermissionGroupAuthorization(agent, permissionGroup, action);
 }
 
@@ -115,7 +103,7 @@ export async function checkPermissionGroupsExist(params: {
   // TODO: use exists with $or or implement bulk ops
   const permissionGroups = await kSemanticModels
     .permissionGroup()
-    .getManyBySpaceAndIdList({spaceId, resourceIdList: idList, opts});
+    .getManyBySpaceAndIdList({spaceId, resourceIdList: idList}, opts);
 
   if (idList.length !== permissionGroups.length) {
     const map = indexArray(permissionGroups, {indexer: getResourceId});
@@ -145,11 +133,31 @@ export function mergePermissionGroupsWithInput(
 }
 
 export function throwPermissionGroupNotFound() {
-  throw new NotFoundError('PermissionGroup permissions group not found');
+  throw new NotFoundError('Permission group not found');
 }
 
 export function assertPermissionGroup(
   permissionGroup?: PermissionGroup | null
 ): asserts permissionGroup {
   appAssert(permissionGroup, kReuseableErrors.permissionGroup.notFound());
+}
+
+export async function getPermissionGroupWithMatcher(params: {
+  matcher: PermissionGroupMatcher;
+  opts?: SemanticProviderOpParams;
+}) {
+  const {matcher, opts} = params;
+  const {spaceId, name, permissionGroupId} = matcher;
+
+  if (permissionGroupId) {
+    return kSemanticModels
+      .permissionGroup()
+      .getOneById(permissionGroupId, opts);
+  }
+
+  if (spaceId && name) {
+    return kSemanticModels.permissionGroup().getByName({spaceId, name}, opts);
+  }
+
+  throw new InvalidRequestError('Permission group ID or name not set');
 }

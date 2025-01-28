@@ -28,7 +28,7 @@ export type PermissionEntityInheritanceMap = Record<
 export interface PermissionGroupMatcher {
   permissionGroupId?: string;
   name?: string;
-  workspaceId?: string;
+  spaceId: string;
 }
 
 export type PublicPermissionGroup = ToPublicDefinitions<PermissionGroup>;

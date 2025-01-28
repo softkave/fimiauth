@@ -5,6 +5,7 @@ import {
   kUtilsInjectables,
 } from '../../../contexts/injection/injectables.js';
 import {PermissionGroup} from '../../../definitions/permissionGroups.js';
+import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {getTimestamp} from '../../../utils/dateFns.js';
 import {getActionAgentFromSessionAgent} from '../../../utils/sessionUtils.js';
 import {validate} from '../../../utils/validate.js';
@@ -26,14 +27,16 @@ const updatePermissionGroup: UpdatePermissionGroupEndpoint = async reqData => {
       kSessionUtils.permittedAgentTypes.api,
       kSessionUtils.accessScopes.api
     );
-  let permissionGroup = await kSemanticModels.utils().withTxn(async opts => {
+
+  const permissionGroup = await kSemanticModels.utils().withTxn(async opts => {
     const {workspace, permissionGroup} =
       await checkPermissionGroupAuthorization03(
         agent,
         data,
-        'updatePermission',
+        kFimidaraPermissionActions.updatePermission,
         opts
       );
+
     const update: Partial<PermissionGroup> = {
       ...omit(data.data, 'permissionGroups'),
       lastUpdatedAt: getTimestamp(),
@@ -41,16 +44,17 @@ const updatePermissionGroup: UpdatePermissionGroupEndpoint = async reqData => {
     };
 
     if (update.name && update.name !== permissionGroup.name) {
-      await checkPermissionGroupNameAvailable(
-        workspace.resourceId,
-        update.name,
-        opts
-      );
+      await checkPermissionGroupNameAvailable({
+        spaceId: data.spaceId ?? workspace.resourceId,
+        name: update.name,
+        opts,
+      });
     }
 
     const updatedPermissionGroup = await kSemanticModels
       .permissionGroup()
       .getAndUpdateOneById(permissionGroup.resourceId, update, opts);
+
     assertPermissionGroup(updatedPermissionGroup);
     return updatedPermissionGroup;
   });

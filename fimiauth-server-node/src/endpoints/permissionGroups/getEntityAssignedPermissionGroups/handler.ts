@@ -23,16 +23,22 @@ const getEntityAssignedPermissionGroups: GetEntityAssignedPermissionGroupsEndpoi
         kSessionUtils.permittedAgentTypes.api,
         kSessionUtils.accessScopes.api
       );
+
     const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
-    await checkReadEntityAssignedPermissionGroups(
+    await checkReadEntityAssignedPermissionGroups({
       agent,
       workspace,
-      data.entityId
-    );
-    const result = await fetchEntityAssignedPermissionGroupList(
-      data.entityId,
-      data.includeInheritedPermissionGroups ?? false
-    );
+      spaceId: data.spaceId ?? workspace.resourceId,
+      entityId: data.entityId,
+    });
+
+    const result = await fetchEntityAssignedPermissionGroupList({
+      spaceId: data.spaceId ?? workspace.resourceId,
+      entityId: data.entityId,
+      includeInheritedPermissionGroups:
+        data.includeInheritedPermissionGroups ?? false,
+    });
+
     return {
       permissionGroups: permissionGroupListExtractor(result.permissionGroups),
       immediateAssignedPermissionGroupsMeta:

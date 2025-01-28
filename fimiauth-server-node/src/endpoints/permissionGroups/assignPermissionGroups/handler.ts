@@ -88,17 +88,17 @@ const assignPermissionGroups: AssignPermissionGroupsEndpoint =
             return;
           }
 
-          // Assign permission groups to entity
-          return addAssignedPermissionGroupList(
+          return addAssignedPermissionGroupList({
             agent,
-            workspace.resourceId,
-            permissionGroupList,
-            entityId,
-            false, // don't delete existing assigned permission groups
-            true, // skip permission groups check
-            /** skip auth check */ true,
-            opts
-          );
+            workspaceId: workspace.resourceId,
+            spaceId: data.spaceId ?? workspace.resourceId,
+            permissionGroupsInput: permissionGroupList,
+            assigneeId: entityId,
+            deleteExisting: false,
+            skipPermissionGroupsExistCheck: true,
+            skipAuthCheck: true,
+            opts,
+          });
         })
       );
     });

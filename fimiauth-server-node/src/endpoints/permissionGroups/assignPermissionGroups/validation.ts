@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import permissionItemValidationSchemas from '../../permissionItems/validation.js';
 import {endpointValidationSchemas} from '../../validation.js';
-import permissionGroupsValidationSchemas from '../validation.js';
+import kPermissionGroupsValidationSchemas from '../validation.js';
 import {AssignPermissionGroupsEndpointParams} from './types.js';
 
 export const assignPermissionGroupsJoiSchema =
@@ -10,6 +10,6 @@ export const assignPermissionGroupsJoiSchema =
       ...endpointValidationSchemas.optionalWorkspaceIdParts,
       entityId: permissionItemValidationSchemas.entityParts.entityId.required(),
       permissionGroupId:
-        permissionGroupsValidationSchemas.pgIdOrList.required(),
+        kPermissionGroupsValidationSchemas.pgIdOrList.required(),
     })
     .required();

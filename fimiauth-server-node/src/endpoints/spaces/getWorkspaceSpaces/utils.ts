@@ -1,7 +1,7 @@
 import {resolveTargetChildrenAccessCheckWithAgent} from '../../../contexts/authorizationChecks/checkAuthorizaton.js';
 import {SessionAgent} from '../../../definitions/system.js';
 import {Workspace} from '../../../definitions/workspace.js';
-import {getWorkspaceResourceListQuery00} from '../../utils.js';
+import {getSpaceResourceListQuery00} from '../../utils.js';
 
 export async function getWorkspaceSpacesQuery(
   agent: SessionAgent,
@@ -14,5 +14,5 @@ export async function getWorkspaceSpacesQuery(
     target: {action: 'getSpace', targetId: workspace.resourceId},
   });
 
-  return getWorkspaceResourceListQuery00(workspace, report);
+  return getSpaceResourceListQuery00(workspace, report);
 }

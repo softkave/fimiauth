@@ -22,11 +22,18 @@ const countWorkspacePermissionGroups: CountWorkspacePermissionGroupsEndpoint =
         kSessionUtils.permittedAgentTypes.api,
         kSessionUtils.accessScopes.api
       );
+
     const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
-    const q = await getWorkspacePermissionGroupsQuery(agent, workspace);
+    const q = await getWorkspacePermissionGroupsQuery(
+      agent,
+      workspace,
+      data.spaceId ?? workspace.resourceId
+    );
+
     const count = await kSemanticModels
       .permissionGroup()
-      .countManyByWorkspaceAndIdList(q);
+      .countManyBySpaceAndIdList(q);
+
     return {count};
   };
 

@@ -21,7 +21,7 @@ import {
   AddPermissionGroupEndpointResult,
 } from './addPermissionGroup/types.js';
 import {AssignPermissionGroupsEndpointParams} from './assignPermissionGroups/types.js';
-import {permissionGroupConstants} from './constants.js';
+import {kPermissionGroupConstants} from './constants.js';
 import {CountWorkspacePermissionGroupsEndpointParams} from './countWorkspacePermissionGroups/types.js';
 import {DeletePermissionGroupEndpointParams} from './deletePermissionGroup/types.js';
 import {
@@ -322,7 +322,7 @@ export const addPermissionGroupEndpointDefinition = mddocConstruct
       AddPermissionGroupHttpEndpoint['mddocHttpDefinition']['responseBody']
     >
   >()
-  .setBasePathname(permissionGroupConstants.routes.addPermissionGroup)
+  .setBasePathname(kPermissionGroupConstants.routes.addPermissionGroup)
   .setMethod(HttpEndpointMethod.Post)
   .setRequestBody(addPermissionGroupParams)
   .setRequestHeaders(
@@ -355,7 +355,7 @@ export const getPermissionGroupEndpointDefinition = mddocConstruct
       GetPermissionGroupHttpEndpoint['mddocHttpDefinition']['responseBody']
     >
   >()
-  .setBasePathname(permissionGroupConstants.routes.getPermissionGroup)
+  .setBasePathname(kPermissionGroupConstants.routes.getPermissionGroup)
   .setMethod(HttpEndpointMethod.Post)
   .setRequestBody(getPermissionGroupParams)
   .setRequestHeaders(
@@ -388,7 +388,7 @@ export const updatePermissionGroupEndpointDefinition = mddocConstruct
       UpdatePermissionGroupHttpEndpoint['mddocHttpDefinition']['responseBody']
     >
   >()
-  .setBasePathname(permissionGroupConstants.routes.updatePermissionGroup)
+  .setBasePathname(kPermissionGroupConstants.routes.updatePermissionGroup)
   .setMethod(HttpEndpointMethod.Post)
   .setRequestBody(updatePermissionGroupParams)
   .setRequestHeaders(
@@ -421,7 +421,7 @@ export const deletePermissionGroupEndpointDefinition = mddocConstruct
       DeletePermissionGroupHttpEndpoint['mddocHttpDefinition']['responseBody']
     >
   >()
-  .setBasePathname(permissionGroupConstants.routes.deletePermissionGroup)
+  .setBasePathname(kPermissionGroupConstants.routes.deletePermissionGroup)
   .setMethod(HttpEndpointMethod.Delete)
   .setRequestBody(deletePermissionGroupParams)
   .setRequestHeaders(
@@ -454,7 +454,9 @@ export const getWorkspacePermissionGroupsEndpointDefinition = mddocConstruct
       GetWorkspacePermissionGroupsHttpEndpoint['mddocHttpDefinition']['responseBody']
     >
   >()
-  .setBasePathname(permissionGroupConstants.routes.getWorkspacePermissionGroups)
+  .setBasePathname(
+    kPermissionGroupConstants.routes.getWorkspacePermissionGroups
+  )
   .setMethod(HttpEndpointMethod.Post)
   .setRequestBody(getWorkspacePermissionGroupsParams)
   .setRequestHeaders(
@@ -488,7 +490,7 @@ export const countWorkspacePermissionGroupsEndpointDefinition = mddocConstruct
     >
   >()
   .setBasePathname(
-    permissionGroupConstants.routes.countWorkspacePermissionGroups
+    kPermissionGroupConstants.routes.countWorkspacePermissionGroups
   )
   .setMethod(HttpEndpointMethod.Post)
   .setRequestBody(countWorkspacePermissionGroupsParams)
@@ -522,7 +524,7 @@ export const assignPermissionGroupsEndpointDefinition = mddocConstruct
       AssignPermissionGroupsHttpEndpoint['mddocHttpDefinition']['responseBody']
     >
   >()
-  .setBasePathname(permissionGroupConstants.routes.assignPermissionGroups)
+  .setBasePathname(kPermissionGroupConstants.routes.assignPermissionGroups)
   .setMethod(HttpEndpointMethod.Post)
   .setRequestBody(assignPermissionGroupsParams)
   .setRequestHeaders(
@@ -551,7 +553,7 @@ export const unassignPermissionGroupsEndpointDefinition = mddocConstruct
       UnassignPermissionGroupsHttpEndpoint['mddocHttpDefinition']['responseBody']
     >
   >()
-  .setBasePathname(permissionGroupConstants.routes.unassignPermissionGroups)
+  .setBasePathname(kPermissionGroupConstants.routes.unassignPermissionGroups)
   .setMethod(HttpEndpointMethod.Post)
   .setRequestBody(unassignPermissionGroupsParams)
   .setRequestHeaders(
@@ -582,7 +584,7 @@ export const getEntityAssignedPermissionGroupsEndpointDefinition =
       >
     >()
     .setBasePathname(
-      permissionGroupConstants.routes.getEntityAssignedPermissionGroups
+      kPermissionGroupConstants.routes.getEntityAssignedPermissionGroups
     )
     .setMethod(HttpEndpointMethod.Post)
     .setRequestBody(getEntityAssignedPermissionGroupsParams)

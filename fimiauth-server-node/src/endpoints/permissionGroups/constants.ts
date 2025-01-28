@@ -1,6 +1,6 @@
 import {kEndpointConstants} from '../constants.js';
 
-export const permissionGroupConstants = {
+export const kPermissionGroupConstants = {
   maxAssignedPermissionGroups: 100,
   routes: {
     addPermissionGroup: `${kEndpointConstants.apiv1}/permissionGroups/addPermissionGroup`,

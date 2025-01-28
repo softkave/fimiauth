@@ -2,7 +2,7 @@ import {resolveTargetChildrenAccessCheckWithAgent} from '../../../contexts/autho
 import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {SessionAgent} from '../../../definitions/system.js';
 import {Workspace} from '../../../definitions/workspace.js';
-import {getWorkspaceResourceListQuery00} from '../../utils.js';
+import {getSpaceResourceListQuery00} from '../../utils.js';
 
 export async function getWorkspaceCollaboratorsQuery(
   agent: SessionAgent,
@@ -20,5 +20,5 @@ export async function getWorkspaceCollaboratorsQuery(
     },
   });
 
-  return getWorkspaceResourceListQuery00(workspace, report);
+  return getSpaceResourceListQuery00(workspace, report);
 }

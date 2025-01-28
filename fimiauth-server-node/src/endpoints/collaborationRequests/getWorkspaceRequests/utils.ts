@@ -3,7 +3,7 @@ import {SemanticCollaborationRequestProviderFilter} from '../../../contexts/sema
 import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {SessionAgent} from '../../../definitions/system.js';
 import {Workspace} from '../../../definitions/workspace.js';
-import {getWorkspaceResourceListQuery00} from '../../utils.js';
+import {getSpaceResourceListQuery00} from '../../utils.js';
 
 export async function getWorkspaceCollaborationRequestsQuery(
   agent: SessionAgent,
@@ -24,7 +24,7 @@ export async function getWorkspaceCollaborationRequestsQuery(
     });
 
   const q: SemanticCollaborationRequestProviderFilter =
-    getWorkspaceResourceListQuery00(workspace, permissionsSummaryReport);
+    getSpaceResourceListQuery00(workspace, permissionsSummaryReport);
 
   if (email) {
     q.email = email;

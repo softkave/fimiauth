@@ -6,6 +6,7 @@ import {
   kUtilsInjectables,
 } from '../../../contexts/injection/injectables.js';
 import {AssignedItem} from '../../../definitions/assignedItem.js';
+import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {convertToArray} from '../../../utils/fns.js';
 import {validate} from '../../../utils/validate.js';
 import {getWorkspaceFromEndpointInput} from '../../workspaces/utils.js';
@@ -22,12 +23,17 @@ const unassignPermissionGroups: UnassignPermissionGroupsEndpoint =
         kSessionUtils.permittedAgentTypes.api,
         kSessionUtils.accessScopes.api
       );
+
     const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
     await checkAuthorizationWithAgent({
       agent,
       workspace,
       workspaceId: workspace.resourceId,
-      target: {targetId: workspace.resourceId, action: 'updatePermission'},
+      spaceId: data.spaceId ?? workspace.resourceId,
+      target: {
+        targetId: workspace.resourceId,
+        action: kFimidaraPermissionActions.updatePermission,
+      },
     });
 
     const queries: LiteralDataQuery<AssignedItem>[] = [];

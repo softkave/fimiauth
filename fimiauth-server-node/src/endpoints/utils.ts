@@ -10,7 +10,6 @@ import {kUtilsInjectables} from '../contexts/injection/injectables.js';
 import {getInAndNinQuery} from '../contexts/semantic/utils.js';
 import {IServerRequest} from '../contexts/types.js';
 import {Agent, WorkspaceResource} from '../definitions/system.js';
-import {Workspace} from '../definitions/workspace.js';
 import OperationError, {
   FimidaraExternalError,
 } from '../utils/OperationError.js';
@@ -193,20 +192,20 @@ export function endpointDecodeURIComponent(component?: unknown) {
     : undefined;
 }
 
-export function getWorkspaceResourceListQuery00(
-  workspace: Workspace,
+export function getSpaceResourceListQuery00(
+  spaceId: string,
   report: ResolvedTargetChildrenAccessCheck
 ) {
   if (report.access === kResolvedTargetChildrenAccess.full) {
     return {
-      workspaceId: workspace.resourceId,
+      spaceId,
       excludeResourceIdList: report.partialDenyIds?.length
         ? report.partialDenyIds
         : undefined,
     };
   } else if (report.access === kResolvedTargetChildrenAccess.partial) {
     return {
-      workspaceId: workspace.resourceId,
+      spaceId,
       resourceIdList: report.partialAllowIds,
     };
   }
@@ -214,13 +213,13 @@ export function getWorkspaceResourceListQuery00(
   throw new PermissionDeniedError({item: report.item});
 }
 
-export function getWorkspaceResourceListQuery01(
-  workspace: Workspace,
+export function getSpaceResourceListQuery01(
+  spaceId: string,
   report: ResolvedTargetChildrenAccessCheck
 ): DataQuery<WorkspaceResource> {
-  const query = getWorkspaceResourceListQuery00(workspace, report);
+  const query = getSpaceResourceListQuery00(spaceId, report);
   return {
-    workspaceId: workspace.resourceId,
+    spaceId,
     ...getInAndNinQuery<WorkspaceResource>(
       'resourceId',
       query.resourceIdList,

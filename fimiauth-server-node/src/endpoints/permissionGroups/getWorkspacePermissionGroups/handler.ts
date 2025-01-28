@@ -26,11 +26,16 @@ const getWorkspacePermissionGroups: GetWorkspacePermissionGroupsEndpoint =
       );
 
     const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
-    const q = await getWorkspacePermissionGroupsQuery(agent, workspace);
+    const q = await getWorkspacePermissionGroupsQuery(
+      agent,
+      workspace,
+      data.spaceId ?? workspace.resourceId
+    );
+
     applyDefaultEndpointPaginationOptions(data);
     const items = await kSemanticModels
       .permissionGroup()
-      .getManyByWorkspaceAndIdList(q, data);
+      .getManyBySpaceAndIdList(q, data);
 
     return {
       page: getEndpointPageFromInput(data),

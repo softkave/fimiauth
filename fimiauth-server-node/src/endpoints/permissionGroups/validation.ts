@@ -15,9 +15,9 @@ const pgIdOrList = Joi.alternatives().try(
     .max(kEndpointConstants.inputListMax)
 );
 
-const permissionGroupsValidationSchemas = {
+const kPermissionGroupsValidationSchemas = {
   assignedPermissionGroup,
   pgIdOrList,
 };
 
-export default permissionGroupsValidationSchemas;
+export default kPermissionGroupsValidationSchemas;
