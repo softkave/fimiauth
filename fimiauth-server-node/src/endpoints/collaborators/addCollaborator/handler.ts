@@ -5,6 +5,7 @@ import {
   kUtilsInjectables,
 } from '../../../contexts/injection/injectables.js';
 import {Collaborator} from '../../../definitions/collaborator.js';
+import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {kFimidaraResourceType} from '../../../definitions/system.js';
 import {newWorkspaceResource} from '../../../utils/resource.js';
 import {getWorkspaceIdFromSessionAgent} from '../../../utils/sessionUtils.js';
@@ -31,7 +32,11 @@ const addCollaborator: AddCollaboratorEndpoint = async reqData => {
     agent,
     workspace,
     workspaceId: workspace.resourceId,
-    target: {targetId: workspace.resourceId, action: 'addCollaborator'},
+    spaceId: data.spaceId ?? workspace.spaceId,
+    target: {
+      targetId: workspace.resourceId,
+      action: kFimidaraPermissionActions.addCollaborator,
+    },
   });
 
   const collaborator = await kSemanticModels.utils().withTxn(async opts => {
@@ -43,14 +48,15 @@ const addCollaborator: AddCollaboratorEndpoint = async reqData => {
       throw new ResourceExistsError('Collaborator already exists');
     }
 
-    const collaborator = newWorkspaceResource<Collaborator>(
+    const collaborator = newWorkspaceResource<Collaborator>({
       agent,
-      kFimidaraResourceType.Collaborator,
-      workspace.resourceId,
-      {...data, workspaceId: workspace.resourceId}
-    );
-    await kSemanticModels.collaborator().insertItem(collaborator, opts);
+      type: kFimidaraResourceType.Collaborator,
+      workspaceId: workspace.resourceId,
+      spaceId: data.spaceId ?? workspace.spaceId,
+      seed: {...data, workspaceId: workspace.resourceId},
+    });
 
+    await kSemanticModels.collaborator().insertItem(collaborator, opts);
     return collaborator;
   });
 

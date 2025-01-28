@@ -26,6 +26,7 @@ const removeCollaborator: RemoveCollaboratorEndpoint = async reqData => {
     agent,
     workspace,
     workspaceId: workspace.resourceId,
+    spaceId: data.spaceId ?? workspace.spaceId,
     target: {
       targetId: workspace.resourceId,
       action: kFimidaraPermissionActions.removeCollaborator,
@@ -36,6 +37,7 @@ const removeCollaborator: RemoveCollaboratorEndpoint = async reqData => {
     workspaceId,
     providedResourceId: data.collaboratorId,
     collaboratorId: data.collaboratorId,
+    spaceId: data.spaceId ?? workspace.spaceId,
   });
 
   const [job] = await beginDeleteCollaborator({

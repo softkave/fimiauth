@@ -63,3 +63,4 @@
 - we need a way to paginate resolveTargetChildrenAccessCheckWithAgent calls because it could potentially return a lot of results
 - logic around delete space
 - send email if request description changed
+- targetId should be spaceId or workspaceId

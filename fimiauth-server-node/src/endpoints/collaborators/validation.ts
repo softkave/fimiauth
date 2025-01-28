@@ -1,3 +1,3 @@
-const collaboratorsValidationSchemas = {};
+const kCollaboratorsValidationSchemas = {};
 
-export default collaboratorsValidationSchemas;
+export default kCollaboratorsValidationSchemas;

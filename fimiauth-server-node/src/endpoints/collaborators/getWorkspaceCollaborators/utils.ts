@@ -1,52 +1,24 @@
-import {
-  kResolvedTargetChildrenAccess,
-  resolveTargetChildrenAccessCheckWithAgent,
-} from '../../../contexts/authorizationChecks/checkAuthorizaton.js';
-import {DataQuery} from '../../../contexts/data/types.js';
-import {getInAndNinQuery} from '../../../contexts/semantic/utils.js';
-import {AssignedItem} from '../../../definitions/assignedItem.js';
-import {
-  kFimidaraResourceType,
-  SessionAgent,
-} from '../../../definitions/system.js';
+import {resolveTargetChildrenAccessCheckWithAgent} from '../../../contexts/authorizationChecks/checkAuthorizaton.js';
+import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
+import {SessionAgent} from '../../../definitions/system.js';
 import {Workspace} from '../../../definitions/workspace.js';
-import {PermissionDeniedError} from '../../users/errors.js';
+import {getWorkspaceResourceListQuery00} from '../../utils.js';
 
 export async function getWorkspaceCollaboratorsQuery(
   agent: SessionAgent,
-  workspace: Workspace
-): Promise<DataQuery<AssignedItem>> {
-  const permissionsSummaryReport =
-    await resolveTargetChildrenAccessCheckWithAgent({
-      agent,
-      workspaceId: workspace.resourceId,
-      workspace: workspace,
-      target: {targetId: workspace.resourceId, action: 'readCollaborator'},
-    });
+  workspace: Workspace,
+  spaceId: string
+) {
+  const report = await resolveTargetChildrenAccessCheckWithAgent({
+    agent,
+    workspace,
+    spaceId,
+    workspaceId: workspace.resourceId,
+    target: {
+      action: kFimidaraPermissionActions.readCollaborator,
+      targetId: workspace.resourceId,
+    },
+  });
 
-  if (permissionsSummaryReport.access === kResolvedTargetChildrenAccess.full) {
-    return {
-      workspaceId: workspace.resourceId,
-      assignedItemType: kFimidaraResourceType.Workspace,
-      assigneeType: kFimidaraResourceType.User,
-      ...getInAndNinQuery<AssignedItem>(
-        'assigneeId',
-        /** inList */ undefined,
-        permissionsSummaryReport.partialDenyIds
-      ),
-    };
-  } else if (
-    permissionsSummaryReport.access === kResolvedTargetChildrenAccess.partial
-  ) {
-    return {
-      workspaceId: workspace.resourceId,
-      assigneeId: permissionsSummaryReport.partialAllowIds && {
-        $in: permissionsSummaryReport.partialAllowIds,
-      },
-      assignedItemType: kFimidaraResourceType.Workspace,
-      assigneeType: kFimidaraResourceType.User,
-    };
-  }
-
-  throw new PermissionDeniedError();
+  return getWorkspaceResourceListQuery00(workspace, report);
 }

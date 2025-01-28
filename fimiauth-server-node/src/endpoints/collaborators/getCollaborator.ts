@@ -6,6 +6,7 @@ export async function getCollaborator(params: {
   collaboratorId?: string;
   providedResourceId?: string;
   workspaceId: string;
+  spaceId: string;
 }) {
   let collaborator: Collaborator | null = null;
   if (params.collaboratorId) {
@@ -15,7 +16,7 @@ export async function getCollaborator(params: {
   } else if (params.providedResourceId) {
     collaborator = await kSemanticModels
       .collaborator()
-      .getByProvidedId(params.workspaceId, params.providedResourceId);
+      .getByProvidedId(params.spaceId, params.providedResourceId);
   } else {
     throw new InvalidRequestError(
       'Either collaboratorId or providedResourceId must be provided'

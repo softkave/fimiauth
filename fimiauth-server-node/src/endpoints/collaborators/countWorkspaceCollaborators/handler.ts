@@ -4,8 +4,10 @@ import {
   kSemanticModels,
   kUtilsInjectables,
 } from '../../../contexts/injection/injectables.js';
+import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {validate} from '../../../utils/validate.js';
 import {getWorkspaceFromEndpointInput} from '../../workspaces/utils.js';
+import {getWorkspaceCollaboratorsQuery} from '../getWorkspaceCollaborators/utils.js';
 import {CountWorkspaceCollaboratorsEndpoint} from './types.js';
 import {countWorkspaceCollaboratorsJoiSchema} from './validation.js';
 
@@ -25,12 +27,22 @@ const countWorkspaceCollaborators: CountWorkspaceCollaboratorsEndpoint =
       agent,
       workspace,
       workspaceId: workspace.resourceId,
-      target: {targetId: workspace.resourceId, action: 'readCollaborator'},
+      spaceId: data.spaceId ?? workspace.spaceId,
+      target: {
+        targetId: workspace.resourceId,
+        action: kFimidaraPermissionActions.readCollaborator,
+      },
     });
+
+    const q = await getWorkspaceCollaboratorsQuery(
+      agent,
+      workspace,
+      data.spaceId ?? workspace.resourceId
+    );
 
     const count = await kSemanticModels
       .collaborator()
-      .countByWorkspaceId(workspace.resourceId);
+      .countManyByWorkspaceAndIdList(q);
 
     return {count};
   };
