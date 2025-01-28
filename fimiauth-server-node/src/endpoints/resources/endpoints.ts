@@ -11,5 +11,6 @@ export function getResourcesHttpEndpoints() {
       mddocHttpDefinition: getResourcesEndpointDefinition,
     },
   };
+
   return resourcesExportedEndpoints;
 }

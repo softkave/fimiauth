@@ -2,7 +2,7 @@ import Joi from 'joi';
 import {getWorkspaceResourceTypeList} from '../../definitions/system.js';
 import {kValidationSchemas} from '../../utils/validationUtils.js';
 import {kEndpointConstants} from '../constants.js';
-import {permissionItemConstants} from './constants.js';
+import {kPermissionItemConstants} from './constants.js';
 import {PermissionItemInput} from './types.js';
 
 const targetId = kValidationSchemas.resourceId;
@@ -35,10 +35,10 @@ const itemInput = Joi.object<PermissionItemInput>().keys({
 });
 const itemInputList = Joi.array()
   .items(itemInput)
-  .max(permissionItemConstants.maxPermissionItemsPerRequest);
+  .max(kPermissionItemConstants.maxPermissionItemsPerRequest);
 const itemIds = Joi.array()
   .items(kValidationSchemas.resourceId.required())
-  .max(permissionItemConstants.maxPermissionItemsPerRequest)
+  .max(kPermissionItemConstants.maxPermissionItemsPerRequest)
   .unique();
 const publicAccessOp = Joi.object().keys({
   action: kValidationSchemas.crudAction.required(),
@@ -46,9 +46,9 @@ const publicAccessOp = Joi.object().keys({
 });
 const publicAccessOpList = Joi.array()
   .items(publicAccessOp)
-  .max(permissionItemConstants.maxPermissionItemsPerRequest);
+  .max(kPermissionItemConstants.maxPermissionItemsPerRequest);
 
-const permissionItemValidationSchemas = {
+const kPermissionItemValidationSchemas = {
   itemIds,
   itemInput,
   itemInputList,
@@ -58,4 +58,4 @@ const permissionItemValidationSchemas = {
   entityParts,
 };
 
-export default permissionItemValidationSchemas;
+export default kPermissionItemValidationSchemas;

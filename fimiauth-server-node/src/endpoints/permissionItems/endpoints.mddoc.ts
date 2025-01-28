@@ -11,7 +11,7 @@ import {
   mddocEndpointHttpResponseItems,
 } from '../endpoints.mddoc.js';
 import {AddPermissionItemsEndpointParams} from './addItems/types.js';
-import {permissionItemConstants} from './constants.js';
+import {kPermissionItemConstants} from './constants.js';
 import {
   DeletePermissionItemInput,
   DeletePermissionItemsEndpointParams,
@@ -97,7 +97,7 @@ const deletePermissionItemInput = mddocConstruct
 const deletePermissionItemInputList = mddocConstruct
   .constructFieldArray<DeletePermissionItemInput>()
   .setType(deletePermissionItemInput)
-  .setMax(permissionItemConstants.maxPermissionItemsPerRequest);
+  .setMax(kPermissionItemConstants.maxPermissionItemsPerRequest);
 
 const newPermissionItemInput = mddocConstruct
   .constructFieldObject<PermissionItemInput>()
@@ -208,12 +208,12 @@ const resolvedPermissionItem = mddocConstruct
 const newPermissionItemInputList = mddocConstruct
   .constructFieldArray<PermissionItemInput>()
   .setType(newPermissionItemInput)
-  .setMax(permissionItemConstants.maxPermissionItemsPerRequest);
+  .setMax(kPermissionItemConstants.maxPermissionItemsPerRequest);
 
 const resolvePermissionsItemInputList = mddocConstruct
   .constructFieldArray<ResolveEntityPermissionItemInput>()
   .setType(resolvePermissionsItemInput)
-  .setMax(permissionItemConstants.maxPermissionItemsPerRequest);
+  .setMax(kPermissionItemConstants.maxPermissionItemsPerRequest);
 
 const resolvedPermissionItemList = mddocConstruct
   .constructFieldArray<ResolvedEntityPermissionItem>()
@@ -288,7 +288,7 @@ export const addPermissionItemsEndpointDefinition = mddocConstruct
       AddPermissionItemsHttpEndpoint['mddocHttpDefinition']['responseBody']
     >
   >()
-  .setBasePathname(permissionItemConstants.routes.addItems)
+  .setBasePathname(kPermissionItemConstants.routes.addItems)
   .setMethod(HttpEndpointMethod.Post)
   .setRequestBody(addPermissionItemsParams)
   .setRequestHeaders(
@@ -317,7 +317,7 @@ export const deletePermissionItemsEndpointDefinition = mddocConstruct
       DeletePermissionItemsHttpEndpoint['mddocHttpDefinition']['responseBody']
     >
   >()
-  .setBasePathname(permissionItemConstants.routes.deleteItems)
+  .setBasePathname(kPermissionItemConstants.routes.deleteItems)
   .setMethod(HttpEndpointMethod.Delete)
   .setRequestBody(deletePermissionItemsParams)
   .setRequestHeaders(
@@ -352,7 +352,7 @@ export const resolveEntityPermissionsEndpointDefinition = mddocConstruct
       ResolveEntityPermissionsHttpEndpoint['mddocHttpDefinition']['responseBody']
     >
   >()
-  .setBasePathname(permissionItemConstants.routes.resolveEntityPermissions)
+  .setBasePathname(kPermissionItemConstants.routes.resolveEntityPermissions)
   .setMethod(HttpEndpointMethod.Post)
   .setRequestBody(resolveEntityPermissionsParams)
   .setRequestHeaders(

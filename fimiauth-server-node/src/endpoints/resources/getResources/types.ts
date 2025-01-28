@@ -1,9 +1,9 @@
 import {PublicResourceWrapper} from '../../../definitions/system.js';
-import {Endpoint} from '../../types.js';
+import {Endpoint, EndpointOptionalWorkspaceIDParam} from '../../types.js';
 import {FetchResourceItem} from '../types.js';
 
-export interface GetResourcesEndpointParams {
-  workspaceId?: string;
+export interface GetResourcesEndpointParams
+  extends EndpointOptionalWorkspaceIDParam {
   resources: FetchResourceItem[];
 }
 

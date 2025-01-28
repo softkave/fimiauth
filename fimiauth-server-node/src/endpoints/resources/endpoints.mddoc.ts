@@ -1,4 +1,7 @@
-import {PublicResource, PublicResourceWrapper} from '../../definitions/system.js';
+import {
+  PublicResource,
+  PublicResourceWrapper,
+} from '../../definitions/system.js';
 import {
   HttpEndpointMethod,
   InferFieldObjectOrMultipartType,
@@ -6,7 +9,7 @@ import {
   mddocConstruct,
 } from '../../mddoc/mddoc.js';
 import {fReusables, mddocEndpointHttpHeaderItems} from '../endpoints.mddoc.js';
-import resourcesConstants from './constants.js';
+import kResourcesConstants from './constants.js';
 import {
   GetResourcesEndpointParams,
   GetResourcesEndpointResult,
@@ -17,9 +20,15 @@ const fetchResourceItemInput = mddocConstruct
   .constructFieldObject<FetchResourceItem>()
   .setName('FetchResourceItem')
   .setFields({
-    resourceId: mddocConstruct.constructFieldObjectField(false, fReusables.idOrList),
+    resourceId: mddocConstruct.constructFieldObjectField(
+      false,
+      fReusables.idOrList
+    ),
     action: mddocConstruct.constructFieldObjectField(true, fReusables.action),
-    filepath: mddocConstruct.constructFieldObjectField(false, fReusables.filepathOrList),
+    filepath: mddocConstruct.constructFieldObjectField(
+      false,
+      fReusables.filepathOrList
+    ),
     folderpath: mddocConstruct.constructFieldObjectField(
       false,
       fReusables.folderpathOrList
@@ -51,7 +60,10 @@ const resourceWrapper = mddocConstruct
   .setName('ResourceWrapper')
   .setFields({
     resourceId: mddocConstruct.constructFieldObjectField(true, fReusables.id),
-    resourceType: mddocConstruct.constructFieldObjectField(true, fReusables.resourceType),
+    resourceType: mddocConstruct.constructFieldObjectField(
+      true,
+      fReusables.resourceType
+    ),
     resource: mddocConstruct.constructFieldObjectField(
       true,
       mddocConstruct
@@ -70,7 +82,9 @@ const getResourcesResponseBody = mddocConstruct
   .setFields({
     resources: mddocConstruct.constructFieldObjectField(
       true,
-      mddocConstruct.constructFieldArray<PublicResourceWrapper>().setType(resourceWrapper)
+      mddocConstruct
+        .constructFieldArray<PublicResourceWrapper>()
+        .setType(resourceWrapper)
     ),
   });
 export const getResourcesEndpointDefinition = mddocConstruct
@@ -81,21 +95,27 @@ export const getResourcesEndpointDefinition = mddocConstruct
     InferFieldObjectType<
       GetResourcesHttpEndpoint['mddocHttpDefinition']['pathParamaters']
     >,
-    InferFieldObjectType<GetResourcesHttpEndpoint['mddocHttpDefinition']['query']>,
+    InferFieldObjectType<
+      GetResourcesHttpEndpoint['mddocHttpDefinition']['query']
+    >,
     InferFieldObjectOrMultipartType<
       GetResourcesHttpEndpoint['mddocHttpDefinition']['requestBody']
     >,
     InferFieldObjectType<
       GetResourcesHttpEndpoint['mddocHttpDefinition']['responseHeaders']
     >,
-    InferFieldObjectType<GetResourcesHttpEndpoint['mddocHttpDefinition']['responseBody']>
+    InferFieldObjectType<
+      GetResourcesHttpEndpoint['mddocHttpDefinition']['responseBody']
+    >
   >()
-  .setBasePathname(resourcesConstants.routes.getResources)
+  .setBasePathname(kResourcesConstants.routes.getResources)
   .setMethod(HttpEndpointMethod.Post)
   .setRequestBody(getResourcesParams)
   .setRequestHeaders(
     mddocEndpointHttpHeaderItems.requestHeaders_AuthRequired_JsonContentType
   )
-  .setResponseHeaders(mddocEndpointHttpHeaderItems.responseHeaders_JsonContentType)
+  .setResponseHeaders(
+    mddocEndpointHttpHeaderItems.responseHeaders_JsonContentType
+  )
   .setResponseBody(getResourcesResponseBody)
   .setName('GetResourcesEndpoint');

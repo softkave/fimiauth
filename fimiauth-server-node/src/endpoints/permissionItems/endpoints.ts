@@ -27,5 +27,6 @@ export function getPermissionItemsHttpEndpoints() {
       mddocHttpDefinition: resolveEntityPermissionsEndpointDefinition,
     },
   };
+
   return permissionItemsExportedEndpoints;
 }

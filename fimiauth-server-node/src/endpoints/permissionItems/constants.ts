@@ -1,6 +1,6 @@
 import {kEndpointConstants} from '../constants.js';
 
-export const permissionItemConstants = {
+export const kPermissionItemConstants = {
   maxPermissionItemsPerRequest: 1000,
   routes: {
     addItems: `${kEndpointConstants.apiv1}/permissionItems/addItems`,

@@ -15,11 +15,8 @@ const kAllowedTypes = [
   kFimidaraResourceType.AgentToken,
   kFimidaraResourceType.PermissionGroup,
   kFimidaraResourceType.PermissionItem,
-  kFimidaraResourceType.Folder,
-  kFimidaraResourceType.File,
-  kFimidaraResourceType.User,
-  kFimidaraResourceType.Tag,
-  kFimidaraResourceType.UsageRecord,
+  kFimidaraResourceType.Collaborator,
+  kFimidaraResourceType.Space,
 ];
 
 const getResources: GetResourcesEndpoint = async reqData => {
@@ -31,18 +28,20 @@ const getResources: GetResourcesEndpoint = async reqData => {
       kSessionUtils.permittedAgentTypes.api,
       kSessionUtils.accessScopes.api
     );
+
   const workspaceId = getWorkspaceIdFromSessionAgent(agent, data.workspaceId);
   const workspace = await checkWorkspaceExists(workspaceId);
   const resources = await INTERNAL_getResources({
     agent,
     allowedTypes: kAllowedTypes,
     workspaceId: workspace.resourceId,
+    spaceId: data.spaceId ?? workspace.resourceId,
     inputResources: data.resources,
     checkAuth: true,
     nothrowOnCheckError: true,
-    fillAssignedItems: true,
-    checkBelongsToWorkspace: !!data.workspaceId,
+    checkBelongsToSpace: true,
   });
+
   return {resources: getPublicResourceList(resources, workspaceId)};
 };
 
