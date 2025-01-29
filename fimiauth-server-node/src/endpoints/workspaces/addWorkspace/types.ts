@@ -12,7 +12,7 @@ export type AddWorkspaceEndpointParams = NewWorkspaceInput;
 
 export interface AddWorkspaceEndpointResult {
   workspace: PublicWorkspace;
-  agentToken: EncodedAgentToken;
+  token: EncodedAgentToken;
 }
 
 export type AddWorkspaceEndpoint = Endpoint<

@@ -14,8 +14,8 @@ export function generatePermissionGroupForTest(
 ) {
   const createdAt = getTimestamp();
   const createdBy: Agent = {
-    agentId: getNewIdForResource(kFimidaraResourceType.User),
-    agentType: kFimidaraResourceType.User,
+    agentId: getNewIdForResource(kFimidaraResourceType.AgentToken),
+    agentType: kFimidaraResourceType.AgentToken,
     agentTokenId: getNewIdForResource(kFimidaraResourceType.AgentToken),
   };
   const token: PermissionGroup = {
@@ -25,6 +25,7 @@ export function generatePermissionGroupForTest(
     lastUpdatedBy: createdBy,
     resourceId: getNewIdForResource(kFimidaraResourceType.PermissionGroup),
     workspaceId: getNewIdForResource(kFimidaraResourceType.Workspace),
+    spaceId: getNewIdForResource(kFimidaraResourceType.Space),
     name: faker.company.name(),
     description: faker.lorem.sentence(),
     isDeleted: false,
@@ -56,14 +57,15 @@ export async function generateAndInsertPermissionGroupListForTest(
     .withTxn(async opts =>
       kSemanticModels.permissionGroup().insertItem(items, opts)
     );
+
   return items;
 }
 
 export function generateAssignedItemForTest(seed: Partial<AssignedItem> = {}) {
   const createdAt = getTimestamp();
   const createdBy: Agent = {
-    agentId: getNewIdForResource(kFimidaraResourceType.User),
-    agentType: kFimidaraResourceType.User,
+    agentId: getNewIdForResource(kFimidaraResourceType.AgentToken),
+    agentType: kFimidaraResourceType.AgentToken,
     agentTokenId: getNewIdForResource(kFimidaraResourceType.AgentToken),
   };
   const item: AssignedItem = {
@@ -73,6 +75,7 @@ export function generateAssignedItemForTest(seed: Partial<AssignedItem> = {}) {
     lastUpdatedBy: createdBy,
     resourceId: getNewIdForResource(kFimidaraResourceType.AssignedItem),
     workspaceId: getNewIdForResource(kFimidaraResourceType.Workspace),
+    spaceId: getNewIdForResource(kFimidaraResourceType.Space),
     assignedItemId: getNewIdForResource(kFimidaraResourceType.PermissionGroup),
     assignedItemType: seed.assignedItemId
       ? getResourceTypeFromId(seed.assignedItemId)
@@ -85,6 +88,7 @@ export function generateAssignedItemForTest(seed: Partial<AssignedItem> = {}) {
     isDeleted: false,
     ...seed,
   };
+
   return item;
 }
 

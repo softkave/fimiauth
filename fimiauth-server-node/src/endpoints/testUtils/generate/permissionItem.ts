@@ -20,16 +20,18 @@ export function generatePermissionItemForTest(
 ) {
   const createdAt = getTimestamp();
   const createdBy: Agent = {
-    agentId: getNewIdForResource(kFimidaraResourceType.User),
-    agentType: kFimidaraResourceType.User,
+    agentId: getNewIdForResource(kFimidaraResourceType.AgentToken),
+    agentType: kFimidaraResourceType.AgentToken,
     agentTokenId: getNewIdForResource(kFimidaraResourceType.AgentToken),
   };
   const workspaceId = getNewIdForResource(kFimidaraResourceType.Workspace);
+  const spaceId = getNewIdForResource(kFimidaraResourceType.Space);
   const itemType = randomResourceType();
   const item: PermissionItem = {
     createdAt,
     createdBy,
     workspaceId,
+    spaceId,
     lastUpdatedAt: createdAt,
     lastUpdatedBy: createdBy,
     targetParentId: workspaceId,
@@ -37,7 +39,7 @@ export function generatePermissionItemForTest(
     entityId: createdBy.agentId,
     entityType: seed.entityId
       ? getResourceTypeFromId(seed.entityId)
-      : kFimidaraResourceType.User,
+      : kFimidaraResourceType.AgentToken,
     targetId: getNewIdForResource(itemType),
     targetType: seed.targetId ? getResourceTypeFromId(seed.targetId) : itemType,
     action: randomAction(),

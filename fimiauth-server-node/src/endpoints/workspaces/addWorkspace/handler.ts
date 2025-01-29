@@ -24,7 +24,7 @@ const addWorkspace: AddWorkspaceEndpoint = async reqData => {
 
   return {
     workspace: workspaceExtractor(workspace),
-    agentToken: {jwtTokenExpiresAt, refreshToken, jwtToken},
+    token: {jwtTokenExpiresAt, refreshToken, jwtToken},
   };
 };
 

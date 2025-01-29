@@ -109,6 +109,7 @@ class ResolvedPermissionsAccessChecker
       key,
       get(this.permissions, wildcardKey, [])
     ) as PermissionItem[];
+
     return this.checkAccess(items, nothrow);
   }
 
@@ -382,7 +383,7 @@ export async function resolveTargetChildrenAccessCheckWithAgent(
     };
   }
 ) {
-  const {agent, target, spaceId} = params;
+  const {agent, target} = params;
   const agentId = agent?.agentId;
   appAssert(agentId);
   return await resolveTargetChildrenAccessCheck({

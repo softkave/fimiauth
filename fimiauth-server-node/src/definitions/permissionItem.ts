@@ -8,10 +8,6 @@ import {
 
 export const kFimidaraPermissionActions = {
   wildcard: '*',
-  // wildcardAdd: 'wildcardAdd',
-  wildcardRead: 'wildcardRead',
-  // wildcardUpdate: 'wildcardUpdate',
-  // wildcardDelete: 'wildcardDelete',
 
   updateWorkspace: 'updateWorkspace',
   deleteWorkspace: 'deleteWorkspace',

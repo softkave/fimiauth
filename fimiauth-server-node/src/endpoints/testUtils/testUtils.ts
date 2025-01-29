@@ -2,15 +2,18 @@ import {faker} from '@faker-js/faker';
 import * as argon2 from 'argon2';
 import assert from 'assert';
 import {add} from 'date-fns';
+import {getNewId} from 'softkave-js-utils';
 import {globalSetup} from '../../contexts/globalUtils.js';
-import {kSemanticModels} from '../../contexts/injection/injectables.js';
+import {
+  kSemanticModels,
+  kUtilsInjectables,
+} from '../../contexts/injection/injectables.js';
 import {IServerRequest} from '../../contexts/types.js';
 import {AgentToken, PublicAgentToken} from '../../definitions/agentToken.js';
 import {
   BaseTokenData,
   kCurrentJWTTokenVersion,
 } from '../../definitions/system.js';
-import {PublicWorkspace, Workspace} from '../../definitions/workspace.js';
 import {FimidaraSuppliedConfig} from '../../resources/config.js';
 import {kPublicSessionAgent, kSystemSessionAgent} from '../../utils/agent.js';
 import {getTimestamp} from '../../utils/dateFns.js';
@@ -34,11 +37,14 @@ import addPermissionItems from '../permissionItems/addItems/handler.js';
 import {AddPermissionItemsEndpointParams} from '../permissionItems/addItems/types.js';
 import {PermissionItemInput} from '../permissionItems/types.js';
 import RequestData from '../RequestData.js';
-import {initFimidara} from '../runtime/initFimidara.js';
+import addSpace from '../spaces/addSpace/handler.js';
+import {
+  AddSpaceEndpointParams,
+  NewSpaceInput,
+} from '../spaces/addSpace/types.js';
 import {BaseEndpointResult} from '../types.js';
 import addWorkspace from '../workspaces/addWorkspace/handler.js';
 import {AddWorkspaceEndpointParams} from '../workspaces/addWorkspace/types.js';
-import {makeRootnameFromName} from '../workspaces/utils.js';
 import MockTestEmailProviderContext from './context/email/MockTestEmailProviderContext.js';
 
 export function getTestEmailProvider() {
@@ -59,7 +65,6 @@ export async function initTests(overrides: FimidaraSuppliedConfig = {}) {
       useHandlePrepareFileQueue: true,
     }
   );
-  await initFimidara();
 }
 
 export async function initFnTests() {
@@ -84,6 +89,18 @@ export function assertEndpointResultOk(result?: BaseEndpointResult | void) {
 
 export function mockExpressRequest(token?: BaseTokenData) {
   const req: IServerRequest = {auth: token} as unknown as IServerRequest;
+  return req;
+}
+
+export function mockExpressRequestWithSystemAuthId(
+  systemAuthId = kUtilsInjectables.suppliedConfig().systemAuthId
+) {
+  const req: IServerRequest = {
+    headers: {
+      'x-system-auth-id': systemAuthId,
+    },
+  } as unknown as IServerRequest;
+
   return req;
 }
 
@@ -145,23 +162,16 @@ export function mockExpressRequestForPublicAgent() {
   return req;
 }
 
-export interface IInsertWorkspaceForTestResult {
-  workspace: PublicWorkspace;
-  rawWorkspace: Workspace;
-}
-
 export async function insertWorkspaceForTest(
-  userToken: AgentToken,
   workspaceInput: Partial<AddWorkspaceEndpointParams> = {}
-): Promise<IInsertWorkspaceForTestResult> {
+) {
   const companyName = faker.lorem.words(6);
   const reqData = RequestData.fromExpressRequest<AddWorkspaceEndpointParams>(
-    mockExpressRequestWithAgentToken(userToken),
+    mockExpressRequestWithSystemAuthId(),
     {
       name: companyName,
-      rootname: makeRootnameFromName(companyName),
       description: faker.company.catchPhraseDescriptor(),
-      // usageThresholds: generateTestUsageThresholdInputMap(),
+      userId: getNewId(),
       ...workspaceInput,
     }
   );
@@ -173,17 +183,26 @@ export async function insertWorkspaceForTest(
     .workspace()
     .getOneById(result.workspace.resourceId);
   assert(rawWorkspace);
-  return {rawWorkspace, workspace: result.workspace};
+
+  const decodedToken = kUtilsInjectables
+    .session()
+    .decodeToken(result.token.jwtToken);
+  const agentToken = await kSemanticModels
+    .agentToken()
+    .getOneById(decodedToken.sub.id);
+  assert(agentToken);
+
+  return {rawWorkspace, agentToken, ...result};
 }
 
 export async function insertPermissionGroupForTest(
-  userToken: AgentToken,
+  agentToken: AgentToken,
   workspaceId: string,
   permissionGroupInput: Partial<NewPermissionGroupInput> = {}
 ) {
   const reqData =
     RequestData.fromExpressRequest<AddPermissionGroupEndpointParams>(
-      mockExpressRequestWithAgentToken(userToken),
+      mockExpressRequestWithAgentToken(agentToken),
       {
         workspaceId,
         name: faker.lorem.words(3),
@@ -198,13 +217,13 @@ export async function insertPermissionGroupForTest(
 }
 
 export async function insertPermissionItemsForTest(
-  userToken: AgentToken,
+  agentToken: AgentToken,
   workspaceId: string,
   input: PermissionItemInput | PermissionItemInput[]
 ) {
   const reqData =
     RequestData.fromExpressRequest<AddPermissionItemsEndpointParams>(
-      mockExpressRequestWithAgentToken(userToken),
+      mockExpressRequestWithAgentToken(agentToken),
       {workspaceId, items: convertToArray(input)}
     );
   const result = await addPermissionItems(reqData);
@@ -213,13 +232,13 @@ export async function insertPermissionItemsForTest(
 }
 
 export async function insertRequestForTest(
-  userToken: AgentToken,
+  agentToken: AgentToken,
   workspaceId: string,
   requestInput: Partial<CollaborationRequestInput> = {}
 ) {
   const reqData =
     RequestData.fromExpressRequest<SendCollaborationRequestEndpointParams>(
-      mockExpressRequestWithAgentToken(userToken),
+      mockExpressRequestWithAgentToken(agentToken),
       {
         workspaceId,
         recipientEmail: faker.internet.email(),
@@ -235,12 +254,12 @@ export async function insertRequestForTest(
 }
 
 export async function insertAgentTokenForTest(
-  userToken: AgentToken,
+  agentToken: AgentToken,
   workspaceId: string,
   tokenInput: Partial<NewAgentTokenInput> = {}
 ) {
   const reqData = RequestData.fromExpressRequest<AddAgentTokenEndpointParams>(
-    mockExpressRequestWithAgentToken(userToken),
+    mockExpressRequestWithAgentToken(agentToken),
     {
       workspaceId,
       expiresAt: getTimestamp(add(Date.now(), {days: 1})),
@@ -259,4 +278,31 @@ export async function insertAgentTokenForTest(
   assert(rawToken);
 
   return {...result, rawToken};
+}
+
+export async function insertSpaceForTest(params: {
+  agentToken: AgentToken;
+  workspaceId: string;
+  spaceInput?: Partial<NewSpaceInput>;
+}) {
+  const {agentToken, workspaceId, spaceInput = {}} = params;
+  const reqData = RequestData.fromExpressRequest<AddSpaceEndpointParams>(
+    mockExpressRequestWithAgentToken(agentToken),
+    {
+      workspaceId,
+      name: faker.lorem.words(7),
+      description: faker.lorem.words(10),
+      ...spaceInput,
+    }
+  );
+
+  const result = await addSpace(reqData);
+  assertEndpointResultOk(result);
+
+  const rawSpace = await kSemanticModels
+    .space()
+    .getOneById(result.space.resourceId);
+  assert(rawSpace);
+
+  return {...result, rawSpace};
 }
