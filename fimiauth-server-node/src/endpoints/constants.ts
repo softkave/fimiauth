@@ -14,8 +14,9 @@ export const kEndpointConstants = {
   minPage: 0,
   minPageSize: 1,
   maxPageSize: 1000,
-  providedResourceIdMaxLength: 50,
+  providedResourceIdMaxLength: 100,
   inputListMax: 1000,
   apiv1: '/v1',
   continuationTokenMaxLength: 100,
+  maxResourceIdLength: 100,
 };

@@ -286,7 +286,7 @@ describe('addItems', () => {
     );
     expect(pItemFolder01).toBeTruthy();
     expect(pItemFolder02).toBeTruthy();
-    expect(pItemFolder01?.targetParentId).toBe(workspace.resourceId);
-    expect(pItemFolder02?.targetParentId).toBe(folder01.resourceId);
+    expect(pItemFolder01?.containerId).toBe(workspace.resourceId);
+    expect(pItemFolder02?.containerId).toBe(folder01.resourceId);
   });
 });

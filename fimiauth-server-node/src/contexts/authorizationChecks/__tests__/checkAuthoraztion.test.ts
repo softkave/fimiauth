@@ -31,7 +31,7 @@ import {
 } from '../../injection/injectables.js';
 import {
   checkAuthorizationWithAgent,
-  kResolvedTargetChildrenAccess,
+  kResolvedAuthCheckAccess,
   resolveTargetChildrenAccessCheckWithAgent,
 } from '../checkAuthorizaton.js';
 
@@ -692,7 +692,7 @@ describe('checkAuthorization', () => {
       workspace: rawWorkspace,
     });
 
-    assert(resolveResult.access === kResolvedTargetChildrenAccess.full);
+    assert(resolveResult.access === kResolvedAuthCheckAccess.full);
     expect(resolveResult.item).toBeTruthy();
     expect(resolveResult.partialDenyIds.length).toBe(0);
     expect(resolveResult.partialDenyItems.length).toBe(0);
@@ -742,10 +742,10 @@ describe('checkAuthorization', () => {
       workspace: rawWorkspace,
     });
 
-    assert(resolveResult01.access === kResolvedTargetChildrenAccess.deny);
+    assert(resolveResult01.access === kResolvedAuthCheckAccess.deny);
     expect(resolveResult01.item).toBeTruthy();
 
-    assert(resolveResult02.access === kResolvedTargetChildrenAccess.partial);
+    assert(resolveResult02.access === kResolvedAuthCheckAccess.partial);
     expect(resolveResult02.item).toBeFalsy();
     expect(resolveResult02.partialAllowIds.length).toBe(0);
     expect(resolveResult02.partialAllowItems.length).toBe(0);
@@ -770,7 +770,7 @@ describe('checkAuthorization', () => {
         rawWorkspace.resourceId,
         user02.resourceId,
         kFimidaraPermissionActions.readFile,
-        {targetId: file01.resourceId, targetParentId: folder01.resourceId}
+        {targetId: file01.resourceId, containerId: folder01.resourceId}
       ),
       addPermissions(
         rawWorkspace.resourceId,
@@ -779,7 +779,7 @@ describe('checkAuthorization', () => {
         {
           targetId: file02.resourceId,
           access: false,
-          targetParentId: folder01.resourceId,
+          containerId: folder01.resourceId,
         }
       ),
     ]);
@@ -798,7 +798,7 @@ describe('checkAuthorization', () => {
       workspace: rawWorkspace,
     });
 
-    assert(resolveResult.access === kResolvedTargetChildrenAccess.partial);
+    assert(resolveResult.access === kResolvedAuthCheckAccess.partial);
     expect(resolveResult.item).toBeFalsy();
     expect(resolveResult.partialAllowIds?.length).toBe(1);
     expect(resolveResult.partialAllowItems?.length).toBe(1);
@@ -824,7 +824,7 @@ describe('checkAuthorization', () => {
         rawWorkspace.resourceId,
         user02.resourceId,
         kFimidaraPermissionActions.readFile,
-        {targetId: file01.resourceId, targetParentId: folder01.resourceId}
+        {targetId: file01.resourceId, containerId: folder01.resourceId}
       ),
       addPermissions(
         rawWorkspace.resourceId,
@@ -848,8 +848,8 @@ describe('checkAuthorization', () => {
       workspace: rawWorkspace,
     });
 
-    expect(resolveResult.access).toBe(kResolvedTargetChildrenAccess.partial);
-    assert(resolveResult.access === kResolvedTargetChildrenAccess.partial);
+    expect(resolveResult.access).toBe(kResolvedAuthCheckAccess.partial);
+    assert(resolveResult.access === kResolvedAuthCheckAccess.partial);
     expect(resolveResult.item).toBeFalsy();
     expect(resolveResult.partialAllowIds?.length).toBe(1);
     expect(resolveResult.partialAllowItems?.length).toBe(1);
@@ -878,7 +878,7 @@ describe('checkAuthorization', () => {
         {
           targetId: file01.resourceId,
           access: false,
-          targetParentId: folder01.resourceId,
+          containerId: folder01.resourceId,
         }
       ),
       addPermissions(
@@ -903,7 +903,7 @@ describe('checkAuthorization', () => {
       workspace: rawWorkspace,
     });
 
-    assert(resolveResult.access === kResolvedTargetChildrenAccess.full);
+    assert(resolveResult.access === kResolvedAuthCheckAccess.full);
     expect(resolveResult.item).toBeTruthy();
     expect(resolveResult.partialDenyIds?.length).toBe(1);
     expect(resolveResult.partialDenyItems?.length).toBe(1);

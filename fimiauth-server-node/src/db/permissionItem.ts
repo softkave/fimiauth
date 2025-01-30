@@ -7,7 +7,7 @@ const permissionItemSchema = ensureMongoTypeFields<PermissionItem>({
   entityId: {type: String, index: true},
   entityType: {type: String, index: true},
   targetId: {type: String, index: true},
-  targetParentId: {type: String, index: true},
+  containerId: {type: String, index: true},
   targetType: {type: String, index: true},
   access: {type: Boolean, index: true},
   action: {type: String, index: true},
@@ -20,7 +20,11 @@ const modelName = 'permission-item';
 const collectionName = 'permission-items';
 
 export function getPermissionItemModel(connection: Connection) {
-  const model = connection.model<PermissionItem>(modelName, schema, collectionName);
+  const model = connection.model<PermissionItem>(
+    modelName,
+    schema,
+    collectionName
+  );
   return model;
 }
 

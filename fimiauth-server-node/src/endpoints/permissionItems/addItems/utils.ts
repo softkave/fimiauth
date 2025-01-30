@@ -1,43 +1,17 @@
-import {forEach, get, has, set} from 'lodash-es';
+import {get, has, set, uniq} from 'lodash-es';
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
 import {SemanticProviderMutationParams} from '../../../contexts/semantic/types.js';
 import {
-  FimidaraPermissionAction,
   PermissionItem,
   kFimidaraPermissionActions,
 } from '../../../definitions/permissionItem.js';
 import {
-  FimidaraResourceType,
-  ResourceWrapper,
   SessionAgent,
   kFimidaraResourceType,
 } from '../../../definitions/system.js';
 import {Workspace} from '../../../definitions/workspace.js';
-import {appAssert} from '../../../utils/assertion.js';
-import {
-  convertToArray,
-  extractResourceIdList,
-  isObjectEmpty,
-} from '../../../utils/fns.js';
-import {indexArray} from '../../../utils/indexArray.js';
-import {
-  getResourceTypeFromId,
-  newWorkspaceResource,
-} from '../../../utils/resource.js';
-import {InvalidRequestError} from '../../errors.js';
-import {getPermissionItemTargets} from '../getPermissionItemTargets.js';
-import {PermissionItemInputTarget} from '../types.js';
-import {getPermissionItemEntities, getTargetType} from '../utils.js';
+import {newWorkspaceResource} from '../../../utils/resource.js';
 import {AddPermissionItemsEndpointParams} from './types.js';
-
-/**
- * - separate entities, separate targets
- * - fetch entities, fetch targets
- * - confirm entities and targets belong to space
- * - fetch permissions for entity + target
- * - fold permissions into wildcard for access and no access
- * - save remaining permissions
- */
 
 export const INTERNAL_addPermissionItems = async (
   agent: SessionAgent,
@@ -45,124 +19,33 @@ export const INTERNAL_addPermissionItems = async (
   data: AddPermissionItemsEndpointParams,
   opts: SemanticProviderMutationParams
 ) => {
-  let inputEntities: string[] = [];
-  let inputTargets: PermissionItemInputTarget[] = [];
-
-  data.items.forEach(item => {
-    if (item.entityId) {
-      inputEntities = inputEntities.concat(convertToArray(item.entityId));
-    }
-
-    inputTargets = inputTargets.concat(convertToArray(item));
-  });
-
-  appAssert(
-    inputEntities.length,
-    new InvalidRequestError('No permission entity provided')
-  );
-
-  const [entities, targets] = await Promise.all([
-    getPermissionItemEntities({
-      agent,
-      workspaceId: workspace.resourceId,
-      spaceId: data.spaceId ?? workspace.resourceId,
-      entityIds: inputEntities,
-    }),
-    getPermissionItemTargets({
-      agent,
-      workspace,
-      spaceId: data.spaceId ?? workspace.resourceId,
-      target: inputTargets,
-      action: kFimidaraPermissionActions.updatePermission,
-    }),
-  ]);
-
-  const entitiesMapById = indexArray(entities, {path: 'resourceId'});
-  const workspaceWrapper: ResourceWrapper = {
-    resource: workspace,
-    resourceId: workspace.resourceId,
-    resourceType: kFimidaraResourceType.Workspace,
-  };
-
-  const getEntities = (inputEntity: string | string[]) => {
-    const resourceEntities: Record<string, ResourceWrapper> = {};
-
-    // TODO: should we throw error when some entities are not found?
-    convertToArray(inputEntity).forEach(entityId => {
-      const entity = entitiesMapById[entityId];
-
-      if (entity) {
-        resourceEntities[entityId] = entitiesMapById[entityId];
-      }
-    });
-
-    return resourceEntities;
-  };
-
-  type ProcessedPermissionItemInput = {
-    entity: ResourceWrapper;
-    action: FimidaraPermissionAction;
-    target: ResourceWrapper;
-    targetType: FimidaraResourceType;
-    access: boolean;
-  };
-
-  const processedItems: ProcessedPermissionItemInput[] = [];
-
-  data.items.forEach(item => {
-    const itemEntitiesMap = getEntities(item.entityId);
-
-    forEach(itemEntitiesMap, entity => {
-      convertToArray(item.action).forEach(action => {
-        const nextTarget = item;
-        let {targets: nextTargetsMap} = targets.getByTarget(nextTarget);
-
-        // Default to workspace if there's no target resource
-        if (isObjectEmpty(nextTargetsMap)) {
-          nextTargetsMap = {[workspace.resourceId]: workspaceWrapper};
-        }
-
-        forEach(nextTargetsMap, nextTargetFromMap => {
-          processedItems.push({
-            entity,
-            action,
-            target: nextTargetFromMap,
-            access: item.access,
-            targetType: getResourceTypeFromId(nextTargetFromMap.resourceId),
-          });
-        });
-      });
-    });
-  });
-
-  const inputItems: PermissionItem[] = processedItems.map(item => {
-    const targetType = getTargetType(item);
-    const targetParentId = workspace.resourceId;
-
+  const entityIds = uniq(data.items.map(item => item.entityId));
+  const inputItems: PermissionItem[] = data.items.map(item => {
     return newWorkspaceResource({
       agent,
       type: kFimidaraResourceType.PermissionItem,
       workspaceId: workspace.resourceId,
       spaceId: data.spaceId ?? workspace.resourceId,
       seed: {
-        targetType,
-        targetParentId,
-        targetId: item.target.resourceId,
+        targetType: item.targetType ?? '',
+        containerId: item.containerId ?? data.spaceId ?? workspace.resourceId,
+        targetId: item.targetId,
         action: item.action,
-        entityId: item.entity.resourceId,
-        entityType: item.entity.resourceType,
+        entityId: item.entityId,
+        entityType: item.entityType,
         access: item.access,
       },
     });
   });
 
-  // Not using transaction read because heavy computation may happen next to
-  // filter out existing permission items, and I don't want to keep other
-  // permission insertion operations waiting.
+  // intentionally not using transaction read because heavy computation may
+  // happen when filtering out existing permission items, and we don't want to
+  // keep other permission insertion operations waiting.
+  // TODO: move to a different thread
   const existingPermissionItems = await kSemanticModels
     .permissions()
     .getPermissionItems({
-      entityId: extractResourceIdList(entities),
+      entityId: entityIds,
       spaceId: data.spaceId ?? workspace.resourceId,
       sortByDate: true,
     });

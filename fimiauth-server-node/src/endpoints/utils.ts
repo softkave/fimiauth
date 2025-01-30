@@ -3,7 +3,7 @@ import {compact, isString} from 'lodash-es';
 import {AnyObject} from 'softkave-js-utils';
 import {
   ResolvedTargetChildrenAccessCheck,
-  kResolvedTargetChildrenAccess,
+  kResolvedAuthCheckAccess,
 } from '../contexts/authorizationChecks/checkAuthorizaton.js';
 import {DataQuery} from '../contexts/data/types.js';
 import {kUtilsInjectables} from '../contexts/injection/injectables.js';
@@ -196,14 +196,14 @@ export function getSpaceResourceListQuery00(
   spaceId: string,
   report: ResolvedTargetChildrenAccessCheck
 ) {
-  if (report.access === kResolvedTargetChildrenAccess.full) {
+  if (report.access === kResolvedAuthCheckAccess.full) {
     return {
       spaceId,
       excludeResourceIdList: report.partialDenyIds?.length
         ? report.partialDenyIds
         : undefined,
     };
-  } else if (report.access === kResolvedTargetChildrenAccess.partial) {
+  } else if (report.access === kResolvedAuthCheckAccess.partial) {
     return {
       spaceId,
       resourceIdList: report.partialAllowIds,

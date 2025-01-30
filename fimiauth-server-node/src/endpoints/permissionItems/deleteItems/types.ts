@@ -8,9 +8,9 @@ export type DeletePermissionItemInputTarget =
 
 export interface DeletePermissionItemInput
   extends DeletePermissionItemInputTarget {
-  action?: FimidaraPermissionAction | FimidaraPermissionAction[];
+  action?: FimidaraPermissionAction;
   access?: boolean;
-  entityId?: string | string[];
+  entityId?: string;
 }
 
 export interface DeletePermissionItemsEndpointParams

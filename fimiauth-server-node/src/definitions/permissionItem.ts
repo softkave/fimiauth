@@ -1,4 +1,3 @@
-import {OmitFrom} from 'softkave-js-utils';
 import {ValueOf} from 'type-fest';
 import {
   FimidaraResourceType,
@@ -41,16 +40,17 @@ export type FimidaraPermissionAction =
   | ValueOf<typeof kFimidaraPermissionActions>
   | (string & {});
 
+export type FimidaraPermissionEntityType = FimidaraResourceType | (string & {});
+export type FimidaraPermissionTargetType = FimidaraResourceType | (string & {});
+
 export interface PermissionItem extends WorkspaceResource {
   entityId: string;
-  entityType: FimidaraResourceType;
-  targetParentId?: string;
+  entityType: FimidaraPermissionEntityType;
+  containerId?: string;
   targetId: string;
-  targetType: FimidaraResourceType;
+  targetType: FimidaraPermissionTargetType;
   access: boolean;
   action: FimidaraPermissionAction;
 }
 
-export type PublicPermissionItem = ToPublicDefinitions<
-  OmitFrom<PermissionItem, 'targetParentId'>
->;
+export type PublicPermissionItem = ToPublicDefinitions<PermissionItem>;

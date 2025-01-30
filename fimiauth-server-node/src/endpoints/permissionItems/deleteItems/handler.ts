@@ -36,6 +36,7 @@ const deletePermissionItems: DeletePermissionItemsEndpoint = async reqData => {
   const jobs = await beginDeletePermissionItemByInput({
     agent,
     workspaceId,
+    spaceId: data.spaceId ?? workspace.resourceId,
     items: data.items,
   });
 

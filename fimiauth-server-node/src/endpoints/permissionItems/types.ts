@@ -5,17 +5,20 @@ import {DeletePermissionItemsEndpoint} from './deleteItems/types.js';
 import {ResolveEntityPermissionsEndpoint} from './resolveEntityPermissions/types.js';
 
 export interface PermissionItemInputTarget {
-  targetId?: string | string[];
+  targetId?: string;
+  containerId?: string;
 }
 
 export interface ResolvedEntityPermissionItemTarget {
   targetId?: string;
+  containerId?: string;
 }
 
 export interface PermissionItemInput extends PermissionItemInputTarget {
-  action: FimidaraPermissionAction | FimidaraPermissionAction[];
+  targetId: string;
+  action: FimidaraPermissionAction;
   access: boolean;
-  entityId: string | string[];
+  entityId: string;
 }
 
 export type AddPermissionItemsHttpEndpoint =

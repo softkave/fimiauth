@@ -6,15 +6,12 @@ export type ResolveEntityPermissionItemInputTarget = PermissionItemInputTarget;
 
 export interface ResolveEntityPermissionItemInput
   extends PermissionItemInputTarget {
-  action: FimidaraPermissionAction | FimidaraPermissionAction[];
-  entityId: string | string[];
+  action: FimidaraPermissionAction;
+  entityId: string;
 }
 
 export interface ResolvedEntityPermissionItemTarget {
   targetId?: string;
-  filepath?: string;
-  folderpath?: string;
-  workspaceRootname?: string;
 }
 
 export interface ResolvedEntityPermissionItem {

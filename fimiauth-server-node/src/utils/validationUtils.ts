@@ -51,7 +51,9 @@ const verificationCode = Joi.string()
   .trim()
   .min(kValidationConstants.minVerificationCodeLength)
   .max(kValidationConstants.maxVerificationCodeLength);
-const resourceId = Joi.string().trim().max(50);
+const resourceId = Joi.string()
+  .trim()
+  .max(kEndpointConstants.maxResourceIdLength);
 const resourceIdList = Joi.array()
   .items(resourceId)
   .min(1)

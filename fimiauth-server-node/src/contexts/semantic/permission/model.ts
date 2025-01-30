@@ -122,13 +122,11 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
       .permissionItem()
       .getManyByQuery(query, options);
 
-    if (props.sortByTarget || props.sortByDate || props.sortByEntity) {
+    if (props.sortByDate || props.sortByEntity) {
       this.sortItems(
         items,
         props.entityId,
-        props.targetId,
         props.sortByEntity,
-        props.sortByTarget,
         props.sortByDate
       );
     }
@@ -176,16 +174,9 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
   sortItems(
     items: PermissionItem[],
     entityId: string | string[] | undefined,
-    targetId: string | string[] | undefined,
     sortByEntity?: boolean,
-    sortByTarget?: boolean,
     sortByDate?: boolean
   ): PermissionItem[] {
-    const targetIdMap = sortByTarget
-      ? indexArray(toCompactArray(targetId), {
-          reducer: (item, arr, i) => i,
-        })
-      : {};
     const entityIdMap = sortByEntity
       ? indexArray(toCompactArray(entityId), {
           reducer: (item, arr, i) => i,
@@ -198,11 +189,6 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
           (entityIdMap[item01.entityId] ?? Number.MAX_SAFE_INTEGER) -
           (entityIdMap[item02.entityId] ?? Number.MAX_SAFE_INTEGER)
         );
-      } else if (sortByTarget && item01.targetId !== item02.targetId) {
-        return (
-          (targetIdMap[item01.targetId] ?? Number.MAX_SAFE_INTEGER) -
-          (targetIdMap[item02.targetId] ?? Number.MAX_SAFE_INTEGER)
-        );
       } else if (sortByDate) {
         return (item01.lastUpdatedAt - item02.lastUpdatedAt) * -1;
       }
@@ -214,12 +200,12 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
 
   protected getPermissionItemsQuery(props: {
     spaceId: string;
-    entityId?: string | string[];
+    entityId: string | string[];
     action?: FimidaraPermissionAction | FimidaraPermissionAction[];
     targetId?: string | string[];
-    targetParentId?: string;
+    containerId?: string | string[];
   }) {
-    let targetItemsQuery: DataQuery<PermissionItem> | undefined = undefined;
+    let targetItemsQuery: DataQuery<PermissionItem> | undefined;
 
     if (props.targetId) {
       targetItemsQuery = {
@@ -228,21 +214,17 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
         ...getInAndNinQuery<PermissionItem>('entityId', props.entityId),
         ...getInAndNinQuery<PermissionItem>('action', props.action),
       };
-    }
-
-    // For when we want to fetch an entity's permissions regardless of container
-    // or target
-    if (!targetItemsQuery && props.entityId) {
+    } else if (props.containerId) {
       targetItemsQuery = {
         spaceId: props.spaceId,
-        targetParentId: props.targetParentId,
+        ...getInAndNinQuery<PermissionItem>('containerId', props.containerId),
         ...getInAndNinQuery<PermissionItem>('entityId', props.entityId),
         ...getInAndNinQuery<PermissionItem>('action', props.action),
       };
     }
 
     if (!targetItemsQuery) {
-      throw new Error('Provide targetId, or targetType, or entityId');
+      throw new Error('Provide targetId, or containerId');
     }
 
     return {targetItemsQuery};

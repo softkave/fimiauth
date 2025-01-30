@@ -15,26 +15,21 @@ import {
 
 export type SemanticPermissionProviderType_GetPermissionItemsProps = {
   spaceId: string;
-  entityId?: string | string[];
+  entityId: string | string[];
   action?: FimidaraPermissionAction | FimidaraPermissionAction[];
-  targetParentId?: string;
+  containerId?: string | string[];
   targetId?: string | string[];
   /** Sort the permission items by last updated date. */
   sortByDate?: boolean;
-  /** Sort the permission items by target, i.e following the order of
-   * `targetId` passed. */
-  sortByTarget?: boolean;
   /** Sort the permission items by entity, i.e following the order of
    * `entityId` passed. */
   sortByEntity?: boolean;
 };
 
-export type SemanticPermissionProviderType_CountPermissionItemsProps = {
-  spaceId: string;
-  entityId?: string | string[];
-  action?: FimidaraPermissionAction | FimidaraPermissionAction[];
-  targetId?: string | string[];
-};
+export type SemanticPermissionProviderType_CountPermissionItemsProps = Pick<
+  SemanticPermissionProviderType_GetPermissionItemsProps,
+  'spaceId' | 'entityId' | 'action' | 'targetId' | 'containerId'
+>;
 
 export interface SemanticPermissionProviderType {
   getEntityAssignedPermissionGroups(
@@ -60,12 +55,10 @@ export interface SemanticPermissionProviderType {
     props: SemanticPermissionProviderType_CountPermissionItemsProps,
     options?: SemanticProviderOpParams
   ): Promise<number>;
-  sortItems(
-    items: PermissionItem[],
-    entityId: string | string[] | undefined,
-    targetId: string | string[] | undefined,
-    sortByEntity?: boolean,
-    sortByTarget?: boolean,
-    sortByDate?: boolean
-  ): PermissionItem[];
+  sortItems(params: {
+    items: PermissionItem[];
+    entityId: string | string[] | undefined;
+    sortByEntity?: boolean;
+    sortByDate?: boolean;
+  }): PermissionItem[];
 }
