@@ -9,6 +9,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
+import { v7 as uuidv7 } from "uuid";
 
 const dbURL = process.env.PG_DATABASE_URL;
 assert.ok(dbURL, "PG_DATABASE_URL is required");
@@ -18,7 +19,7 @@ export const db = drizzle(dbURL);
 export const users = pgTable("user", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => uuidv7()),
   name: text("name"),
   email: text("email").unique(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
@@ -102,7 +103,7 @@ export const authenticators = pgTable(
 export const workspace = pgTable("workspace", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => uuidv7()),
   name: text("name").notNull(),
   description: text("description"),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
@@ -116,7 +117,7 @@ export const workspace = pgTable("workspace", {
 export const space = pgTable("space", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => uuidv7()),
   name: text("name").notNull(),
   description: text("description"),
   workspaceId: text("workspaceId")
@@ -134,7 +135,7 @@ export const space = pgTable("space", {
 export const agent = pgTable("agent", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => uuidv7()),
   name: text("name"),
   description: text("description"),
   workspaceId: text("workspaceId")
@@ -156,7 +157,7 @@ export const agent = pgTable("agent", {
 export const permissionGroup = pgTable("permissionGroup", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => uuidv7()),
   name: text("name").notNull(),
   description: text("description"),
   workspaceId: text("workspaceId")
@@ -178,7 +179,7 @@ export const permissionGroup = pgTable("permissionGroup", {
 export const permission = pgTable("permission", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => uuidv7()),
   description: text("description"),
   entityId: text("entityId").notNull(),
   entityType: text("entityType").notNull(),
@@ -204,7 +205,7 @@ export const permission = pgTable("permission", {
 export const collaborator = pgTable("collaborator", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => uuidv7()),
   providedId: text("providedId").notNull(),
   description: text("description"),
   type: text("type").notNull(),
@@ -226,7 +227,7 @@ export const collaborator = pgTable("collaborator", {
 export const collaborationRequest = pgTable("collaborationRequest", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => uuidv7()),
   providedId: text("providedId").notNull(),
   type: text("type").notNull(),
   status: text("status").notNull(),
@@ -250,7 +251,7 @@ export const collaborationRequest = pgTable("collaborationRequest", {
 export const eav = pgTable("eav", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => uuidv7()),
   entity: text("entity").notNull(),
   entityType: text("entityType").notNull(),
   attribute: text("attribute").notNull(),

@@ -49,7 +49,8 @@ export function useMutationHandler<TFn extends AnyFn>(
           if (isFunction(invalidate)) return invalidate(key, params);
           if (isString(invalidate) && key) {
             if (isString(key)) return key.includes(invalidate);
-            if (isArray(key)) return key.some((k) => k.includes(invalidate));
+            if (isArray(key))
+              return key.some((k) => isString(k) && k.includes(invalidate));
           }
           if (invalidate instanceof RegExp) {
             if (isString(key)) return invalidate.test(key);
@@ -88,6 +89,6 @@ export function useMutationHandler<TFn extends AnyFn>(
         convertToArray(opts.onFinally)?.forEach((fn) => fn?.(args));
       }
     },
-    [trigger, onSuccess, opts.onError, opts.onFinally]
+    [trigger, onSuccess, opts.onError, opts.onFinally, showToast]
   );
 }
