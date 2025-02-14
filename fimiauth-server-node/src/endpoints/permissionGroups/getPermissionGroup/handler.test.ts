@@ -4,10 +4,9 @@ import RequestData from '../../RequestData.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertPermissionGroupForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import getPermissionGroup from './handler.js';
@@ -21,15 +20,14 @@ afterAll(async () => {
 });
 
 test('referenced permissionGroup returned', async () => {
-  const {userToken} = await insertUserForTest();
-  const {workspace} = await insertWorkspaceForTest(userToken);
+  const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
   const {permissionGroup: permissionGroup} = await insertPermissionGroupForTest(
-    userToken,
+    agentToken,
     workspace.resourceId
   );
 
   const reqData = RequestData.fromExpressRequest<PermissionGroupMatcher>(
-    mockExpressRequestWithAgentToken(userToken),
+    mockExpressRequestWithAgentToken(agentToken),
     {permissionGroupId: permissionGroup.resourceId}
   );
   const result = await getPermissionGroup(reqData);

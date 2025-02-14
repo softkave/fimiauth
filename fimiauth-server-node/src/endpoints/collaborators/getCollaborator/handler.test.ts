@@ -5,9 +5,8 @@ import {populateUserWorkspaces} from '../../assignedItems/getAssignedItems.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import {collaboratorExtractor} from '../utils.js';
@@ -23,10 +22,9 @@ afterAll(async () => {
 });
 
 test('collaborator returned', async () => {
-  const {userToken, user} = await insertUserForTest();
-  const {workspace} = await insertWorkspaceForTest(userToken);
+  const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
   const reqData = RequestData.fromExpressRequest<GetCollaboratorEndpointParams>(
-    mockExpressRequestWithAgentToken(userToken),
+    mockExpressRequestWithAgentToken(agentToken),
     {workspaceId: workspace.resourceId, collaboratorId: user.resourceId}
   );
 

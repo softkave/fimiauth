@@ -18,7 +18,6 @@ async function insertWorkspace(opts: SemanticProviderMutationParams) {
   return await INTERNAL_createWorkspace(
     {name: companyName, description: 'For SDK tests'},
     kSystemSessionAgent,
-    /** userId */ undefined,
     opts
   );
 }
@@ -27,15 +26,16 @@ async function createAgentToken(
   workspace: Workspace,
   opts: SemanticProviderMutationParams
 ) {
-  const token = await INTERNAL_createAgentToken(
-    kSystemSessionAgent,
-    workspace.resourceId,
-    {
+  const token = await INTERNAL_createAgentToken({
+    agent: kSystemSessionAgent,
+    workspaceId: workspace.resourceId,
+    spaceId: workspace.spaceId,
+    data: {
       name: faker.lorem.words(2),
       description: 'Agent token for SDK tests',
     },
-    opts
-  );
+    opts,
+  });
 
   appAssert(token.workspaceId, 'workspaceId not present in agent token');
   const tokenStr = (await getPublicAgentToken(token, /** shouldEncode */ true))
@@ -50,16 +50,17 @@ export async function setupSDKTestReq() {
     .withTxn(async opts => {
       const {workspace, adminPermissionGroup} = await insertWorkspace(opts);
       const {token, tokenStr} = await createAgentToken(workspace, opts);
-      await addAssignedPermissionGroupList(
-        kSystemSessionAgent,
-        workspace.resourceId,
-        [adminPermissionGroup.resourceId],
-        token.resourceId,
-        false, // don't delete existing assigned permission groups
-        true, // skip permission groups check
-        /** skip auth check */ true,
-        opts
-      );
+      await addAssignedPermissionGroupList({
+        agent: kSystemSessionAgent,
+        workspaceId: workspace.resourceId,
+        spaceId: workspace.spaceId,
+        permissionGroupsInput: [adminPermissionGroup.resourceId],
+        assigneeId: token.resourceId,
+        deleteExisting: false, // don't delete existing assigned permission groups
+        skipPermissionGroupsExistCheck: true, // skip permission groups check
+        skipAuthCheck: true,
+        opts,
+      });
 
       return {workspace, token, tokenStr};
     });

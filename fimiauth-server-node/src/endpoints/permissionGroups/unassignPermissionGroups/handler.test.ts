@@ -1,15 +1,13 @@
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import {extractResourceIdList} from '../../../utils/fns.js';
-import {makeUserSessionAgent} from '../../../utils/sessionUtils.js';
 import RequestData from '../../RequestData.js';
 import {generateAndInsertCollaboratorListForTest} from '../../testUtils/generate/collaborator.js';
 import {generateAndInsertPermissionGroupListForTest} from '../../testUtils/generate/permissionGroup.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import {fetchEntityAssignedPermissionGroupList} from '../getEntityAssignedPermissionGroups/utils.js';
@@ -26,19 +24,22 @@ afterAll(async () => {
 
 describe('unassignPermissionGroups', () => {
   test('permission groups unassigned', async () => {
-    const {userToken, rawUser} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
-    const agent = makeUserSessionAgent(rawUser, userToken);
+    const {workspace, sessionAgent, agentToken} =
+      await generateWorkspaceAndSessionAgent();
     const [pgList01, cList01] = await Promise.all([
       generateAndInsertPermissionGroupListForTest(2, {
         workspaceId: workspace.resourceId,
       }),
-      generateAndInsertCollaboratorListForTest(agent, workspace.resourceId, 2),
+      generateAndInsertCollaboratorListForTest(
+        sessionAgent,
+        workspace.resourceId,
+        2
+      ),
     ]);
     const cList01Ids = extractResourceIdList(cList01);
     const pgList01Ids = extractResourceIdList(pgList01);
     await assignPgListToIdList(
-      agent,
+      sessionAgent,
       workspace.resourceId,
       cList01Ids,
       toAssignedPgListInput(pgList01)
@@ -46,7 +47,7 @@ describe('unassignPermissionGroups', () => {
 
     const result01 = await unassignPermissionGroups(
       RequestData.fromExpressRequest(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {
           workspaceId: workspace.resourceId,
           permissionGroupId: pgList01Ids,

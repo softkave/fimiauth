@@ -7,10 +7,9 @@ import {generateAndInsertPermissionGroupListForTest} from '../../testUtils/gener
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertPermissionGroupForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import getWorkspacePermissionGroups from './handler.js';
@@ -26,16 +25,15 @@ afterAll(async () => {
 
 describe('getWorkspacePermissionGroups', () => {
   test("workspace's permissionGroups returned", async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const {permissionGroup: permissionGroup01} =
-      await insertPermissionGroupForTest(userToken, workspace.resourceId);
+      await insertPermissionGroupForTest(agentToken, workspace.resourceId);
     const {permissionGroup: permissionGroup02} =
-      await insertPermissionGroupForTest(userToken, workspace.resourceId);
+      await insertPermissionGroupForTest(agentToken, workspace.resourceId);
 
     const reqData =
       RequestData.fromExpressRequest<GetWorkspacePermissionGroupsEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {workspaceId: workspace.resourceId}
       );
     const result = await getWorkspacePermissionGroups(reqData);
@@ -56,8 +54,7 @@ describe('getWorkspacePermissionGroups', () => {
   });
 
   test('pagination', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     await generateAndInsertPermissionGroupListForTest(15, {
       workspaceId: workspace.resourceId,
     });
@@ -68,7 +65,7 @@ describe('getWorkspacePermissionGroups', () => {
     let page = 0;
     let reqData =
       RequestData.fromExpressRequest<GetWorkspacePermissionGroupsEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {page, pageSize, workspaceId: workspace.resourceId}
       );
     let result = await getWorkspacePermissionGroups(reqData);
@@ -81,7 +78,7 @@ describe('getWorkspacePermissionGroups', () => {
     page = 1;
     reqData =
       RequestData.fromExpressRequest<GetWorkspacePermissionGroupsEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {page, pageSize, workspaceId: workspace.resourceId}
       );
     result = await getWorkspacePermissionGroups(reqData);

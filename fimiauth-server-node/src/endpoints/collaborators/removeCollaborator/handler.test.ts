@@ -11,9 +11,8 @@ import RequestData from '../../RequestData.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import removeCollaborator from './handler.js';
@@ -34,11 +33,10 @@ afterAll(async () => {
 
 describe('removeCollaborator', () => {
   test('collaborator removed', async () => {
-    const {userToken, user} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const reqData =
       RequestData.fromExpressRequest<RemoveCollaboratorEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {workspaceId: workspace.resourceId, collaboratorId: user.resourceId}
       );
 

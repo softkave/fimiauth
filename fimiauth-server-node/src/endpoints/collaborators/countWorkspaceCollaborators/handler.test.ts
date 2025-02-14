@@ -6,9 +6,8 @@ import {generateAndInsertCollaboratorListForTest} from '../../testUtils/generate
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import countWorkspaceCollaborators from './handler.js';
@@ -24,8 +23,7 @@ afterAll(async () => {
 
 describe('countWorkspaceCollaborators', () => {
   test('count', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const seedCount = 15;
     await generateAndInsertCollaboratorListForTest(
       kSystemSessionAgent,
@@ -40,7 +38,7 @@ describe('countWorkspaceCollaborators', () => {
 
     const reqData =
       RequestData.fromExpressRequest<CountWorkspaceCollaboratorsEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {workspaceId: workspace.resourceId}
       );
     const result = await countWorkspaceCollaborators(reqData);

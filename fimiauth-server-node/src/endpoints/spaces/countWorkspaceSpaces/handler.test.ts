@@ -5,9 +5,8 @@ import {generateAndInsertPermissionGroupListForTest} from '../../testUtils/gener
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import countWorkspacePermissionGroups from './handler.js';
@@ -23,8 +22,7 @@ afterAll(async () => {
 
 describe('countWorkspacePermissionGroups', () => {
   test('count', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     await generateAndInsertPermissionGroupListForTest(15, {
       workspaceId: workspace.resourceId,
     });
@@ -33,7 +31,7 @@ describe('countWorkspacePermissionGroups', () => {
     });
     const reqData =
       RequestData.fromExpressRequest<CountWorkspacePermissionGroupsEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {workspaceId: workspace.resourceId}
       );
     const result = await countWorkspacePermissionGroups(reqData);

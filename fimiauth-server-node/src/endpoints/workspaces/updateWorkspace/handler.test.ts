@@ -7,8 +7,8 @@ import {expectErrorThrown} from '../../testUtils/helpers/error.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
-  insertUserForTest,
   insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
@@ -26,8 +26,7 @@ afterAll(async () => {
 
 describe('updateWorkspce', () => {
   test('workspace updated', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const companyName = faker.company.name();
     const workspaceUpdateInput: Partial<UpdateWorkspaceInput> = {
       name: companyName,
@@ -38,7 +37,7 @@ describe('updateWorkspce', () => {
 
     const reqData =
       RequestData.fromExpressRequest<UpdateWorkspaceEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {
           workspaceId: workspace.resourceId,
           workspace: workspaceUpdateInput,
@@ -57,13 +56,12 @@ describe('updateWorkspce', () => {
   });
 
   test('fails if workspace name exists', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
-    const {workspace: w02} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
+    const {workspace: w02} = await insertWorkspaceForTest(agentToken);
     await expectErrorThrown(async () => {
       const reqData =
         RequestData.fromExpressRequest<UpdateWorkspaceEndpointParams>(
-          mockExpressRequestWithAgentToken(userToken),
+          mockExpressRequestWithAgentToken(agentToken),
           {workspaceId: workspace.resourceId, workspace: {name: w02.name}}
         );
 

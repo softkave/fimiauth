@@ -25,7 +25,6 @@ const addAgentTokenEndpoint: AddAgentTokenEndpoint = async reqData => {
   const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
   await checkAuthorizationWithAgent({
     agent,
-    workspace,
     spaceId: data.spaceId ?? workspace.resourceId,
     workspaceId: workspace.resourceId,
     target: {

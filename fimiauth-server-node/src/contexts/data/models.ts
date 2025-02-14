@@ -1,4 +1,4 @@
-import {AgentToken} from '../../definitions/agentToken.js';
+import {AgentToken, AgentToken} from '../../definitions/agentToken.js';
 import {App, AppShard} from '../../definitions/app.js';
 import {AssignedItem} from '../../definitions/assignedItem.js';
 import {CollaborationRequest} from '../../definitions/collaborationRequest.js';
@@ -9,7 +9,7 @@ import {JobHistory} from '../../definitions/jobHistory.js';
 import {PermissionGroup} from '../../definitions/permissionGroups.js';
 import {PermissionItem} from '../../definitions/permissionItem.js';
 import {Space} from '../../definitions/space.js';
-import {AppRuntimeState, ResourceWrapper} from '../../definitions/system.js';
+import {ResourceWrapper} from '../../definitions/system.js';
 import {Workspace} from '../../definitions/workspace.js';
 import {throwAgentTokenNotFound} from '../../endpoints/agentTokens/utils.js';
 import {throwAssignedItemNotFound} from '../../endpoints/assignedItems/utils.js';
@@ -22,7 +22,6 @@ import {BaseMongoDataProvider} from './BaseMongoDataProvider.js';
 import {
   AgentTokenDataProvider,
   AppDataProvider,
-  AppRuntimeStateDataProvider,
   AppShardDataProvider,
   AssignedItemDataProvider,
   CollaborationRequestDataProvider,
@@ -71,13 +70,6 @@ export class AssignedItemMongoDataProvider
   implements AssignedItemDataProvider
 {
   throwNotFound = throwAssignedItemNotFound;
-}
-
-export class AppRuntimeStateMongoDataProvider
-  extends BaseMongoDataProvider<AppRuntimeState>
-  implements AppRuntimeStateDataProvider
-{
-  throwNotFound = throwNotFound;
 }
 
 export class AgentTokenMongoDataProvider

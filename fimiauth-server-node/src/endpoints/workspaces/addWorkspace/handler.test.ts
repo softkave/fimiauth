@@ -1,33 +1,21 @@
 import {faker} from '@faker-js/faker';
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
-import {
-  kSemanticModels,
-  kUtilsInjectables,
-} from '../../../contexts/injection/injectables.js';
-import {kRegisterUtilsInjectables} from '../../../contexts/injection/register.js';
-import {appAssert} from '../../../utils/assertion.js';
-import {mergeData} from '../../../utils/fns.js';
-import {kReuseableErrors} from '../../../utils/reusableErrors.js';
-import {populateUserWorkspaces} from '../../assignedItems/getAssignedItems.js';
+import {kSemanticModels} from '../../../contexts/injection/injectables.js';
 import {fetchEntityAssignedPermissionGroupList} from '../../permissionGroups/getEntityAssignedPermissionGroups/utils.js';
 import EndpointReusableQueries from '../../queries.js';
 import {expectErrorThrown} from '../../testUtils/helpers/error.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
+  generateWorkspaceAndSessionAgent,
   initTests,
-  insertUserForTest,
   insertWorkspaceForTest,
 } from '../../testUtils/testUtils.js';
-import {WorkspaceExistsError, WorkspaceRootnameExistsError} from '../errors.js';
-import {
-  assertWorkspace,
-  makeRootnameFromName,
-  workspaceExtractor,
-} from '../utils.js';
+import {WorkspaceExistsError} from '../errors.js';
+import {assertWorkspace, workspaceExtractor} from '../utils.js';
 import {AddWorkspaceEndpointParams} from './types.js';
 import {
-  DEFAULT_ADMIN_PERMISSION_GROUP_NAME,
-  DEFAULT_PUBLIC_PERMISSION_GROUP_NAME,
+  kDefaultAdminPermissionGroupName,
+  kDefaultPublicPermissionGroupName,
 } from './utils.js';
 
 beforeAll(async () => {
@@ -40,15 +28,14 @@ afterAll(async () => {
 
 describe('addWorkspace', () => {
   test('workspace created', async () => {
-    const {userToken} = await insertUserForTest();
     const companyName = faker.company.name();
     const companyInput: AddWorkspaceEndpointParams = {
       name: companyName,
-      rootname: makeRootnameFromName(companyName),
       description: faker.company.catchPhraseDescriptor(),
+      userId: faker.string.uuid(),
     };
 
-    const result = await insertWorkspaceForTest(userToken, companyInput);
+    const result = await insertWorkspaceForTest(companyInput);
     expect(result.workspace).toMatchObject(companyInput);
     expect(result.workspace.publicPermissionGroupId).toBeTruthy();
     const workspace = await kSemanticModels
@@ -64,7 +51,7 @@ describe('addWorkspace', () => {
       .assertGetOneByQuery(
         EndpointReusableQueries.getByWorkspaceIdAndName(
           workspace.resourceId,
-          DEFAULT_ADMIN_PERMISSION_GROUP_NAME
+          kDefaultAdminPermissionGroupName
         )
       );
     await kSemanticModels
@@ -72,25 +59,15 @@ describe('addWorkspace', () => {
       .assertGetOneByQuery(
         EndpointReusableQueries.getByWorkspaceIdAndName(
           workspace.resourceId,
-          DEFAULT_PUBLIC_PERMISSION_GROUP_NAME
+          kDefaultPublicPermissionGroupName
         )
       );
 
-    appAssert(userToken.forEntityId);
-    const user = await populateUserWorkspaces(
-      await kSemanticModels
-        .user()
-        .assertGetOneByQuery(
-          EndpointReusableQueries.getByResourceId(userToken.forEntityId)
-        )
-    );
-    const userWorkspace = user.workspaces.find(
-      item => item.workspaceId === workspace.resourceId
-    );
-
-    expect(userWorkspace).toBeTruthy();
     const userPermissionGroupsResult =
-      await fetchEntityAssignedPermissionGroupList(userToken.forEntityId);
+      await fetchEntityAssignedPermissionGroupList({
+        entityId: result.agentToken.resourceId,
+        spaceId: workspace.spaceId,
+      });
     const assignedAdminPermissionGroup =
       userPermissionGroupsResult.permissionGroups.find(
         item => item.resourceId === adminPermissionGroup.resourceId
@@ -99,54 +76,11 @@ describe('addWorkspace', () => {
   });
 
   test('fails if workspace name exists', async () => {
-    const {userToken} = await insertUserForTest();
-    const result = await insertWorkspaceForTest(userToken);
+    const {workspace} = await generateWorkspaceAndSessionAgent();
     await expectErrorThrown(async () => {
-      await insertWorkspaceForTest(userToken, {
-        name: result.workspace.name,
+      await insertWorkspaceForTest({
+        name: workspace.name,
       });
     }, [WorkspaceExistsError.name]);
-  });
-
-  test('fails if workspace root name exists', async () => {
-    const {userToken} = await insertUserForTest();
-    const result = await insertWorkspaceForTest(userToken);
-    await expectErrorThrown(async () => {
-      await insertWorkspaceForTest(userToken, {
-        rootname: result.workspace.rootname,
-      });
-    }, [WorkspaceRootnameExistsError.name]);
-  });
-
-  test('fails if user is on waitlist', async () => {
-    kRegisterUtilsInjectables.suppliedConfig(
-      mergeData(
-        kUtilsInjectables.suppliedConfig(),
-        {FLAG_waitlistNewSignups: true},
-        {arrayUpdateStrategy: 'replace'}
-      )
-    );
-    const {userToken} = await insertUserForTest();
-    await expectErrorThrown(
-      async () => {
-        await insertWorkspaceForTest(userToken);
-      },
-      error => {
-        expect((error as Error).message).toBe(
-          kReuseableErrors.user.userOnWaitlist().message
-        );
-      },
-      () => {
-        // TODO: if we ever switch to concurrent tests, then create a context
-        // for this test instead
-        kRegisterUtilsInjectables.suppliedConfig(
-          mergeData(
-            kUtilsInjectables.suppliedConfig(),
-            {FLAG_waitlistNewSignups: false},
-            {arrayUpdateStrategy: 'replace'}
-          )
-        );
-      }
-    );
   });
 });

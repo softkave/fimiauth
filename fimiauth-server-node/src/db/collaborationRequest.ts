@@ -11,6 +11,8 @@ const collaborationRequestSchema = ensureMongoTypeFields<CollaborationRequest>({
   readAt: {type: Number},
   status: {type: String, index: true},
   statusDate: {type: Number},
+  permissionGroupIds: {type: [String], index: true},
+  senderEmail: {type: String, index: true},
 });
 
 export type CollaborationRequestDocument = Document<CollaborationRequest>;
@@ -20,7 +22,11 @@ const modelName = 'collaboration-request';
 const collectionName = 'collaboration-requests';
 
 export function getCollaborationRequestModel(connection: Connection) {
-  const model = connection.model<CollaborationRequest>(modelName, schema, collectionName);
+  const model = connection.model<CollaborationRequest>(
+    modelName,
+    schema,
+    collectionName
+  );
   return model;
 }
 

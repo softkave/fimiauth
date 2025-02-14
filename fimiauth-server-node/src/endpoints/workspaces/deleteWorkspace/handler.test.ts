@@ -11,9 +11,8 @@ import RequestData from '../../RequestData.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import deleteWorkspace from './handler.js';
@@ -32,12 +31,11 @@ afterAll(async () => {
 });
 
 test('workspace deleted', async () => {
-  const {userToken} = await insertUserForTest();
-  const {workspace} = await insertWorkspaceForTest(userToken);
+  const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
 
   const result = await deleteWorkspace(
     RequestData.fromExpressRequest(
-      mockExpressRequestWithAgentToken(userToken),
+      mockExpressRequestWithAgentToken(agentToken),
       {
         workspaceId: workspace.resourceId,
       }

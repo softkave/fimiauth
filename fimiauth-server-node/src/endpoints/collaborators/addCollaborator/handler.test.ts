@@ -1,15 +1,13 @@
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
-import {populateAssignedTags} from '../../assignedItems/getAssignedItems.js';
+import {permissionGroupExtractor} from '../../permissionGroups/utils.js';
 import EndpointReusableQueries from '../../queries.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertPermissionGroupForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
 } from '../../testUtils/testUtils.js';
-import {permissionGroupExtractor} from '../utils.js';
 
 /**
  * TODO:
@@ -26,18 +24,14 @@ afterAll(async () => {
 
 describe('addPermissionGroup', () => {
   test('permissionGroup permissions group added', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const {permissionGroup: permissionGroup} =
-      await insertPermissionGroupForTest(userToken, workspace.resourceId);
-    const savedPermissionGroup = await populateAssignedTags(
-      workspace.resourceId,
-      await kSemanticModels
-        .permissionGroup()
-        .assertGetOneByQuery(
-          EndpointReusableQueries.getByResourceId(permissionGroup.resourceId)
-        )
-    );
+      await insertPermissionGroupForTest(agentToken, workspace.resourceId);
+    const savedPermissionGroup = await kSemanticModels
+      .permissionGroup()
+      .assertGetOneByQuery(
+        EndpointReusableQueries.getByResourceId(permissionGroup.resourceId)
+      );
     expect(permissionGroupExtractor(savedPermissionGroup)).toMatchObject(
       permissionGroup
     );

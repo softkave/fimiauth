@@ -41,6 +41,7 @@ const INTERNAL_createWorkspace = async (
     workspaceId: id,
     resourceId: id,
     createdAt,
+    spaceId: id,
   };
 
   const {
@@ -52,12 +53,17 @@ const INTERNAL_createWorkspace = async (
   workspace.publicPermissionGroupId = publicPermissionGroup.resourceId;
 
   await kSemanticModels.workspace().insertItem(workspace, opts);
-  const agentToken = await INTERNAL_createAgentToken(
+  const agentToken = await INTERNAL_createAgentToken({
     agent,
-    workspace.resourceId,
-    {name: `Agent token for ${data.userId}`, providedResourceId: data.userId},
-    opts
-  );
+    workspaceId: workspace.resourceId,
+    spaceId: workspace.spaceId,
+    data: {
+      name: `Agent token for ${data.userId}`,
+      providedResourceId: data.userId,
+    },
+    opts,
+  });
+
   await Promise.all([
     kSemanticModels
       .permissionGroup()
@@ -70,16 +76,17 @@ const INTERNAL_createWorkspace = async (
         opts
       ),
     kSemanticModels.permissionItem().insertItem(permissionItems, opts),
-    addAssignedPermissionGroupList(
+    addAssignedPermissionGroupList({
       agent,
-      workspace.resourceId,
-      [adminPermissionGroup.resourceId],
-      agentToken.resourceId,
-      /** deleteExisting */ false,
-      /** skipPermissionGroupsExistCheck */ true,
-      /** skip auth check */ true,
-      opts
-    ),
+      workspaceId: workspace.resourceId,
+      spaceId: workspace.spaceId,
+      permissionGroupsInput: [adminPermissionGroup.resourceId],
+      assigneeId: agentToken.resourceId,
+      deleteExisting: false,
+      skipPermissionGroupsExistCheck: true,
+      skipAuthCheck: true,
+      opts,
+    }),
   ]);
 
   return {workspace, adminPermissionGroup, publicPermissionGroup, agentToken};

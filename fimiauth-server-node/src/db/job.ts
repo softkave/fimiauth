@@ -28,6 +28,7 @@ const jobSchema = ensureMongoTypeFields<Job>({
   cooldownTill: {type: Number, index: true},
   runCategory: {type: String},
   cronInterval: {type: Number},
+  spaceId: {type: String, index: true},
 });
 
 export type JobDocument = Document<Job>;

@@ -12,14 +12,13 @@ import {generateAndInsertPermissionGroupListForTest} from '../../testUtils/gener
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertFolderForTest,
   insertPermissionItemsForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
-import {DEFAULT_ADMIN_PERMISSION_GROUP_NAME} from '../../workspaces/addWorkspace/utils.js';
+import {kDefaultAdminPermissionGroupName} from '../../workspaces/addWorkspace/utils.js';
 import {PermissionItemInput} from '../types.js';
 import resolveEntityPermissions from './handler.js';
 import {
@@ -40,8 +39,7 @@ afterAll(async () => {
 
 describe('resolveEntityPermissions', () => {
   test('correct results returned', async () => {
-    const {userToken, rawUser} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const [[pg01, pg02, pg03, pg04, pg05], [file01]] = await Promise.all([
       generateAndInsertPermissionGroupListForTest(/** count */ 5, {
         workspaceId: workspace.resourceId,
@@ -75,14 +73,14 @@ describe('resolveEntityPermissions', () => {
       access: false,
       entityId: pg03.resourceId,
     };
-    await insertPermissionItemsForTest(userToken, workspace.resourceId, [
+    await insertPermissionItemsForTest(agentToken, workspace.resourceId, [
       pItem01,
       pItem02,
       pItem03,
     ]);
 
     // Assign pg01 to another to grant it it's permissions
-    const sessionAgent = makeUserSessionAgent(rawUser, userToken);
+    const sessionAgent = makeUserSessionAgent(rawUser, agentToken);
     await assignPgListToIdList(
       sessionAgent,
       workspace.resourceId,
@@ -93,7 +91,7 @@ describe('resolveEntityPermissions', () => {
     // Test
     const reqData =
       RequestData.fromExpressRequest<ResolveEntityPermissionsEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {
           workspaceId: workspace.resourceId,
           items: [
@@ -170,19 +168,18 @@ describe('resolveEntityPermissions', () => {
   });
 
   test('combination of wildcard and appliesTo', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
-    const {folder} = await insertFolderForTest(userToken, workspace);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
+    const {folder} = await insertFolderForTest(agentToken, workspace);
     const adminPg = await kSemanticModels
       .permissionGroup()
       .assertGetOneByQuery({
-        name: DEFAULT_ADMIN_PERMISSION_GROUP_NAME,
+        name: kDefaultAdminPermissionGroupName,
         workspaceId: workspace.resourceId,
       });
 
     const reqData =
       RequestData.fromExpressRequest<ResolveEntityPermissionsEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {
           workspaceId: workspace.resourceId,
           items: [

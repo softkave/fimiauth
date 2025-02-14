@@ -7,10 +7,9 @@ import {expectContainsEveryItemIn} from '../../testUtils/helpers/assertion.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertRequestForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import getWorkspaceCollaborationRequests from './handler.js';
@@ -31,19 +30,18 @@ afterAll(async () => {
 
 describe('getWorkspaceRequests', () => {
   test('workspace collaboration requests returned', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const {request: request01} = await insertRequestForTest(
-      userToken,
+      agentToken,
       workspace.resourceId
     );
     const {request: request02} = await insertRequestForTest(
-      userToken,
+      agentToken,
       workspace.resourceId
     );
     const reqData =
       RequestData.fromExpressRequest<GetWorkspaceCollaborationRequestsEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {workspaceId: workspace.resourceId}
       );
     const result = await getWorkspaceCollaborationRequests(reqData);
@@ -57,8 +55,7 @@ describe('getWorkspaceRequests', () => {
   });
 
   test('pagination', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     await generateAndInsertCollaborationRequestListForTest(15, () => ({
       workspaceId: workspace.resourceId,
     }));
@@ -69,7 +66,7 @@ describe('getWorkspaceRequests', () => {
     let page = 0;
     let reqData =
       RequestData.fromExpressRequest<GetWorkspaceCollaborationRequestsEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {page, pageSize, workspaceId: workspace.resourceId}
       );
     let result = await getWorkspaceCollaborationRequests(reqData);
@@ -82,7 +79,7 @@ describe('getWorkspaceRequests', () => {
     page = 1;
     reqData =
       RequestData.fromExpressRequest<GetWorkspaceCollaborationRequestsEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {page, pageSize, workspaceId: workspace.resourceId}
       );
     result = await getWorkspaceCollaborationRequests(reqData);

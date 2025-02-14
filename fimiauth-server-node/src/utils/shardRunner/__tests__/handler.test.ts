@@ -3,9 +3,8 @@ import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
 import {kUtilsInjectables} from '../../../contexts/injection/injectables.js';
 import {completeTests} from '../../../endpoints/testUtils/helpers/testFns.js';
 import {
+  generateWorkspaceAndSessionAgent,
   initTests,
-  insertUserForTest,
-  insertWorkspaceForTest,
 } from '../../../endpoints/testUtils/testUtils.js';
 import {
   handleShardQueue,
@@ -152,8 +151,7 @@ function pJSON(value: any) {
 
 describe('shardRunner handler > handleShardQueue', () => {
   test('reads items and calls handlerFn', async () => {
-    const {userToken, sessionAgent} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, sessionAgent} = await generateWorkspaceAndSessionAgent();
     const queueKey = 'test' + Math.random();
     const count = {ack: 0, success: 0, error: 0, expected: 4};
     const p = getDeferredPromise();
@@ -229,8 +227,7 @@ describe('shardRunner handler > handleShardQueue', () => {
 
 describe('shardRunner handler > singleItemHandleShardQueue', () => {
   test('singleItemHandleShardQueue outputs', async () => {
-    const {userToken, sessionAgent} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, sessionAgent} = await generateWorkspaceAndSessionAgent();
     const queueKey = 'test' + Math.random();
     const count = {ack: 0, success: 0, error: 0, expected: 4};
     const p = getDeferredPromise();
@@ -325,8 +322,7 @@ describe('shardRunner handler > singleItemHandleShardQueue', () => {
   });
 
   test('singleItemHandleShardQueue error', async () => {
-    const {userToken, sessionAgent} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, sessionAgent} = await generateWorkspaceAndSessionAgent();
     const queueKey = 'test' + Math.random();
     const count = {ack: 0, error: 0, success: 0, expected: 4};
     const p = getDeferredPromise();
@@ -425,8 +421,7 @@ describe('shardRunner handler > singleItemHandleShardQueue', () => {
 
 describe('shardRunner handler > multiItemsHandleShardQueue', () => {
   test('multiItemsHandleShardQueue outputs', async () => {
-    const {userToken, sessionAgent} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, sessionAgent} = await generateWorkspaceAndSessionAgent();
     const queueKey = 'test' + Math.random();
     const count = {ack: 0, success: 0, error: 0, expected: 4};
     const p = getDeferredPromise();
@@ -521,8 +516,7 @@ describe('shardRunner handler > multiItemsHandleShardQueue', () => {
   });
 
   test('multiItemsHandleShardQueue error', async () => {
-    const {userToken, sessionAgent} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, sessionAgent} = await generateWorkspaceAndSessionAgent();
     const queueKey = 'test' + Math.random();
     const count = {ack: 0, error: 0, success: 0, expected: 4};
     const p = getDeferredPromise();

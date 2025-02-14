@@ -11,13 +11,9 @@ import {Job} from '../../definitions/job.js';
 import {JobHistory} from '../../definitions/jobHistory.js';
 import {PermissionGroup} from '../../definitions/permissionGroups.js';
 import {PermissionItem} from '../../definitions/permissionItem.js';
-import {
-  AppRuntimeState,
-  Resource,
-  ResourceWrapper,
-} from '../../definitions/system.js';
-import {Workspace} from '../../definitions/workspace.js';
 import {Space} from '../../definitions/space.js';
+import {Resource, ResourceWrapper} from '../../definitions/system.js';
+import {Workspace} from '../../definitions/workspace.js';
 
 export type DataQuerySort<T, K extends keyof T = keyof T> = {
   [P in K]?: SortOrder;
@@ -230,7 +226,6 @@ export interface DataProviderUtils {
 }
 
 export type AgentTokenQuery = DataQuery<AgentToken>;
-export type AppRuntimeStateQuery = DataQuery<AppRuntimeState>;
 export type AssignedItemQuery<T extends AnyObject = AnyObject> = DataQuery<
   AssignedItem<T>
 >;
@@ -247,10 +242,6 @@ export type JobHistoryQuery = DataQuery<JobHistory>;
 export type AgentTokenDataProvider = BaseDataProvider<
   AgentToken,
   DataQuery<AgentToken>
->;
-export type AppRuntimeStateDataProvider = BaseDataProvider<
-  AppRuntimeState,
-  DataQuery<AppRuntimeState>
 >;
 export type AssignedItemDataProvider = BaseDataProvider<
   AssignedItem,

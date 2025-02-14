@@ -69,7 +69,6 @@ export async function checkWorkspaceAuthorization(
 ) {
   await checkAuthorizationWithAgent({
     agent,
-    workspace,
     opts,
     workspaceId: workspace.resourceId,
     spaceId: workspace.resourceId,

@@ -1,3 +1,4 @@
+import {OmitFrom} from 'softkave-js-utils';
 import {
   Agent,
   FimidaraResourceType,
@@ -7,7 +8,8 @@ import {
   WorkspaceResource,
 } from './system.js';
 
-export interface AgentToken extends WorkspaceResource {
+export interface AgentToken
+  extends OmitFrom<WorkspaceResource, 'workspaceId' | 'spaceId'> {
   name?: string;
   description?: string;
   version: number;
@@ -25,6 +27,8 @@ export interface AgentToken extends WorkspaceResource {
   shouldRefresh?: boolean;
   /** Refresh duration in milliseconds */
   refreshDuration?: number;
+  workspaceId: string | null;
+  spaceId: string | null;
 }
 
 export interface EncodedAgentToken {

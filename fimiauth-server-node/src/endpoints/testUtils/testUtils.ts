@@ -8,6 +8,7 @@ import {
   kSemanticModels,
   kUtilsInjectables,
 } from '../../contexts/injection/injectables.js';
+import {kSessionUtils} from '../../contexts/SessionContext.js';
 import {IServerRequest} from '../../contexts/types.js';
 import {AgentToken, PublicAgentToken} from '../../definitions/agentToken.js';
 import {
@@ -46,6 +47,7 @@ import {BaseEndpointResult} from '../types.js';
 import addWorkspace from '../workspaces/addWorkspace/handler.js';
 import {AddWorkspaceEndpointParams} from '../workspaces/addWorkspace/types.js';
 import MockTestEmailProviderContext from './context/email/MockTestEmailProviderContext.js';
+import {appAssert} from '../../utils/assertion.js';
 
 export function getTestEmailProvider() {
   return new MockTestEmailProviderContext();
@@ -192,7 +194,9 @@ export async function insertWorkspaceForTest(
     .getOneById(decodedToken.sub.id);
   assert(agentToken);
 
-  return {rawWorkspace, agentToken, ...result};
+  const userId = reqData.data?.userId;
+  appAssert(userId);
+  return {rawWorkspace, agentToken, userId, ...result};
 }
 
 export async function insertPermissionGroupForTest(
@@ -305,4 +309,38 @@ export async function insertSpaceForTest(params: {
   assert(rawSpace);
 
   return {...result, rawSpace};
+}
+
+export async function generateWorkspaceAndSessionAgent() {
+  const workspaceResult = await insertWorkspaceForTest();
+  const sessionAgent = await kUtilsInjectables
+    .session()
+    .getAgentFromReq(
+      RequestData.fromExpressRequest(
+        mockExpressRequestWithAgentToken(workspaceResult.agentToken)
+      ),
+      kSessionUtils.permittedAgentTypes.api,
+      kSessionUtils.accessScopes.api
+    );
+
+  return {...workspaceResult, sessionAgent};
+}
+
+export async function generateAgentTokenAndSessionAgent(params: {
+  workspaceId: string;
+  createdBy: AgentToken;
+}) {
+  const {workspaceId, createdBy} = params;
+  const tokenResult = await insertAgentTokenForTest(createdBy, workspaceId);
+  const sessionAgent = await kUtilsInjectables
+    .session()
+    .getAgentFromReq(
+      RequestData.fromExpressRequest(
+        mockExpressRequestWithAgentToken(tokenResult.rawToken)
+      ),
+      kSessionUtils.permittedAgentTypes.api,
+      kSessionUtils.accessScopes.api
+    );
+
+  return {...tokenResult, sessionAgent};
 }

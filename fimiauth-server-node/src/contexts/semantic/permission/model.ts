@@ -9,6 +9,10 @@ import {
   PermissionItem,
 } from '../../../definitions/permissionItem.js';
 import {Resource, kFimidaraResourceType} from '../../../definitions/system.js';
+import {
+  kPublicSessionAgent,
+  kSystemSessionAgent,
+} from '../../../utils/agent.js';
 import {appAssert} from '../../../utils/assertion.js';
 import {toCompactArray} from '../../../utils/fns.js';
 import {indexArray} from '../../../utils/indexArray.js';
@@ -123,12 +127,12 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
       .getManyByQuery(query, options);
 
     if (props.sortByDate || props.sortByEntity) {
-      this.sortItems(
+      this.sortItems({
         items,
-        props.entityId,
-        props.sortByEntity,
-        props.sortByDate
-      );
+        entityId: props.entityId,
+        sortByEntity: props.sortByEntity,
+        sortByDate: props.sortByDate,
+      });
     }
 
     return items;
@@ -151,6 +155,14 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
     props: {entityId: string},
     opts?: SemanticProviderQueryParams<Resource>
   ): Promise<Resource | null> {
+    if (props.entityId === kPublicSessionAgent.agentId) {
+      return kPublicSessionAgent.agentToken;
+    }
+
+    if (props.entityId === kSystemSessionAgent.agentId) {
+      return kSystemSessionAgent.agentToken;
+    }
+
     const type = getResourceTypeFromId(props.entityId);
     const query: LiteralDataQuery<Resource> = {resourceId: props.entityId};
     const dataQuery = addIsDeletedIntoQuery<DataQuery<Resource>>(
@@ -171,12 +183,13 @@ export class DataSemanticPermission implements SemanticPermissionProviderType {
     return null;
   }
 
-  sortItems(
-    items: PermissionItem[],
-    entityId: string | string[] | undefined,
-    sortByEntity?: boolean,
-    sortByDate?: boolean
-  ): PermissionItem[] {
+  sortItems(params: {
+    items: PermissionItem[];
+    entityId: string | string[] | undefined;
+    sortByEntity?: boolean;
+    sortByDate?: boolean;
+  }): PermissionItem[] {
+    const {items, entityId, sortByEntity, sortByDate} = params;
     const entityIdMap = sortByEntity
       ? indexArray(toCompactArray(entityId), {
           reducer: (item, arr, i) => i,

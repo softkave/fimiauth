@@ -6,6 +6,7 @@ const spaceSchema = ensureMongoTypeFields<Space>({
   ...workspaceResourceSchema,
   name: {type: String, required: true, index: true},
   description: {type: String, required: false},
+  publicPermissionGroupId: {type: String, index: true},
 });
 
 export type SpaceDocument = Document<Space>;

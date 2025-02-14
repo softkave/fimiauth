@@ -9,16 +9,14 @@ import {expectContainsEveryItemInForAnyType} from '../../testUtils/helpers/asser
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertPermissionGroupForTest,
   insertPermissionItemsForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import deletePermissionItems from './handler.js';
 import {
-  DeletePermissionItemInput,
   DeletePermissionItemInput,
   DeletePermissionItemsEndpointParams,
 } from './types.js';
@@ -32,20 +30,19 @@ afterAll(async () => {
 });
 
 test('permission items deleted', async () => {
-  const {userToken} = await insertUserForTest();
-  const {workspace} = await insertWorkspaceForTest(userToken);
+  const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
   const [{permissionGroup: pg01}, {permissionGroup: pg02}] = await Promise.all([
-    insertPermissionGroupForTest(userToken, workspace.resourceId),
-    insertPermissionGroupForTest(userToken, workspace.resourceId),
+    insertPermissionGroupForTest(agentToken, workspace.resourceId),
+    insertPermissionGroupForTest(agentToken, workspace.resourceId),
   ]);
   await Promise.all([
-    insertPermissionItemsForTest(userToken, workspace.resourceId, {
+    insertPermissionItemsForTest(agentToken, workspace.resourceId, {
       entityId: pg01.resourceId,
       targetId: workspace.resourceId,
       access: true,
       action: kFimidaraPermissionActions.addTag,
     }),
-    insertPermissionItemsForTest(userToken, workspace.resourceId, {
+    insertPermissionItemsForTest(agentToken, workspace.resourceId, {
       entityId: pg02.resourceId,
       targetId: workspace.resourceId,
       access: true,

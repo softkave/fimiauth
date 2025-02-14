@@ -3,10 +3,9 @@ import RequestData from '../../RequestData.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertAgentTokenForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import encodeAgentToken from './handler.js';
@@ -24,17 +23,16 @@ describe('encodeAgentToken', () => {
   test.each([true, false])(
     'token encoded, withRefresh=%s',
     async withRefresh => {
-      const {userToken} = await insertUserForTest();
-      const {workspace} = await insertWorkspaceForTest(userToken);
+      const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
       const {token: token01} = await insertAgentTokenForTest(
-        userToken,
+        agentToken,
         workspace.resourceId,
         {shouldRefresh: withRefresh}
       );
 
       const reqData =
         RequestData.fromExpressRequest<EncodeAgentTokenEndpointParams>(
-          mockExpressRequestWithAgentToken(userToken),
+          mockExpressRequestWithAgentToken(agentToken),
           {tokenId: token01.resourceId, workspaceId: workspace.resourceId}
         );
       const result = await encodeAgentToken(reqData);

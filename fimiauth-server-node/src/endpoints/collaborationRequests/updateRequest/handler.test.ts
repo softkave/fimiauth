@@ -6,10 +6,9 @@ import RequestData from '../../RequestData.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertRequestForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import updateCollaborationRequest from './handler.js';
@@ -28,10 +27,9 @@ afterAll(async () => {
 
 describe('updateCollaborationRequest', () => {
   test('collaboration request updated', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const {request: request01} = await insertRequestForTest(
-      userToken,
+      agentToken,
       workspace.resourceId
     );
     const updateCollaborationRequestInput: UpdateCollaborationRequestInput = {
@@ -41,7 +39,7 @@ describe('updateCollaborationRequest', () => {
 
     const reqData =
       RequestData.fromExpressRequest<UpdateCollaborationRequestEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {
           requestId: request01.resourceId,
           request: updateCollaborationRequestInput,

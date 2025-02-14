@@ -16,10 +16,10 @@ import {
 import {getTimestamp} from '../../../utils/dateFns.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertRequestForTest,
   insertUserForTest,
-  insertWorkspaceForTest,
 } from '../../testUtils/testUtils.js';
 import {CollaborationRequestInput} from './types.js';
 
@@ -33,16 +33,15 @@ afterAll(async () => {
 
 describe('sendCollaborationRequest', () => {
   test('collaboration request sent', async () => {
-    const {userToken} = await insertUserForTest();
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const {user: user02} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
     const requestInput: CollaborationRequestInput = {
       recipientEmail: user02.email,
       message: faker.lorem.paragraph(),
       expires: getTimestamp(add(Date.now(), {days: 1})),
     };
     const {request: request01} = await insertRequestForTest(
-      userToken,
+      agentToken,
       workspace.resourceId,
       requestInput
     );

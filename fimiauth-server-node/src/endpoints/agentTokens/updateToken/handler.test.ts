@@ -2,15 +2,13 @@ import {faker} from '@faker-js/faker';
 import {afterAll, beforeAll, expect, test} from 'vitest';
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
 import RequestData from '../../RequestData.js';
-import {populateAssignedTags} from '../../assignedItems/getAssignedItems.js';
 import EndpointReusableQueries from '../../queries.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertAgentTokenForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import {agentTokenExtractor, getPublicAgentToken} from '../utils.js';
@@ -35,10 +33,9 @@ afterAll(async () => {
 });
 
 test('agent token updated', async () => {
-  const {userToken} = await insertUserForTest();
-  const {workspace} = await insertWorkspaceForTest(userToken);
+  const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
   const {token: token01} = await insertAgentTokenForTest(
-    userToken,
+    agentToken,
     workspace.resourceId
   );
   const tokenUpdateInput: UpdateAgentTokenInput = {
@@ -48,7 +45,7 @@ test('agent token updated', async () => {
 
   const reqData =
     RequestData.fromExpressRequest<UpdateAgentTokenEndpointParams>(
-      mockExpressRequestWithAgentToken(userToken),
+      mockExpressRequestWithAgentToken(agentToken),
       {
         tokenId: token01.resourceId,
         token: tokenUpdateInput,
@@ -59,14 +56,11 @@ test('agent token updated', async () => {
   assertEndpointResultOk(result);
 
   const updatedToken = await getPublicAgentToken(
-    await populateAssignedTags(
-      workspace.resourceId,
-      await kSemanticModels
-        .agentToken()
-        .assertGetOneByQuery(
-          EndpointReusableQueries.getByResourceId(token01.resourceId)
-        )
-    ),
+    await kSemanticModels
+      .agentToken()
+      .assertGetOneByQuery(
+        EndpointReusableQueries.getByResourceId(token01.resourceId)
+      ),
     /** shouldEncode */ false
   );
   expect(agentTokenExtractor(updatedToken)).toMatchObject(result.token);

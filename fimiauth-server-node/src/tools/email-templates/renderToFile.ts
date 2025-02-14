@@ -18,16 +18,6 @@ import {
   collaborationRequestRevokedEmailText,
 } from '../../emailTemplates/collaborationRequestRevoked.js';
 import {
-  ConfirmEmailAddressEmailProps,
-  confirmEmailAddressEmailHTML,
-  confirmEmailAddressEmailText,
-} from '../../emailTemplates/confirmEmailAddress.js';
-import {
-  ForgotPasswordEmailProps,
-  forgotPasswordEmailHTML,
-  forgotPasswordEmailText,
-} from '../../emailTemplates/forgotPassword.js';
-import {
   NewSignupsOnWaitlistEmailProps,
   newSignupsOnWaitlistEmailHTML,
   newSignupsOnWaitlistEmailText,
@@ -54,35 +44,6 @@ async function writeToFile(filename: string, htmlText: string, text: string) {
     fs.promises.writeFile(htmlFilepath, htmlText),
     fs.promises.writeFile(textFilepath, text),
   ]);
-}
-
-// Confirm email address email
-export async function renderConfirmEmailAddressMedia() {
-  const props: ConfirmEmailAddressEmailProps = {
-    firstName: 'Abayomi',
-    link: 'https://fimidara.com/accounts/confirm-email-address?t=jwt-token',
-    loginLink: 'https://fimidara.com/accounts/signup',
-    signupLink: 'https://fimidara.com/accounts/login',
-  };
-
-  const renderedHTML = confirmEmailAddressEmailHTML(props);
-  const renderedText = confirmEmailAddressEmailText(props);
-  await writeToFile('confirmEmailAddress', renderedHTML, renderedText);
-}
-
-// Forgot password email
-export async function renderForgotPasswordMedia() {
-  const props: ForgotPasswordEmailProps = {
-    expiration: new Date(),
-    link: 'https://fimidara.com/accounts/forgot-password?t=jwt-token',
-    firstName: 'Abayomi',
-    loginLink: 'https://fimidara.com/accounts/signup',
-    signupLink: 'https://fimidara.com/accounts/login',
-  };
-
-  const renderedHTML = forgotPasswordEmailHTML(props);
-  const renderedText = forgotPasswordEmailText(props);
-  await writeToFile('forgotPassword', renderedHTML, renderedText);
 }
 
 // Collaboration request email

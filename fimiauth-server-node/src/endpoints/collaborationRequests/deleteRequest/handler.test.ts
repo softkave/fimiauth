@@ -11,10 +11,9 @@ import RequestData from '../../RequestData.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertRequestForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import deleteCollaborationRequest from './handler.js';
@@ -29,12 +28,14 @@ afterAll(async () => {
 });
 
 test('collaboration request deleted', async () => {
-  const {userToken} = await insertUserForTest();
-  const {workspace} = await insertWorkspaceForTest(userToken);
-  const {request} = await insertRequestForTest(userToken, workspace.resourceId);
+  const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
+  const {request} = await insertRequestForTest(
+    agentToken,
+    workspace.resourceId
+  );
   const reqData =
     RequestData.fromExpressRequest<DeleteCollaborationRequestEndpointParams>(
-      mockExpressRequestWithAgentToken(userToken),
+      mockExpressRequestWithAgentToken(agentToken),
       {requestId: request.resourceId}
     );
 

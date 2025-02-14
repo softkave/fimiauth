@@ -7,10 +7,9 @@ import EndpointReusableQueries from '../../queries.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertPermissionGroupForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import {permissionGroupExtractor} from '../utils.js';
@@ -34,12 +33,11 @@ afterAll(async () => {
 });
 
 test('permissionGroup updated', async () => {
-  const {userToken} = await insertUserForTest();
-  const {workspace} = await insertWorkspaceForTest(userToken);
+  const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
   const {permissionGroup: permissionGroup00} =
-    await insertPermissionGroupForTest(userToken, workspace.resourceId);
-  await insertPermissionGroupForTest(userToken, workspace.resourceId);
-  await insertPermissionGroupForTest(userToken, workspace.resourceId);
+    await insertPermissionGroupForTest(agentToken, workspace.resourceId);
+  await insertPermissionGroupForTest(agentToken, workspace.resourceId);
+  await insertPermissionGroupForTest(agentToken, workspace.resourceId);
 
   const updatePermissionGroupInput: UpdatePermissionGroupInput = {
     name: faker.lorem.words(2),
@@ -47,7 +45,7 @@ test('permissionGroup updated', async () => {
   };
   const reqData =
     RequestData.fromExpressRequest<UpdatePermissionGroupEndpointParams>(
-      mockExpressRequestWithAgentToken(userToken),
+      mockExpressRequestWithAgentToken(agentToken),
       {
         permissionGroupId: permissionGroup00.resourceId,
         data: updatePermissionGroupInput,

@@ -15,10 +15,10 @@ import RequestData from '../../RequestData.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertRequestForTest,
   insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import {collaborationRequestForUserExtractor} from '../utils.js';
@@ -34,17 +34,16 @@ afterAll(async () => {
 });
 
 test('collaboration request revoked', async () => {
-  const {userToken} = await insertUserForTest();
+  const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
   const {user: user02} = await insertUserForTest();
-  const {workspace} = await insertWorkspaceForTest(userToken);
   const {request: request01} = await insertRequestForTest(
-    userToken,
+    agentToken,
     workspace.resourceId,
     {recipientEmail: user02.email}
   );
   const reqData =
     RequestData.fromExpressRequest<RevokeCollaborationRequestEndpointParams>(
-      mockExpressRequestWithAgentToken(userToken),
+      mockExpressRequestWithAgentToken(agentToken),
       {requestId: request01.resourceId}
     );
   const result = await revokeCollaborationRequest(reqData);

@@ -13,9 +13,8 @@ import {generateAndInsertCollaboratorListForTest} from '../../testUtils/generate
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import {collaboratorExtractor} from '../utils.js';
@@ -37,12 +36,11 @@ afterAll(async () => {
 
 describe('getWorkspaceCollaborators', () => {
   test('workspace collaborators returned', async () => {
-    const {userToken, user} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
 
     const reqData =
       RequestData.fromExpressRequest<GetWorkspaceCollaboratorsEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {workspaceId: workspace.resourceId}
       );
     const result = await getWorkspaceCollaborators(reqData);
@@ -59,8 +57,7 @@ describe('getWorkspaceCollaborators', () => {
   });
 
   test('pagination', async () => {
-    const {userToken, rawUser} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const seedCount = 15;
     const seedUsers = await generateAndInsertCollaboratorListForTest(
       kSystemSessionAgent,
@@ -82,7 +79,7 @@ describe('getWorkspaceCollaborators', () => {
     let page = 0;
     let reqData =
       RequestData.fromExpressRequest<GetWorkspaceCollaboratorsEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {pageSize, workspaceId: workspace.resourceId}
       );
     let result = await getWorkspaceCollaborators(reqData);
@@ -97,7 +94,7 @@ describe('getWorkspaceCollaborators', () => {
     page = 1;
     reqData =
       RequestData.fromExpressRequest<GetWorkspaceCollaboratorsEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
+        mockExpressRequestWithAgentToken(agentToken),
         {page, pageSize, workspaceId: workspace.resourceId}
       );
     result = await getWorkspaceCollaborators(reqData);

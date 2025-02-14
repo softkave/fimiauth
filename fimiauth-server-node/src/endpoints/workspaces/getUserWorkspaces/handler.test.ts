@@ -1,12 +1,13 @@
-import {calculatePageSize} from 'softkave-js-utils';
+import {
+  calculatePageSize,
+  kLoopAsyncSettlementType,
+  loopAndCollateAsync,
+} from 'softkave-js-utils';
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
-import {kSystemSessionAgent} from '../../../utils/agent.js';
 import {appAssert} from '../../../utils/assertion.js';
 import {getResourceId} from '../../../utils/fns.js';
 import RequestData from '../../RequestData.js';
-import {assignWorkspaceToUser} from '../../assignedItems/addAssignedItems.js';
-import {populateUserWorkspaces} from '../../assignedItems/getAssignedItems.js';
 import EndpointReusableQueries from '../../queries.js';
 import {generateAndInsertWorkspaceListForTest} from '../../testUtils/generate/workspace.js';
 import {expectContainsNoneIn} from '../../testUtils/helpers/assertion.js';
@@ -14,7 +15,6 @@ import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
   initTests,
-  insertUserForTest,
   insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
@@ -30,41 +30,14 @@ afterAll(async () => {
 });
 
 describe('getUserWorkspaces', () => {
-  test('user workspaces are returned', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace: workspace01} = await insertWorkspaceForTest(userToken);
-    const {workspace: workspace02} = await insertWorkspaceForTest(userToken);
-    const {workspace: workspace03} = await insertWorkspaceForTest(userToken);
-    const reqData =
-      RequestData.fromExpressRequest<GetUserWorkspacesEndpointParams>(
-        mockExpressRequestWithAgentToken(userToken),
-        {}
-      );
-    const result = await getUserWorkspaces(reqData);
-    assertEndpointResultOk(result);
-    expect(result.workspaces).toHaveLength(3);
-    expect(result.workspaces).toContainEqual(workspace01);
-    expect(result.workspaces).toContainEqual(workspace02);
-    expect(result.workspaces).toContainEqual(workspace03);
-  });
-
   test('pagination', async () => {
     const {userToken, rawUser} = await insertUserForTest();
     const workspaces = await generateAndInsertWorkspaceListForTest(15);
-    await kSemanticModels
-      .utils()
-      .withTxn(opts =>
-        Promise.all(
-          workspaces.map(w =>
-            assignWorkspaceToUser(
-              kSystemSessionAgent,
-              w.resourceId,
-              rawUser.resourceId,
-              opts
-            )
-          )
-        )
-      );
+    await loopAndCollateAsync(
+      () => insertWorkspaceForTest(userToken),
+      15,
+      kLoopAsyncSettlementType.all
+    );
 
     appAssert(userToken.forEntityId);
     const user = await populateUserWorkspaces(

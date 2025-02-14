@@ -19,10 +19,9 @@ import {generateAndInsertPermissionItemListForTest} from '../../testUtils/genera
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertPermissionGroupForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import {FetchResourceItem} from '../types.js';
@@ -44,10 +43,9 @@ afterAll(async () => {
 
 describe('getResources', () => {
   test('resources returned', async () => {
-    const {userToken, rawUser} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const [{permissionGroup}, folders, files] = await Promise.all([
-      insertPermissionGroupForTest(userToken, workspace.resourceId),
+      insertPermissionGroupForTest(agentToken, workspace.resourceId),
       generateAndInsertTestFolders(2, {
         workspaceId: workspace.resourceId,
         parentId: null,

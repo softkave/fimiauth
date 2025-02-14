@@ -1,4 +1,4 @@
-import {first, get, set} from 'lodash-es';
+import {compact, first, flatten, get, set} from 'lodash-es';
 import {convertToArray, makeStringKey} from 'softkave-js-utils';
 import {ValueOf} from 'type-fest';
 import {
@@ -12,6 +12,7 @@ import {appAssert} from '../../utils/assertion.js';
 import {toUniqArray} from '../../utils/fns.js';
 import {sortPermissionEntityInheritanceMap} from '../../utils/permissionEntityUtils.js';
 import {kReuseableErrors} from '../../utils/reusableErrors.js';
+import {kIncludeInProjection} from '../data/types.js';
 import {kSemanticModels} from '../injection/injectables.js';
 import {SemanticProviderOpParams} from '../semantic/types.js';
 
@@ -24,7 +25,6 @@ export interface AccessCheckTarget {
 export interface CheckAuthorizationParams {
   workspaceId: string;
   spaceId: string;
-  workspace?: {publicPermissionGroupId: string};
   target: AccessCheckTarget;
   opts?: SemanticProviderOpParams;
   nothrow?: boolean;
@@ -226,41 +226,74 @@ async function getAndSortEntityInheritance(params: {
   return entityIdList;
 }
 
+async function getPublicPermissionGroupIdForSpace(params: {
+  spaceId: string;
+  opts?: SemanticProviderOpParams;
+}) {
+  const {spaceId, opts} = params;
+  const space = await kSemanticModels.space().getOneById(spaceId, {
+    ...opts,
+    projection: {publicPermissionGroupId: kIncludeInProjection},
+  });
+  appAssert(space, kReuseableErrors.space.notFound());
+  return space.publicPermissionGroupId;
+}
+
+async function getPublicPermissionGroupIdForWorkspace(params: {
+  workspaceId: string;
+  opts?: SemanticProviderOpParams;
+}) {
+  const {workspaceId, opts} = params;
+  const workspace = await kSemanticModels.workspace().getOneById(workspaceId, {
+    ...opts,
+    projection: {publicPermissionGroupId: kIncludeInProjection},
+  });
+  appAssert(workspace, kReuseableErrors.workspace.notFound());
+  return workspace.publicPermissionGroupId;
+}
+
+async function getPublicPermissionGroupIds(params: {
+  spaceId: string;
+  workspaceId: string;
+  opts?: SemanticProviderOpParams;
+}) {
+  const {spaceId, workspaceId, opts} = params;
+  const [spacePublicPermissionGroupId, workspacePublicPermissionGroupId] =
+    await Promise.all([
+      getPublicPermissionGroupIdForSpace({spaceId, opts}),
+      getPublicPermissionGroupIdForWorkspace({workspaceId, opts}),
+    ]);
+
+  return compact([
+    spacePublicPermissionGroupId,
+    workspacePublicPermissionGroupId,
+  ]);
+}
+
 async function resolveEntityInheritance(
   params: CheckAuthorizationParams & {fetchEntitiesDeep: boolean}
 ) {
   const {target, spaceId, excludePublicPermissions} = params;
-  let publicPermissionGroupId: string | undefined =
-    params.workspace?.publicPermissionGroupId;
+  const publicPermissionGroupIds = excludePublicPermissions
+    ? []
+    : await getPublicPermissionGroupIds({
+        spaceId,
+        workspaceId: params.workspaceId,
+        opts: params.opts,
+      });
 
-  if (!excludePublicPermissions && !publicPermissionGroupId) {
-    const workspace =
-      params.workspace ??
-      (await kSemanticModels
-        .workspace()
-        .getOneById(params.workspaceId, params.opts));
-    appAssert(workspace, kReuseableErrors.workspace.notFound());
-    publicPermissionGroupId = workspace.publicPermissionGroupId;
-  }
+  const entityIdLists = await Promise.all(
+    [target.entityId, ...publicPermissionGroupIds].map(id =>
+      getAndSortEntityInheritance({
+        spaceId,
+        entityId: id,
+        fetchEntitiesDeep: params.fetchEntitiesDeep,
+        opts: params.opts,
+      })
+    )
+  );
 
-  const [entityIdList, publicEntityIdList] = await Promise.all([
-    getAndSortEntityInheritance({
-      spaceId,
-      entityId: target.entityId,
-      fetchEntitiesDeep: params.fetchEntitiesDeep,
-      opts: params.opts,
-    }),
-    publicPermissionGroupId
-      ? getAndSortEntityInheritance({
-          spaceId,
-          entityId: publicPermissionGroupId,
-          fetchEntitiesDeep: params.fetchEntitiesDeep,
-          opts: params.opts,
-        })
-      : Promise.resolve([]),
-  ]);
-
-  const completeEntityIdList = [...entityIdList, ...publicEntityIdList];
+  const completeEntityIdList = flatten(entityIdLists);
   return completeEntityIdList;
 }
 

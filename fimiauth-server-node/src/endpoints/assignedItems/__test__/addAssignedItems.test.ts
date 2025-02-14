@@ -3,7 +3,6 @@ import {afterAll, beforeAll, describe, test} from 'vitest';
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
 import {AssignedItem} from '../../../definitions/assignedItem.js';
 import {extractResourceIdList, makeKey} from '../../../utils/fns.js';
-import {makeUserSessionAgent} from '../../../utils/sessionUtils.js';
 import {
   assignPgListToIdList,
   toAssignedPgListInput,
@@ -12,9 +11,8 @@ import {generateAndInsertPermissionGroupListForTest} from '../../testUtils/gener
 import {expectContainsEveryItemInForAnyType} from '../../testUtils/helpers/assertion.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
+  generateWorkspaceAndSessionAgent,
   initTests,
-  insertUserForTest,
-  insertWorkspaceForTest,
 } from '../../testUtils/testUtils.js';
 import {addAssignedPermissionGroupList} from '../addAssignedItems.js';
 
@@ -28,8 +26,7 @@ afterAll(async () => {
 
 describe('addAssignedItems', () => {
   test('addAssignedPermissionGroupList does not duplicate', async () => {
-    const {userToken, rawUser} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, sessionAgent} = await generateWorkspaceAndSessionAgent();
     const [pgList01, pgListAssignedTo01, pgListAssignedTo02] =
       await Promise.all([
         generateAndInsertPermissionGroupListForTest(2, {
@@ -42,28 +39,28 @@ describe('addAssignedItems', () => {
           workspaceId: workspace.resourceId,
         }),
       ]);
-    const agent = makeUserSessionAgent(rawUser, userToken);
     const pgListAssignedTo01Input = toAssignedPgListInput(pgListAssignedTo01);
     const pgListAssignedTo02Input = toAssignedPgListInput(pgListAssignedTo02);
     const pgList01IdList = extractResourceIdList(pgList01);
     await assignPgListToIdList(
-      agent,
+      sessionAgent,
       workspace.resourceId,
       pgList01IdList,
       pgListAssignedTo01Input
     );
 
     const assignedItems = await kSemanticModels.utils().withTxn(opts =>
-      addAssignedPermissionGroupList(
-        agent,
-        workspace.resourceId,
-        pgListAssignedTo02Input,
-        pgList01IdList,
-        false, // do not delete existing items
-        true, // skip permission groups check
-        false, // skip auth check
-        opts
-      )
+      addAssignedPermissionGroupList({
+        agent: sessionAgent,
+        workspaceId: workspace.resourceId,
+        spaceId: workspace.resourceId,
+        permissionGroupsInput: pgListAssignedTo02Input,
+        assigneeId: pgList01IdList,
+        deleteExisting: false, // do not delete existing items
+        skipPermissionGroupsExistCheck: true, // skip permission groups check
+        skipAuthCheck: false, // skip auth check
+        opts,
+      })
     );
 
     expectContainsEveryItemInForAnyType(

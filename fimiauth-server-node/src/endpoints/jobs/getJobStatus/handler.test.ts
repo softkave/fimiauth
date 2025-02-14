@@ -1,12 +1,11 @@
+import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import RequestData from '../../RequestData.js';
 import {generateAndInsertJobListForTest} from '../../testUtils/generate/job.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
-import {test, beforeAll, afterAll, describe, expect} from 'vitest';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import getJobStatus from './handler.js';
@@ -21,16 +20,18 @@ afterAll(async () => {
 
 describe('getJobStatus', () => {
   test('getJobStatus', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const [job] = await generateAndInsertJobListForTest(/** count */ 1, {
       workspaceId: workspace.resourceId,
     });
 
     const result = await getJobStatus(
-      RequestData.fromExpressRequest(mockExpressRequestWithAgentToken(userToken), {
-        jobId: job.resourceId,
-      })
+      RequestData.fromExpressRequest(
+        mockExpressRequestWithAgentToken(agentToken),
+        {
+          jobId: job.resourceId,
+        }
+      )
     );
     assertEndpointResultOk(result);
     expect(result.status).toBe(job.status);

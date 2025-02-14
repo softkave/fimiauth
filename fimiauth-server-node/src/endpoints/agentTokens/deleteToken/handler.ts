@@ -31,9 +31,12 @@ const deleteAgentToken: DeleteAgentTokenEndpoint = async reqData => {
     action: kFimidaraPermissionActions.deleteAgentToken,
   });
 
+  appAssert(token.workspaceId);
+  appAssert(token.spaceId);
   const [job] = await beginDeleteAgentToken({
     agent,
     workspaceId: token.workspaceId,
+    spaceId: token.spaceId,
     resources: [token],
   });
 

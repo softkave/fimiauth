@@ -4,10 +4,9 @@ import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import {kUtilsInjectables} from '../../../contexts/injection/injectables.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertAgentTokenForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
 } from '../../testUtils/testUtils.js';
 import {encodeAgentToken} from '../utils.js';
 
@@ -21,10 +20,9 @@ afterAll(async () => {
 
 describe('encodeAgentToken', () => {
   test('used right expirations', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const {rawToken: token} = await insertAgentTokenForTest(
-      userToken,
+      agentToken,
       workspace.resourceId,
       {
         shouldRefresh: true,

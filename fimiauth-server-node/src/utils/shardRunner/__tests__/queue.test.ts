@@ -3,9 +3,8 @@ import {afterEach, beforeEach, describe, expect, test} from 'vitest';
 import {kUtilsInjectables} from '../../../contexts/injection/injectables.js';
 import {completeTests} from '../../../endpoints/testUtils/helpers/testFns.js';
 import {
+  generateWorkspaceAndSessionAgent,
   initTests,
-  insertUserForTest,
-  insertWorkspaceForTest,
 } from '../../../endpoints/testUtils/testUtils.js';
 import {queueShardRunner} from '../queue.js';
 import {
@@ -30,8 +29,7 @@ interface ITestItem {
 
 describe('shardRunner queue', () => {
   test('queued + success', async () => {
-    const {userToken, sessionAgent} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, sessionAgent} = await generateWorkspaceAndSessionAgent();
     const item: ITestItem = {data: 'test'};
     const queueKey = 'test' + Math.random();
     const wakeupChannel = getShardRunnerPubSubAlertChannel({queueKey});
@@ -69,8 +67,7 @@ describe('shardRunner queue', () => {
   });
 
   test('queued + error', async () => {
-    const {userToken, sessionAgent} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, sessionAgent} = await generateWorkspaceAndSessionAgent();
     const item: ITestItem = {data: 'test'};
     const queueKey = 'test' + Math.random();
     const wakeupChannel = getShardRunnerPubSubAlertChannel({queueKey});
@@ -107,8 +104,7 @@ describe('shardRunner queue', () => {
   });
 
   test('queued + timeout', async () => {
-    const {userToken, sessionAgent} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, sessionAgent} = await generateWorkspaceAndSessionAgent();
     const item: ITestItem = {data: 'test'};
     const queueKey = 'test' + Math.random();
 
@@ -124,8 +120,7 @@ describe('shardRunner queue', () => {
   });
 
   test('queued + ack', async () => {
-    const {userToken, sessionAgent} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, sessionAgent} = await generateWorkspaceAndSessionAgent();
     const item: ITestItem = {data: 'test'};
     const queueKey = 'test' + Math.random();
     const wakeupChannel = getShardRunnerPubSubAlertChannel({queueKey});

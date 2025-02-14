@@ -7,10 +7,9 @@ import {
 } from '../../../contexts/injection/injectables.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertAgentTokenForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
 } from '../../testUtils/testUtils.js';
 import {agentTokenExtractor, getPublicAgentToken} from '../utils.js';
 
@@ -30,11 +29,10 @@ afterAll(async () => {
 
 describe('addAgentToken', () => {
   test('Agent token added', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
 
     const {token} = await insertAgentTokenForTest(
-      userToken,
+      agentToken,
       workspace.resourceId
     );
 
@@ -51,12 +49,11 @@ describe('addAgentToken', () => {
   });
 
   test.each([true, false])('shouldRefresh=%s', async shouldRefresh => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
 
     const expiresAt = Date.now() + 1000;
     const {token} = await insertAgentTokenForTest(
-      userToken,
+      agentToken,
       workspace.resourceId,
       /** tokenInput */ {
         expiresAt,

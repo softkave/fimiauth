@@ -3,6 +3,7 @@ import {
   kUtilsInjectables,
 } from '../../../contexts/injection/injectables.js';
 import {AgentToken} from '../../../definitions/agentToken.js';
+import {appAssert} from '../../../utils/assertion.js';
 import {validate} from '../../../utils/validate.js';
 import {encodeAgentToken} from '../../agentTokens/utils.js';
 import {
@@ -23,6 +24,7 @@ const getUserWorkspaces: GetUserWorkspacesEndpoint = async reqData => {
     .getManyByUserId(systemAgent.agentId, data.userId);
   const agentTokensByWorkspaceId = agentTokens.reduce(
     (acc, token) => {
+      appAssert(token.workspaceId);
       acc[token.workspaceId] = token;
       return acc;
     },

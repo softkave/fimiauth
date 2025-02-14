@@ -11,10 +11,9 @@ import RequestData from '../../RequestData.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertAgentTokenForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import deleteAgentToken from './handler.js';
@@ -34,15 +33,14 @@ afterAll(async () => {
 });
 
 test('Agent token deleted', async () => {
-  const {userToken} = await insertUserForTest();
-  const {workspace} = await insertWorkspaceForTest(userToken);
+  const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
   const {token} = await insertAgentTokenForTest(
-    userToken,
+    agentToken,
     workspace.resourceId
   );
   const reqData =
     RequestData.fromExpressRequest<DeleteAgentTokenEndpointParams>(
-      mockExpressRequestWithAgentToken(userToken),
+      mockExpressRequestWithAgentToken(agentToken),
       {tokenId: token.resourceId, workspaceId: workspace.resourceId}
     );
 

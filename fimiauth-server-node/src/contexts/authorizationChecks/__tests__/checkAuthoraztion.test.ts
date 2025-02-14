@@ -1,13 +1,11 @@
 import assert from 'assert';
 import {waitTimeout} from 'softkave-js-utils';
 import {describe, expect, test} from 'vitest';
-import {AgentToken} from '../../../definitions/agentToken.js';
 import {
   FimidaraPermissionAction,
   PermissionItem,
   kFimidaraPermissionActions,
 } from '../../../definitions/permissionItem.js';
-import RequestData from '../../../endpoints/RequestData.js';
 import {PermissionDeniedError} from '../../../endpoints/errors.js';
 import {generateAndInsertAgentTokenListForTest} from '../../../endpoints/testUtils/generate/agentToken.js';
 import {
@@ -19,20 +17,14 @@ import {generateAndInsertSpaceListForTest} from '../../../endpoints/testUtils/ge
 import {expectErrorThrown} from '../../../endpoints/testUtils/helpers/error.js';
 import {startTesting} from '../../../endpoints/testUtils/helpers/testFns.js';
 import {
-  insertAgentTokenForTest,
-  insertWorkspaceForTest,
-  mockExpressRequestWithAgentToken,
+  generateAgentTokenAndSessionAgent,
+  generateWorkspaceAndSessionAgent,
 } from '../../../endpoints/testUtils/testUtils.js';
 import {convertToArray} from '../../../utils/fns.js';
-import {kSessionUtils} from '../../SessionContext.js';
-import {
-  kSemanticModels,
-  kUtilsInjectables,
-} from '../../injection/injectables.js';
+import {kSemanticModels} from '../../injection/injectables.js';
 import {
   checkAuthorizationWithAgent,
   kResolvedAuthCheckAccess,
-  resolveTargetChildrenAccessCheckWithAgent,
 } from '../checkAuthorizaton.js';
 
 startTesting();
@@ -76,7 +68,6 @@ describe('checkAuthorization', () => {
       },
       workspaceId: rawWorkspace.resourceId,
       spaceId: rawWorkspace.spaceId,
-      workspace: rawWorkspace,
     });
     await expectErrorThrown(async () => {
       await checkAuthorizationWithAgent({
@@ -87,7 +78,6 @@ describe('checkAuthorization', () => {
         },
         workspaceId: rawWorkspace.resourceId,
         spaceId: rawWorkspace.spaceId,
-        workspace: rawWorkspace,
       });
     }, [PermissionDeniedError.name]);
     await expectErrorThrown(async () => {
@@ -99,7 +89,6 @@ describe('checkAuthorization', () => {
         },
         workspaceId: rawWorkspace.resourceId,
         spaceId: rawWorkspace.spaceId,
-        workspace: rawWorkspace,
       });
     }, [PermissionDeniedError.name]);
   });
@@ -167,7 +156,6 @@ describe('checkAuthorization', () => {
       },
       workspaceId: rawWorkspace.resourceId,
       spaceId: rawWorkspace.spaceId,
-      workspace: rawWorkspace,
     });
     await checkAuthorizationWithAgent({
       agent: user02SessionAgent,
@@ -177,7 +165,6 @@ describe('checkAuthorization', () => {
       },
       workspaceId: rawWorkspace.resourceId,
       spaceId: rawWorkspace.spaceId,
-      workspace: rawWorkspace,
     });
 
     await expectErrorThrown(async () => {
@@ -189,7 +176,6 @@ describe('checkAuthorization', () => {
         },
         workspaceId: rawWorkspace.resourceId,
         spaceId: rawWorkspace.spaceId,
-        workspace: rawWorkspace,
       });
     }, [PermissionDeniedError.name]);
     await expectErrorThrown(async () => {
@@ -201,7 +187,6 @@ describe('checkAuthorization', () => {
         },
         workspaceId: rawWorkspace.resourceId,
         spaceId: rawWorkspace.spaceId,
-        workspace: rawWorkspace,
       });
     }, [PermissionDeniedError.name]);
   });
@@ -260,7 +245,6 @@ describe('checkAuthorization', () => {
       },
       workspaceId: rawWorkspace.resourceId,
       spaceId: space01.resourceId,
-      workspace: rawWorkspace,
     });
     await expectErrorThrown(async () => {
       await checkAuthorizationWithAgent({
@@ -271,7 +255,6 @@ describe('checkAuthorization', () => {
         },
         workspaceId: rawWorkspace.resourceId,
         spaceId: space02.resourceId,
-        workspace: rawWorkspace,
       });
     }, [PermissionDeniedError.name]);
     await expectErrorThrown(async () => {
@@ -283,7 +266,6 @@ describe('checkAuthorization', () => {
         },
         workspaceId: rawWorkspace.resourceId,
         spaceId: space03.resourceId,
-        workspace: rawWorkspace,
       });
     }, [PermissionDeniedError.name]);
   });
@@ -369,7 +351,6 @@ describe('checkAuthorization', () => {
       },
       workspaceId: rawWorkspace.resourceId,
       spaceId: space01.resourceId,
-      workspace: rawWorkspace,
     });
     await checkAuthorizationWithAgent({
       agent: user02SessionAgent,
@@ -379,7 +360,6 @@ describe('checkAuthorization', () => {
       },
       workspaceId: rawWorkspace.resourceId,
       spaceId: space02.resourceId,
-      workspace: rawWorkspace,
     });
 
     await expectErrorThrown(async () => {
@@ -391,7 +371,6 @@ describe('checkAuthorization', () => {
         },
         workspaceId: rawWorkspace.resourceId,
         spaceId: space03.resourceId,
-        workspace: rawWorkspace,
       });
     }, [PermissionDeniedError.name]);
     await expectErrorThrown(async () => {
@@ -403,7 +382,6 @@ describe('checkAuthorization', () => {
         },
         workspaceId: rawWorkspace.resourceId,
         spaceId: space04.resourceId,
-        workspace: rawWorkspace,
       });
     }, [PermissionDeniedError.name]);
   });
@@ -437,7 +415,7 @@ describe('checkAuthorization', () => {
       ),
     ]);
 
-    const [check01] = await checkAuthorizationWithAgent({
+    const check01 = await checkAuthorizationWithAgent({
       agent: user02SessionAgent,
       target: {
         action: kFimidaraPermissionActions.readSpace,
@@ -445,10 +423,9 @@ describe('checkAuthorization', () => {
       },
       workspaceId: rawWorkspace.resourceId,
       spaceId: rawWorkspace.spaceId,
-      workspace: rawWorkspace,
       nothrow: true,
     });
-    const [check02] = await checkAuthorizationWithAgent({
+    const check02 = await checkAuthorizationWithAgent({
       agent: user02SessionAgent,
       target: {
         action: kFimidaraPermissionActions.readSpace,
@@ -456,13 +433,12 @@ describe('checkAuthorization', () => {
       },
       workspaceId: rawWorkspace.resourceId,
       spaceId: rawWorkspace.spaceId,
-      workspace: rawWorkspace,
       nothrow: true,
     });
 
-    expect(check01.hasAccess).toBeTruthy();
+    expect(check01.access === kResolvedAuthCheckAccess.full);
     expect(check01.item).toBeTruthy();
-    expect(check02.hasAccess).toBeFalsy();
+    expect(check02.access === kResolvedAuthCheckAccess.deny);
     expect(check02.item).toBeTruthy();
   });
 
@@ -503,7 +479,6 @@ describe('checkAuthorization', () => {
       },
       workspaceId: rawWorkspace.resourceId,
       spaceId: rawWorkspace.spaceId,
-      workspace: rawWorkspace,
     });
     await expectErrorThrown(async () => {
       await checkAuthorizationWithAgent({
@@ -514,7 +489,6 @@ describe('checkAuthorization', () => {
         },
         workspaceId: rawWorkspace.resourceId,
         spaceId: rawWorkspace.spaceId,
-        workspace: rawWorkspace,
       });
     }, [PermissionDeniedError.name]);
   });
@@ -567,7 +541,6 @@ describe('checkAuthorization', () => {
       },
       workspaceId: rawWorkspace.resourceId,
       spaceId: rawWorkspace.spaceId,
-      workspace: rawWorkspace,
     });
   });
 
@@ -615,7 +588,6 @@ describe('checkAuthorization', () => {
       },
       workspaceId: rawWorkspace.resourceId,
       spaceId: space01.resourceId,
-      workspace: rawWorkspace,
     });
   });
 
@@ -657,89 +629,86 @@ describe('checkAuthorization', () => {
       },
       workspaceId: rawWorkspace.resourceId,
       spaceId: rawWorkspace.spaceId,
-      workspace: rawWorkspace,
     });
   });
 
   test('resolve target children full access', async () => {
-    const {rawWorkspace} = await generateWorkspaceAndSessionAgent();
-    const {user: user02, sessionAgent: user02SessionAgent} =
-      await generateUserAndAddToWorkspace(rawWorkspace.resourceId);
-    const [folder01] = await generateAndInsertTestFolders(1, {
-      workspaceId: rawWorkspace.resourceId,
-      parentId: null,
+    const {rawWorkspace, agentToken: createdBy} =
+      await generateWorkspaceAndSessionAgent();
+    const {sessionAgent: user02SessionAgent, rawToken: agent02} =
+      await generateAgentTokenAndSessionAgent({
+        workspaceId: rawWorkspace.resourceId,
+        createdBy,
+      });
+
+    const [space01] = await generateAndInsertSpaceListForTest({
+      count: 1,
+      seed: {workspaceId: rawWorkspace.resourceId},
     });
+
     await Promise.all([
       addPermissions(
         rawWorkspace.resourceId,
-        user02.resourceId,
-        kFimidaraPermissionActions.readFile,
-        {targetId: folder01.resourceId}
+        agent02.resourceId,
+        kFimidaraPermissionActions.readSpace,
+        {targetId: space01.resourceId}
       ),
     ]);
 
-    const resolveResult = await resolveTargetChildrenAccessCheckWithAgent({
+    const resolveResult = await checkAuthorizationWithAgent({
       agent: user02SessionAgent,
+      spaceId: rawWorkspace.spaceId,
       target: {
-        action: kFimidaraPermissionActions.readFile,
-        targetId: getFilePermissionContainers(
-          rawWorkspace.resourceId,
-          folder01,
-          true
-        ),
+        action: kFimidaraPermissionActions.readSpace,
+        targetId: space01.resourceId,
       },
       workspaceId: rawWorkspace.resourceId,
-      workspace: rawWorkspace,
     });
 
     assert(resolveResult.access === kResolvedAuthCheckAccess.full);
     expect(resolveResult.item).toBeTruthy();
-    expect(resolveResult.partialDenyIds.length).toBe(0);
-    expect(resolveResult.partialDenyItems.length).toBe(0);
   });
 
   test('resolve target children no access', async () => {
-    const {rawWorkspace} = await generateWorkspaceAndSessionAgent();
-    const {user: user02, sessionAgent: user02SessionAgent} =
-      await generateUserAndAddToWorkspace(rawWorkspace.resourceId);
-    const [folder01, folder02] = await generateAndInsertTestFolders(2, {
-      workspaceId: rawWorkspace.resourceId,
-      parentId: null,
+    const {rawWorkspace, agentToken: createdBy} =
+      await generateWorkspaceAndSessionAgent();
+    const {sessionAgent: user02SessionAgent, rawToken: agent02} =
+      await generateAgentTokenAndSessionAgent({
+        workspaceId: rawWorkspace.resourceId,
+        createdBy,
+      });
+
+    const [space01] = await generateAndInsertSpaceListForTest({
+      count: 1,
+      seed: {workspaceId: rawWorkspace.resourceId},
     });
+
     await Promise.all([
       addPermissions(
         rawWorkspace.resourceId,
-        user02.resourceId,
-        kFimidaraPermissionActions.readFile,
-        {targetId: folder01.resourceId, access: false}
+        agent02.resourceId,
+        kFimidaraPermissionActions.readSpace,
+        {targetId: space01.resourceId, access: false}
       ),
     ]);
 
-    const resolveResult01 = await resolveTargetChildrenAccessCheckWithAgent({
+    const resolveResult01 = await checkAuthorizationWithAgent({
       agent: user02SessionAgent,
       target: {
-        action: kFimidaraPermissionActions.readFile,
-        targetId: getFilePermissionContainers(
-          rawWorkspace.resourceId,
-          folder01,
-          true
-        ),
+        action: kFimidaraPermissionActions.readSpace,
+        targetId: space01.resourceId,
       },
       workspaceId: rawWorkspace.resourceId,
-      workspace: rawWorkspace,
+      spaceId: rawWorkspace.spaceId,
     });
-    const resolveResult02 = await resolveTargetChildrenAccessCheckWithAgent({
+    const resolveResult02 = await checkAuthorizationWithAgent({
       agent: user02SessionAgent,
       target: {
-        action: kFimidaraPermissionActions.readFile,
-        targetId: getFilePermissionContainers(
-          rawWorkspace.resourceId,
-          folder02,
-          true
-        ),
+        action: kFimidaraPermissionActions.readSpace,
+        targetId: space01.resourceId,
       },
       workspaceId: rawWorkspace.resourceId,
-      workspace: rawWorkspace,
+      spaceId: rawWorkspace.spaceId,
     });
 
     assert(resolveResult01.access === kResolvedAuthCheckAccess.deny);
@@ -747,167 +716,170 @@ describe('checkAuthorization', () => {
 
     assert(resolveResult02.access === kResolvedAuthCheckAccess.partial);
     expect(resolveResult02.item).toBeFalsy();
-    expect(resolveResult02.partialAllowIds.length).toBe(0);
-    expect(resolveResult02.partialAllowItems.length).toBe(0);
+    expect(resolveResult02.allowItems.length).toBe(0);
+    expect(resolveResult02.denyItems.length).toBe(1);
   });
 
   test('resolve target children partial access', async () => {
-    const {rawWorkspace} = await generateWorkspaceAndSessionAgent();
-    const {user: user02, sessionAgent: user02SessionAgent} =
-      await generateUserAndAddToWorkspace(rawWorkspace.resourceId);
-    const [folder01] = await generateAndInsertTestFolders(1, {
-      workspaceId: rawWorkspace.resourceId,
-      parentId: null,
+    const {rawWorkspace, agentToken: createdBy} =
+      await generateWorkspaceAndSessionAgent();
+    const {sessionAgent: user02SessionAgent, rawToken: agent02} =
+      await generateAgentTokenAndSessionAgent({
+        workspaceId: rawWorkspace.resourceId,
+        createdBy,
+      });
+
+    const [space01] = await generateAndInsertSpaceListForTest({
+      count: 1,
+      seed: {workspaceId: rawWorkspace.resourceId},
     });
     const [[file01, file02]] = await Promise.all([
-      generateAndInsertTestFiles(2, {
+      generateAndInsertAgentTokenListForTest(2, {
         workspaceId: rawWorkspace.resourceId,
-        parentId: folder01.resourceId,
+        spaceId: space01.resourceId,
       }),
     ]);
     await Promise.all([
       addPermissions(
         rawWorkspace.resourceId,
-        user02.resourceId,
-        kFimidaraPermissionActions.readFile,
-        {targetId: file01.resourceId, containerId: folder01.resourceId}
+        agent02.resourceId,
+        kFimidaraPermissionActions.readAgentToken,
+        {targetId: file01.resourceId}
       ),
       addPermissions(
         rawWorkspace.resourceId,
-        user02.resourceId,
-        kFimidaraPermissionActions.readFile,
+        agent02.resourceId,
+        kFimidaraPermissionActions.readAgentToken,
         {
           targetId: file02.resourceId,
           access: false,
-          containerId: folder01.resourceId,
         }
       ),
     ]);
 
-    const resolveResult = await resolveTargetChildrenAccessCheckWithAgent({
+    const resolveResult = await checkAuthorizationWithAgent({
       agent: user02SessionAgent,
       target: {
-        action: kFimidaraPermissionActions.readFile,
-        targetId: getFilePermissionContainers(
-          rawWorkspace.resourceId,
-          folder01,
-          true
-        ),
+        action: kFimidaraPermissionActions.readAgentToken,
+        targetId: space01.resourceId,
       },
       workspaceId: rawWorkspace.resourceId,
-      workspace: rawWorkspace,
+      spaceId: rawWorkspace.spaceId,
     });
 
     assert(resolveResult.access === kResolvedAuthCheckAccess.partial);
     expect(resolveResult.item).toBeFalsy();
-    expect(resolveResult.partialAllowIds?.length).toBe(1);
-    expect(resolveResult.partialAllowItems?.length).toBe(1);
-    expect(resolveResult.partialAllowIds).toContain(file01.resourceId);
+    expect(resolveResult.allowItems.length).toBe(1);
+    expect(resolveResult.denyItems.length).toBe(1);
+    expect(resolveResult.allowItems).toContain(file01);
+    expect(resolveResult.denyItems).toContain(file02);
   });
 
   test('resolve target children partial access with parent deny and some children access', async () => {
-    const {rawWorkspace} = await generateWorkspaceAndSessionAgent();
-    const {user: user02, sessionAgent: user02SessionAgent} =
-      await generateUserAndAddToWorkspace(rawWorkspace.resourceId);
-    const [folder01] = await generateAndInsertTestFolders(1, {
-      workspaceId: rawWorkspace.resourceId,
-      parentId: null,
+    const {rawWorkspace, agentToken: createdBy} =
+      await generateWorkspaceAndSessionAgent();
+    const {sessionAgent: user02SessionAgent, rawToken: agent02} =
+      await generateAgentTokenAndSessionAgent({
+        workspaceId: rawWorkspace.resourceId,
+        createdBy,
+      });
+
+    const [space01] = await generateAndInsertSpaceListForTest({
+      count: 1,
+      seed: {workspaceId: rawWorkspace.resourceId},
     });
     const [[file01]] = await Promise.all([
-      generateAndInsertTestFiles(2, {
+      generateAndInsertAgentTokenListForTest(2, {
         workspaceId: rawWorkspace.resourceId,
-        parentId: folder01.resourceId,
+        spaceId: space01.resourceId,
       }),
     ]);
     await Promise.all([
       addPermissions(
         rawWorkspace.resourceId,
-        user02.resourceId,
-        kFimidaraPermissionActions.readFile,
-        {targetId: file01.resourceId, containerId: folder01.resourceId}
+        agent02.resourceId,
+        kFimidaraPermissionActions.readAgentToken,
+        {targetId: file01.resourceId}
       ),
       addPermissions(
         rawWorkspace.resourceId,
-        user02.resourceId,
-        kFimidaraPermissionActions.readFile,
-        {targetId: folder01.resourceId, access: false}
+        agent02.resourceId,
+        kFimidaraPermissionActions.readAgentToken,
+        {targetId: space01.resourceId, access: false}
       ),
     ]);
 
-    const resolveResult = await resolveTargetChildrenAccessCheckWithAgent({
+    const resolveResult = await checkAuthorizationWithAgent({
       agent: user02SessionAgent,
       target: {
-        action: kFimidaraPermissionActions.readFile,
-        targetId: getFilePermissionContainers(
-          rawWorkspace.resourceId,
-          folder01,
-          true
-        ),
+        action: kFimidaraPermissionActions.readAgentToken,
+        targetId: space01.resourceId,
       },
       workspaceId: rawWorkspace.resourceId,
-      workspace: rawWorkspace,
+      spaceId: rawWorkspace.spaceId,
     });
 
     expect(resolveResult.access).toBe(kResolvedAuthCheckAccess.partial);
     assert(resolveResult.access === kResolvedAuthCheckAccess.partial);
     expect(resolveResult.item).toBeFalsy();
-    expect(resolveResult.partialAllowIds?.length).toBe(1);
-    expect(resolveResult.partialAllowItems?.length).toBe(1);
-    expect(resolveResult.partialAllowIds).toContain(file01.resourceId);
+    expect(resolveResult.allowItems.length).toBe(1);
+    expect(resolveResult.denyItems.length).toBe(1);
+    expect(resolveResult.allowItems).toContain(file01);
   });
 
   test('resolve target children partial access with parent allow and some children deny', async () => {
-    const {rawWorkspace} = await generateWorkspaceAndSessionAgent();
-    const {user: user02, sessionAgent: user02SessionAgent} =
-      await generateUserAndAddToWorkspace(rawWorkspace.resourceId);
-    const [folder01] = await generateAndInsertTestFolders(1, {
-      workspaceId: rawWorkspace.resourceId,
-      parentId: null,
+    const {rawWorkspace, agentToken: createdBy} =
+      await generateWorkspaceAndSessionAgent();
+    const {sessionAgent: user02SessionAgent, rawToken: agent02} =
+      await generateAgentTokenAndSessionAgent({
+        workspaceId: rawWorkspace.resourceId,
+        createdBy,
+      });
+    const [folder01] = await generateAndInsertSpaceListForTest({
+      count: 1,
+      seed: {workspaceId: rawWorkspace.resourceId},
     });
     const [[file01]] = await Promise.all([
-      generateAndInsertTestFiles(2, {
+      generateAndInsertAgentTokenListForTest(2, {
         workspaceId: rawWorkspace.resourceId,
-        parentId: folder01.resourceId,
+        spaceId: folder01.resourceId,
       }),
     ]);
     await Promise.all([
       addPermissions(
         rawWorkspace.resourceId,
-        user02.resourceId,
-        kFimidaraPermissionActions.readFile,
+        agent02.resourceId,
+        kFimidaraPermissionActions.readAgentToken,
         {
           targetId: file01.resourceId,
           access: false,
-          containerId: folder01.resourceId,
+          containerId: [folder01.resourceId],
         }
       ),
       addPermissions(
         rawWorkspace.resourceId,
-        user02.resourceId,
-        kFimidaraPermissionActions.readFile,
+        agent02.resourceId,
+        kFimidaraPermissionActions.readAgentToken,
         {targetId: folder01.resourceId}
       ),
     ]);
 
-    const resolveResult = await resolveTargetChildrenAccessCheckWithAgent({
+    const resolveResult = await checkAuthorizationWithAgent({
       agent: user02SessionAgent,
       target: {
-        action: kFimidaraPermissionActions.readFile,
-        targetId: getFilePermissionContainers(
-          rawWorkspace.resourceId,
-          folder01,
-          true
-        ),
+        action: kFimidaraPermissionActions.readAgentToken,
+        targetId: folder01.resourceId,
       },
       workspaceId: rawWorkspace.resourceId,
-      workspace: rawWorkspace,
+      spaceId: rawWorkspace.spaceId,
     });
 
-    assert(resolveResult.access === kResolvedAuthCheckAccess.full);
+    assert(resolveResult.access === kResolvedAuthCheckAccess.partial);
     expect(resolveResult.item).toBeTruthy();
-    expect(resolveResult.partialDenyIds?.length).toBe(1);
-    expect(resolveResult.partialDenyItems?.length).toBe(1);
-    expect(resolveResult.partialDenyIds).toContain(file01.resourceId);
+    expect(resolveResult.denyItems.length).toBe(1);
+    expect(resolveResult.denyItems).toContain(file01);
+    expect(resolveResult.allowItems.length).toBe(1);
+    expect(resolveResult.allowItems).toContain(file01);
   });
 
   test('returns correct access permission', async () => {
@@ -931,7 +903,7 @@ describe('checkAuthorization', () => {
       {targetId: space01.resourceId}
     );
 
-    const [checkResult] = await checkAuthorizationWithAgent({
+    const checkResult = await checkAuthorizationWithAgent({
       agent: user02SessionAgent,
       target: {
         action: kFimidaraPermissionActions.readSpace,
@@ -939,10 +911,9 @@ describe('checkAuthorization', () => {
       },
       workspaceId: rawWorkspace.resourceId,
       spaceId: rawWorkspace.spaceId,
-      workspace: rawWorkspace,
     });
 
-    expect(checkResult.hasAccess).toBeTruthy();
+    expect(checkResult.access).toBe(kResolvedAuthCheckAccess.full);
     expect(checkResult.item?.resourceId).toBe(pItem01.resourceId);
   });
 });
@@ -968,38 +939,4 @@ async function addPermissions(
     .withTxn(opts => kSemanticModels.permissionItem().insertItem(items, opts));
 
   return items;
-}
-
-async function generateWorkspaceAndSessionAgent() {
-  const workspaceResult = await insertWorkspaceForTest();
-  const sessionAgent = await kUtilsInjectables
-    .session()
-    .getAgentFromReq(
-      RequestData.fromExpressRequest(
-        mockExpressRequestWithAgentToken(workspaceResult.agentToken)
-      ),
-      kSessionUtils.permittedAgentTypes.api,
-      kSessionUtils.accessScopes.api
-    );
-
-  return {...workspaceResult, sessionAgent};
-}
-
-async function generateAgentTokenAndSessionAgent(params: {
-  workspaceId: string;
-  createdBy: AgentToken;
-}) {
-  const {workspaceId, createdBy} = params;
-  const tokenResult = await insertAgentTokenForTest(createdBy, workspaceId);
-  const sessionAgent = await kUtilsInjectables
-    .session()
-    .getAgentFromReq(
-      RequestData.fromExpressRequest(
-        mockExpressRequestWithAgentToken(tokenResult.rawToken)
-      ),
-      kSessionUtils.permittedAgentTypes.api,
-      kSessionUtils.accessScopes.api
-    );
-
-  return {...tokenResult, sessionAgent};
 }

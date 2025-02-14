@@ -7,10 +7,9 @@ import {
 } from '../../resources/config.js';
 import {
   renderCollaborationRequestMedia,
+  renderCollaborationRequestMedia,
   renderCollaborationRequestResponseMedia,
   renderCollaborationRequestRevokedMedia,
-  renderConfirmEmailAddressMedia,
-  renderForgotPasswordMedia,
   renderNewSignupsOnWaitlistMedia,
   renderUpgradedFromWaitlistMedia,
 } from './renderToFile.js';
@@ -25,8 +24,6 @@ async function main() {
   kUtilsInjectables.logger().log('Writing templates');
 
   await Promise.all([
-    renderConfirmEmailAddressMedia(),
-    renderForgotPasswordMedia(),
     renderCollaborationRequestMedia(),
     renderCollaborationRequestRevokedMedia(),
     renderCollaborationRequestResponseMedia(),

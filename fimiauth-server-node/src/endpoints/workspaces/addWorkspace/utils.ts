@@ -16,9 +16,9 @@ import {
   newWorkspaceResource,
 } from '../../../utils/resource.js';
 
-export const DEFAULT_ADMIN_PERMISSION_GROUP_NAME = 'Admin';
-export const DEFAULT_PUBLIC_PERMISSION_GROUP_NAME = 'Public';
-export const DEFAULT_COLLABORATOR_PERMISSION_GROUP_NAME = 'Collaborator';
+export const kDefaultAdminPermissionGroupName = 'Admin';
+export const kDefaultPublicPermissionGroupName = 'Public';
+export const kDefaultCollaboratorPermissionGroupName = 'Collaborator';
 
 function generateAdminPermissions(
   agent: Agent,
@@ -28,20 +28,22 @@ function generateAdminPermissions(
   const permissionItems: PermissionItem[] = Object.values(
     kFimidaraPermissionActions
   ).map(action => {
-    const item: PermissionItem = newWorkspaceResource(
+    const item: PermissionItem = newWorkspaceResource({
       agent,
-      kFimidaraResourceType.PermissionItem,
-      workspace.resourceId,
-      {
+      type: kFimidaraResourceType.PermissionItem,
+      workspaceId: workspace.resourceId,
+      spaceId: workspace.spaceId,
+      seed: {
         action,
         entityId: adminPermissionGroup.resourceId,
         entityType: kFimidaraResourceType.PermissionGroup,
-        targetParentId: workspace.resourceId,
         targetId: workspace.resourceId,
         targetType: kFimidaraResourceType.All,
         access: true,
-      }
-    );
+        containerId: [workspace.resourceId],
+      },
+    });
+
     return item;
   });
 
@@ -59,26 +61,29 @@ function generateCollaboratorPermissions(
     targetId: string
   ) {
     return actions.map(action => {
-      const item: PermissionItem = newWorkspaceResource(
+      const item: PermissionItem = newWorkspaceResource({
         agent,
-        kFimidaraResourceType.PermissionItem,
-        workspace.resourceId,
-        {
+        type: kFimidaraResourceType.PermissionItem,
+        workspaceId: workspace.resourceId,
+        spaceId: workspace.spaceId,
+        seed: {
           action,
           targetId,
-          targetParentId: workspace.resourceId,
           targetType: targetType,
           entityId: permissiongroup.resourceId,
           entityType: kFimidaraResourceType.PermissionGroup,
           access: true,
-        }
-      );
+          containerId: [workspace.resourceId],
+        },
+      });
+
       return item;
     });
   }
 
   const actions: FimidaraPermissionAction[] = [
-    kFimidaraPermissionActions.wildcardRead,
+    kFimidaraPermissionActions.readWorkspace,
+    kFimidaraPermissionActions.readCollaborator,
   ];
 
   const permissionItems: PermissionItem[] = makePermission(
@@ -102,10 +107,11 @@ export function generateDefaultWorkspacePermissionGroups(
     resourceId: getNewIdForResource(kFimidaraResourceType.PermissionGroup),
     workspaceId: workspace.resourceId,
     createdBy: agent,
-    name: DEFAULT_ADMIN_PERMISSION_GROUP_NAME,
+    name: kDefaultAdminPermissionGroupName,
     description:
       'Auto-generated permission group with access to every resource in this workspace',
     isDeleted: false,
+    spaceId: workspace.spaceId,
   };
   const publicPermissionGroup: PermissionGroup = {
     createdAt,
@@ -114,11 +120,12 @@ export function generateDefaultWorkspacePermissionGroups(
     resourceId: getNewIdForResource(kFimidaraResourceType.PermissionGroup),
     workspaceId: workspace.resourceId,
     createdBy: agent,
-    name: DEFAULT_PUBLIC_PERMISSION_GROUP_NAME,
+    name: kDefaultPublicPermissionGroupName,
     description:
       'Auto-generated permission group for public/anonymous users. ' +
       'Assign permissions to this group for resource/actions you want to be publicly accessible',
     isDeleted: false,
+    spaceId: workspace.spaceId,
   };
   const collaboratorPermissionGroup: PermissionGroup = {
     createdAt,
@@ -127,10 +134,11 @@ export function generateDefaultWorkspacePermissionGroups(
     resourceId: getNewIdForResource(kFimidaraResourceType.PermissionGroup),
     workspaceId: workspace.resourceId,
     createdBy: agent,
-    name: DEFAULT_COLLABORATOR_PERMISSION_GROUP_NAME,
+    name: kDefaultCollaboratorPermissionGroupName,
     description:
       'Auto-generated permission group for collaborators. Open permission group to see permissions',
     isDeleted: false,
+    spaceId: workspace.spaceId,
   };
   const permissionItems = generateAdminPermissions(
     agent,

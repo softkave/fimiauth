@@ -3,10 +3,9 @@ import RequestData from '../../RequestData.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertAgentTokenForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import getAgentToken from './handler.js';
@@ -27,15 +26,14 @@ afterAll(async () => {
 
 describe('getAgentToken', () => {
   test('referenced agent token returned', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const {token: token01} = await insertAgentTokenForTest(
-      userToken,
+      agentToken,
       workspace.resourceId
     );
 
     const reqData = RequestData.fromExpressRequest<GetAgentTokenEndpointParams>(
-      mockExpressRequestWithAgentToken(userToken),
+      mockExpressRequestWithAgentToken(agentToken),
       {tokenId: token01.resourceId, workspaceId: workspace.resourceId}
     );
     const result = await getAgentToken(reqData);

@@ -6,15 +6,14 @@ import RequestData from '../../RequestData.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
+  generateWorkspaceAndSessionAgent,
   initTests,
   insertAgentTokenForTest,
-  insertUserForTest,
-  insertWorkspaceForTest,
   mockExpressRequestWithAgentRefreshToken,
 } from '../../testUtils/testUtils.js';
-import {PermissionDeniedError} from '../../users/errors.js';
 import refreshAgentToken from './handler.js';
 import {RefreshAgentTokenEndpointParams} from './types.js';
+import {PermissionDeniedError} from '../../errors.js';
 
 beforeAll(async () => {
   await initTests();
@@ -26,10 +25,9 @@ afterAll(async () => {
 
 describe('refreshAgentToken', () => {
   test('token refreshed', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const {token: token01} = await insertAgentTokenForTest(
-      userToken,
+      agentToken,
       workspace.resourceId,
       /** tokenInput */ {
         shouldRefresh: true,
@@ -52,10 +50,9 @@ describe('refreshAgentToken', () => {
   });
 
   test('invalid refresh token', async () => {
-    const {userToken} = await insertUserForTest();
-    const {workspace} = await insertWorkspaceForTest(userToken);
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const {token: token01} = await insertAgentTokenForTest(
-      userToken,
+      agentToken,
       workspace.resourceId,
       /** tokenInput */ {
         shouldRefresh: true,
