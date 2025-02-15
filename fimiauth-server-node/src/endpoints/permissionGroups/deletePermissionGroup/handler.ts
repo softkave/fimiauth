@@ -34,6 +34,7 @@ const deletePermissionGroup: DeletePermissionGroupEndpoint = async reqData => {
   const [job] = await beginDeletePermissionGroup({
     agent,
     workspaceId: workspace.resourceId,
+    spaceId: workspace.resourceId,
     resources: [permissionGroup],
   });
 

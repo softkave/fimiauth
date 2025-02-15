@@ -35,7 +35,10 @@ test('permissionGroup permission group deleted', async () => {
   );
   const reqData = RequestData.fromExpressRequest<PermissionGroupMatcher>(
     mockExpressRequestWithAgentToken(agentToken),
-    {permissionGroupId: permissionGroup.resourceId}
+    {
+      permissionGroupId: permissionGroup.resourceId,
+      spaceId: workspace.resourceId,
+    }
   );
   const result = await deletePermissionGroup(reqData);
   assertEndpointResultOk(result);

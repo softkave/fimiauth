@@ -1,15 +1,15 @@
 import {afterAll, beforeAll, expect, test} from 'vitest';
-import {PermissionGroupMatcher} from '../../../definitions/permissionGroups.js';
 import RequestData from '../../RequestData.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
   generateWorkspaceAndSessionAgent,
   initTests,
-  insertPermissionGroupForTest,
+  insertSpaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
-import getPermissionGroup from './handler.js';
+import getSpace from './handler.js';
+import {GetSpaceEndpointParams} from './types.js';
 
 beforeAll(async () => {
   await initTests();
@@ -19,18 +19,18 @@ afterAll(async () => {
   await completeTests();
 });
 
-test('referenced permissionGroup returned', async () => {
+test('referenced space returned', async () => {
   const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
-  const {permissionGroup: permissionGroup} = await insertPermissionGroupForTest(
+  const {space} = await insertSpaceForTest({
     agentToken,
-    workspace.resourceId
-  );
+    workspaceId: workspace.resourceId,
+  });
 
-  const reqData = RequestData.fromExpressRequest<PermissionGroupMatcher>(
+  const reqData = RequestData.fromExpressRequest<GetSpaceEndpointParams>(
     mockExpressRequestWithAgentToken(agentToken),
-    {permissionGroupId: permissionGroup.resourceId}
+    {spaceId: space.resourceId}
   );
-  const result = await getPermissionGroup(reqData);
+  const result = await getSpace(reqData);
   assertEndpointResultOk(result);
-  expect(result.permissionGroup).toMatchObject(permissionGroup);
+  expect(result.space).toMatchObject(space);
 });

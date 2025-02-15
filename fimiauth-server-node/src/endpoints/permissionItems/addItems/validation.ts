@@ -10,9 +10,7 @@ const itemInput = Joi.object<PermissionItemInput>().keys({
   action: kValidationSchemas.crudActionOrList.required(),
   access: Joi.boolean().required(),
   entityId: kPermissionItemValidationSchemas.entityParts.entityId.required(),
-  entityType: kPermissionItemValidationSchemas.entityParts.entityType,
   containerId: kPermissionItemValidationSchemas.containerId,
-  targetType: kPermissionItemValidationSchemas.targetParts.targetType,
 });
 
 const itemInputList = Joi.array()

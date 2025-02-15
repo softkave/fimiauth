@@ -16,12 +16,12 @@ import {getUserWorkspacesJoiSchema} from './validation.js';
 
 const getUserWorkspaces: GetUserWorkspacesEndpoint = async reqData => {
   const data = validate(reqData.data, getUserWorkspacesJoiSchema);
-  const systemAgent = await kUtilsInjectables.session().getSystemAgent(reqData);
+  await kUtilsInjectables.session().getSystemAgent(reqData);
 
   applyDefaultEndpointPaginationOptions(data);
   const agentTokens = await kSemanticModels
     .agentToken()
-    .getManyByUserId(systemAgent.agentId, data.userId);
+    .getManyByUserId(data.userId);
   const agentTokensByWorkspaceId = agentTokens.reduce(
     (acc, token) => {
       appAssert(token.workspaceId);

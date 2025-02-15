@@ -29,6 +29,7 @@ export function generateAgentTokenForTest(
     forEntityId: null,
     scope:
       seed.workspaceId && !seed.forEntityId ? [kTokenAccessScope.access] : [],
+    spaceId: seed.workspaceId ?? null,
     ...seed,
   });
   return token;

@@ -27,17 +27,14 @@ afterAll(async () => {
 
 describe('assignPermissionGroups', () => {
   test('assign permission groups to users', async () => {
-    const {workspace, agentToken, sessionAgent} =
-      await generateWorkspaceAndSessionAgent();
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const [pgList01, collaboratorList] = await Promise.all([
       generateAndInsertPermissionGroupListForTest(2, {
         workspaceId: workspace.resourceId,
       }),
-      generateAndInsertCollaboratorListForTest(
-        sessionAgent,
-        workspace.resourceId,
-        2
-      ),
+      generateAndInsertCollaboratorListForTest(2, () => ({
+        workspaceId: workspace.resourceId,
+      })),
     ]);
     const pgList01Input = toAssignedPgListInput(pgList01);
 
@@ -55,7 +52,11 @@ describe('assignPermissionGroups', () => {
 
     const permissionGroupsResult = await Promise.all(
       collaboratorList.map(collaborator =>
-        fetchEntityAssignedPermissionGroupList(collaborator.resourceId, false)
+        fetchEntityAssignedPermissionGroupList({
+          entityId: collaborator.resourceId,
+          spaceId: workspace.resourceId,
+          includeInheritedPermissionGroups: false,
+        })
       )
     );
     permissionGroupsResult.forEach(next => {
@@ -68,17 +69,14 @@ describe('assignPermissionGroups', () => {
   });
 
   test('assign permission groups to single user', async () => {
-    const {workspace, agentToken, sessionAgent} =
-      await generateWorkspaceAndSessionAgent();
+    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const [pgList01, collaboratorList] = await Promise.all([
       generateAndInsertPermissionGroupListForTest(2, {
         workspaceId: workspace.resourceId,
       }),
-      generateAndInsertCollaboratorListForTest(
-        sessionAgent,
-        workspace.resourceId,
-        1
-      ),
+      generateAndInsertCollaboratorListForTest(1, () => ({
+        workspaceId: workspace.resourceId,
+      })),
     ]);
     const pgList01Input = toAssignedPgListInput(pgList01);
     const collaborator = first(collaboratorList);
@@ -97,8 +95,11 @@ describe('assignPermissionGroups', () => {
     assertEndpointResultOk(result01);
 
     const permissionGroupsResult = await fetchEntityAssignedPermissionGroupList(
-      collaborator.resourceId,
-      false
+      {
+        entityId: collaborator.resourceId,
+        spaceId: workspace.resourceId,
+        includeInheritedPermissionGroups: false,
+      }
     );
     expect(
       sortStringListLexicographically(

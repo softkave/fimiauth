@@ -2,7 +2,6 @@ import {calculatePageSize} from 'softkave-js-utils';
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
 import {findItemWithField} from '../../../utils/fns.js';
-import {GetWorkspacePermissionGroupsEndpointParams} from '../../permissionGroups/getWorkspacePermissionGroups/types.js';
 import RequestData from '../../RequestData.js';
 import {generateAndInsertPermissionGroupListForTest} from '../../testUtils/generate/permissionGroup.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
@@ -13,7 +12,8 @@ import {
   insertPermissionGroupForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
-import getWorkspacePermissionGroups from './handler.js';
+import getWorkspaceSpaces from './handler.js';
+import {GetWorkspaceSpacesEndpointParams} from './types.js';
 
 beforeAll(async () => {
   await initTests();
@@ -23,8 +23,8 @@ afterAll(async () => {
   await completeTests();
 });
 
-describe('getWorkspacePermissionGroups', () => {
-  test("workspace's permissionGroups returned", async () => {
+describe('getWorkspaceSpaces', () => {
+  test("workspace's spaces returned", async () => {
     const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const {permissionGroup: permissionGroup01} =
       await insertPermissionGroupForTest(agentToken, workspace.resourceId);
@@ -32,20 +32,20 @@ describe('getWorkspacePermissionGroups', () => {
       await insertPermissionGroupForTest(agentToken, workspace.resourceId);
 
     const reqData =
-      RequestData.fromExpressRequest<GetWorkspacePermissionGroupsEndpointParams>(
+      RequestData.fromExpressRequest<GetWorkspaceSpacesEndpointParams>(
         mockExpressRequestWithAgentToken(agentToken),
         {workspaceId: workspace.resourceId}
       );
-    const result = await getWorkspacePermissionGroups(reqData);
+    const result = await getWorkspaceSpaces(reqData);
     assertEndpointResultOk(result);
     const resultPermissionGroup01 = findItemWithField(
-      result.permissionGroups,
+      result.spaces,
       permissionGroup01.resourceId,
       'resourceId'
     );
 
     const resultPermissionGroup02 = findItemWithField(
-      result.permissionGroups,
+      result.spaces,
       permissionGroup02.resourceId,
       'resourceId'
     );
@@ -64,27 +64,26 @@ describe('getWorkspacePermissionGroups', () => {
     const pageSize = 10;
     let page = 0;
     let reqData =
-      RequestData.fromExpressRequest<GetWorkspacePermissionGroupsEndpointParams>(
+      RequestData.fromExpressRequest<GetWorkspaceSpacesEndpointParams>(
         mockExpressRequestWithAgentToken(agentToken),
         {page, pageSize, workspaceId: workspace.resourceId}
       );
-    let result = await getWorkspacePermissionGroups(reqData);
+    let result = await getWorkspaceSpaces(reqData);
     assertEndpointResultOk(result);
     expect(result.page).toBe(page);
-    expect(result.permissionGroups).toHaveLength(
+    expect(result.spaces).toHaveLength(
       calculatePageSize(count, pageSize, page)
     );
 
     page = 1;
-    reqData =
-      RequestData.fromExpressRequest<GetWorkspacePermissionGroupsEndpointParams>(
-        mockExpressRequestWithAgentToken(agentToken),
-        {page, pageSize, workspaceId: workspace.resourceId}
-      );
-    result = await getWorkspacePermissionGroups(reqData);
+    reqData = RequestData.fromExpressRequest<GetWorkspaceSpacesEndpointParams>(
+      mockExpressRequestWithAgentToken(agentToken),
+      {page, pageSize, workspaceId: workspace.resourceId}
+    );
+    result = await getWorkspaceSpaces(reqData);
     assertEndpointResultOk(result);
     expect(result.page).toBe(page);
-    expect(result.permissionGroups).toHaveLength(
+    expect(result.spaces).toHaveLength(
       calculatePageSize(count, pageSize, page)
     );
   });

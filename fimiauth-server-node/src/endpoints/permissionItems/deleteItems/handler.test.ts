@@ -40,13 +40,13 @@ test('permission items deleted', async () => {
       entityId: pg01.resourceId,
       targetId: workspace.resourceId,
       access: true,
-      action: kFimidaraPermissionActions.addTag,
+      action: kFimidaraPermissionActions.addSpace,
     }),
     insertPermissionItemsForTest(agentToken, workspace.resourceId, {
       entityId: pg02.resourceId,
       targetId: workspace.resourceId,
       access: true,
-      action: kFimidaraPermissionActions.addTag,
+      action: kFimidaraPermissionActions.addSpace,
     }),
   ]);
 
@@ -54,7 +54,7 @@ test('permission items deleted', async () => {
     workspaceId: workspace.resourceId,
     items: [
       {
-        action: kFimidaraPermissionActions.addTag,
+        action: kFimidaraPermissionActions.addSpace,
         targetId: workspace.resourceId,
         entityId: pg01.resourceId,
       },
@@ -63,7 +63,7 @@ test('permission items deleted', async () => {
   };
   const reqData =
     RequestData.fromExpressRequest<DeletePermissionItemsEndpointParams>(
-      mockExpressRequestWithAgentToken(userToken),
+      mockExpressRequestWithAgentToken(agentToken),
       params
     );
   const result = await deletePermissionItems(reqData);
@@ -75,9 +75,9 @@ test('permission items deleted', async () => {
     workspaceId: workspace.resourceId,
     createdBy: {
       $objMatch: {
-        agentId: userToken.forEntityId,
-        agentType: kFimidaraResourceType.User,
-        agentTokenId: userToken.resourceId,
+        agentId: agentToken.forEntityId,
+        agentType: kFimidaraResourceType.AgentToken,
+        agentTokenId: agentToken.resourceId,
       },
     },
   })) as Job<DeletePermissionItemInput>[];

@@ -19,7 +19,6 @@ import {
 import {SemanticProviderMutationParams} from '../../../contexts/semantic/types.js';
 import {IServerRequest} from '../../../contexts/types.js';
 import RequestData from '../../RequestData.js';
-import {initFimidara} from '../../runtime/initFimidara.js';
 import {
   Endpoint,
   InferEndpointParams,
@@ -54,7 +53,6 @@ export function startTesting() {
         useHandlePrepareFileQueue: true,
       }
     );
-    await initFimidara();
   });
 
   afterAll(async () => {

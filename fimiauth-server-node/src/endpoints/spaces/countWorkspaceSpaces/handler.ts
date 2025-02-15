@@ -21,7 +21,7 @@ const countWorkspaceSpaces: CountWorkspaceSpacesEndpoint = async reqData => {
 
   const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
   const q = await getWorkspaceSpacesQuery(agent, workspace);
-  const count = await kSemanticModels.space().countManyByWorkspaceAndIdList(q);
+  const count = await kSemanticModels.space().countManyBySpaceAndIdList(q);
 
   return {count};
 };

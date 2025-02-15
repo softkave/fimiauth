@@ -20,6 +20,7 @@ const spaceFields = getFields<PublicSpace>({
   ...workspaceResourceFields,
   name: true,
   description: true,
+  publicPermissionGroupId: true,
 });
 
 export const spaceExtractor = makeExtract(spaceFields);
@@ -34,10 +35,10 @@ export async function checkSpaceAuthorization(
   const workspace = await checkWorkspaceExists(space.workspaceId);
   await checkAuthorizationWithAgent({
     agent,
-    workspace,
     opts,
     workspaceId: workspace.resourceId,
     target: {action, targetId: space.resourceId},
+    spaceId: space.resourceId,
   });
   return {agent, space, workspace};
 }
@@ -72,7 +73,10 @@ export async function checkSpacesExist(
   // TODO: use exists with $or or implement bulk ops
   const spaces = await kSemanticModels
     .space()
-    .getManyByWorkspaceAndIdList({workspaceId, resourceIdList: idList}, opts);
+    .getManyBySpaceAndIdList(
+      {spaceId: workspaceId, resourceIdList: idList},
+      opts
+    );
 
   if (idList.length !== spaces.length) {
     const map = indexArray(spaces, {indexer: getResourceId});

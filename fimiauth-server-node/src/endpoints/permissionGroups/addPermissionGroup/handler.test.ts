@@ -1,8 +1,5 @@
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
-import {
-  kSemanticModels,
-  kSemanticModels,
-} from '../../../contexts/injection/injectables.js';
+import {kSemanticModels} from '../../../contexts/injection/injectables.js';
 import EndpointReusableQueries from '../../queries.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {

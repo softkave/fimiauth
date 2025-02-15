@@ -27,20 +27,19 @@ export async function assignPgListToIdList(
   entityIdList: string[],
   pgInputList: string[]
 ) {
-  await kSemanticModels
-    .utils()
-    .withTxn(async opts =>
-      addAssignedPermissionGroupList(
-        agent,
-        workspaceId,
-        pgInputList,
-        entityIdList,
-        /** delete existing */ false,
-        /** skip permission groups check */ true,
-        /** skip auth check */ true,
-        opts
-      )
-    );
+  await kSemanticModels.utils().withTxn(async opts =>
+    addAssignedPermissionGroupList({
+      agent,
+      workspaceId,
+      spaceId: workspaceId,
+      permissionGroupsInput: pgInputList,
+      assigneeId: entityIdList,
+      deleteExisting: false,
+      skipPermissionGroupsExistCheck: true,
+      skipAuthCheck: true,
+      opts,
+    })
+  );
 }
 
 export async function grantPermission(

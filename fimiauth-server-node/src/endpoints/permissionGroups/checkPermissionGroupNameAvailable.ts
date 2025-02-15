@@ -10,7 +10,7 @@ export async function checkPermissionGroupNameAvailable(params: {
   const {spaceId, name, opts} = params;
   const itemExists = await kSemanticModels
     .permissionGroup()
-    .existsByName({spaceId, name, opts});
+    .existsByName({spaceId, name}, opts);
 
   if (itemExists) {
     throw new ResourceExistsError('Permission group exists');

@@ -2,6 +2,7 @@ import {first, forEach, isString} from 'lodash-es';
 import {
   checkAuthorizationWithAgent,
   getAuthorizationAccessChecker,
+  kResolvedAuthCheckAccess,
 } from '../../../contexts/authorizationChecks/checkAuthorizaton.js';
 import {SemanticProviderOpParams} from '../../../contexts/semantic/types.js';
 import {
@@ -157,7 +158,6 @@ export const INTERNAL_resolveEntityPermissions = async (
   const checkers = await Promise.all(
     itemsToResolve.map(nextItem =>
       getAuthorizationAccessChecker({
-        workspace,
         workspaceId: workspace.resourceId,
         spaceId: data.spaceId ?? workspace.resourceId,
         target: {
@@ -172,20 +172,20 @@ export const INTERNAL_resolveEntityPermissions = async (
   const result: ResolvedEntityPermissionItem[] = itemsToResolve.map(
     (nextItem, index): ResolvedEntityPermissionItem => {
       const checker = checkers[index];
-      const {hasAccess, item} = checker.checkForTargetId(
-        nextItem.entity.resourceId,
-        nextItem.target.resourceId,
-        nextItem.action,
-        /** nothrow */ true
-      );
+      const checkResult = checker.checkForTargetId({
+        entityId: nextItem.entity.resourceId,
+        targetId: nextItem.target.resourceId,
+        action: nextItem.action,
+        nothrow: true,
+      });
 
       return {
-        access: hasAccess,
+        access: checkResult.access === kResolvedAuthCheckAccess.full,
         action: nextItem.action,
         entityId: nextItem.entity.resourceId,
         target: nextItem.resolvedTarget,
-        permittingEntityId: item?.entityId,
-        permittingTargetId: item?.targetId,
+        permittingEntityId: nextItem.entity.resourceId,
+        permittingTargetId: nextItem.target.resourceId,
       };
     }
   );
@@ -206,7 +206,6 @@ export async function checkResolveEntityPermissionsAuth(
   if (!isResolvingOwnPermissions) {
     await checkAuthorizationWithAgent({
       agent,
-      workspace,
       opts,
       workspaceId: workspace.resourceId,
       spaceId: data.spaceId ?? workspace.resourceId,

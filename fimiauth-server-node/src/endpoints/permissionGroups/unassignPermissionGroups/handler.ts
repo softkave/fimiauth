@@ -27,7 +27,6 @@ const unassignPermissionGroups: UnassignPermissionGroupsEndpoint =
     const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
     await checkAuthorizationWithAgent({
       agent,
-      workspace,
       workspaceId: workspace.resourceId,
       spaceId: data.spaceId ?? workspace.resourceId,
       target: {

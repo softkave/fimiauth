@@ -28,7 +28,10 @@ test('referenced permissionGroup returned', async () => {
 
   const reqData = RequestData.fromExpressRequest<PermissionGroupMatcher>(
     mockExpressRequestWithAgentToken(agentToken),
-    {permissionGroupId: permissionGroup.resourceId}
+    {
+      permissionGroupId: permissionGroup.resourceId,
+      spaceId: workspace.resourceId,
+    }
   );
   const result = await getPermissionGroup(reqData);
   assertEndpointResultOk(result);

@@ -29,7 +29,6 @@ const addPermissionItems: AddPermissionItemsEndpoint = async reqData => {
   const workspace = await checkWorkspaceExists(workspaceId);
   await checkAuthorizationWithAgent({
     agent,
-    workspace,
     workspaceId: workspace.resourceId,
     spaceId: data.spaceId ?? workspace.resourceId,
     target: {

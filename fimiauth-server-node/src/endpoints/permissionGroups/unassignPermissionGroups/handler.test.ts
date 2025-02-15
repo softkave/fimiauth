@@ -30,11 +30,9 @@ describe('unassignPermissionGroups', () => {
       generateAndInsertPermissionGroupListForTest(2, {
         workspaceId: workspace.resourceId,
       }),
-      generateAndInsertCollaboratorListForTest(
-        sessionAgent,
-        workspace.resourceId,
-        2
-      ),
+      generateAndInsertCollaboratorListForTest(2, () => ({
+        workspaceId: workspace.resourceId,
+      })),
     ]);
     const cList01Ids = extractResourceIdList(cList01);
     const pgList01Ids = extractResourceIdList(pgList01);
@@ -59,7 +57,11 @@ describe('unassignPermissionGroups', () => {
 
     const entityPgListResult = await Promise.all(
       cList01.map(collaborator =>
-        fetchEntityAssignedPermissionGroupList(collaborator.resourceId, false)
+        fetchEntityAssignedPermissionGroupList({
+          entityId: collaborator.resourceId,
+          spaceId: workspace.resourceId,
+          includeInheritedPermissionGroups: false,
+        })
       )
     );
     const entityPgListId: string[] = [];

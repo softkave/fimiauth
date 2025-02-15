@@ -5,7 +5,6 @@ import {
   Job,
   kJobType,
 } from '../../../definitions/job.js';
-import {PermissionGroupMatcher} from '../../../definitions/permissionGroups.js';
 import {kFimidaraResourceType} from '../../../definitions/system.js';
 import {appAssert} from '../../../utils/assertion.js';
 import RequestData from '../../RequestData.js';
@@ -14,10 +13,11 @@ import {
   assertEndpointResultOk,
   generateWorkspaceAndSessionAgent,
   initTests,
-  insertPermissionGroupForTest,
+  insertSpaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
-import deletePermissionGroup from './handler.js';
+import deleteSpace from './handler.js';
+import {DeleteSpaceEndpointParams} from './types.js';
 
 beforeAll(async () => {
   await initTests();
@@ -27,17 +27,17 @@ afterAll(async () => {
   await completeTests();
 });
 
-test('permissionGroup permission group deleted', async () => {
+test('space permission group deleted', async () => {
   const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
-  const {permissionGroup} = await insertPermissionGroupForTest(
+  const {space} = await insertSpaceForTest({
     agentToken,
-    workspace.resourceId
-  );
-  const reqData = RequestData.fromExpressRequest<PermissionGroupMatcher>(
+    workspaceId: workspace.resourceId,
+  });
+  const reqData = RequestData.fromExpressRequest<DeleteSpaceEndpointParams>(
     mockExpressRequestWithAgentToken(agentToken),
-    {permissionGroupId: permissionGroup.resourceId}
+    {spaceId: space.resourceId}
   );
-  const result = await deletePermissionGroup(reqData);
+  const result = await deleteSpace(reqData);
   assertEndpointResultOk(result);
 
   appAssert(result.jobId);
@@ -45,17 +45,17 @@ test('permissionGroup permission group deleted', async () => {
     type: kJobType.deleteResource,
     resourceId: result.jobId,
     params: {
-      $objMatch: {type: kFimidaraResourceType.PermissionGroup},
+      $objMatch: {type: kFimidaraResourceType.Space},
     },
   })) as Job<DeleteResourceJobParams>;
   expect(job).toBeTruthy();
   expect(job?.params).toMatchObject({
-    resourceId: permissionGroup.resourceId,
+    resourceId: space.resourceId,
     workspaceId: workspace.resourceId,
   });
 
   const dbItem = await kSemanticModels
-    .permissionGroup()
-    .getOneByQuery({resourceId: permissionGroup.resourceId, isDeleted: true});
+    .space()
+    .getOneByQuery({resourceId: space.resourceId, isDeleted: true});
   expect(dbItem).toBeTruthy();
 });

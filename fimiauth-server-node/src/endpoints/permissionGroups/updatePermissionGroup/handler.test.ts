@@ -2,7 +2,6 @@ import {faker} from '@faker-js/faker';
 import {afterAll, beforeAll, expect, test} from 'vitest';
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
 import RequestData from '../../RequestData.js';
-import {populateAssignedTags} from '../../assignedItems/getAssignedItems.js';
 import EndpointReusableQueries from '../../queries.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
@@ -49,20 +48,18 @@ test('permissionGroup updated', async () => {
       {
         permissionGroupId: permissionGroup00.resourceId,
         data: updatePermissionGroupInput,
+        spaceId: workspace.resourceId,
       }
     );
 
   const result = await updatePermissionGroup(reqData);
   assertEndpointResultOk(result);
 
-  const updatedPermissionGroup = await populateAssignedTags(
-    workspace.resourceId,
-    await kSemanticModels
-      .permissionGroup()
-      .assertGetOneByQuery(
-        EndpointReusableQueries.getByResourceId(permissionGroup00.resourceId)
-      )
-  );
+  const updatedPermissionGroup = await kSemanticModels
+    .permissionGroup()
+    .assertGetOneByQuery(
+      EndpointReusableQueries.getByResourceId(permissionGroup00.resourceId)
+    );
 
   expect(permissionGroupExtractor(updatedPermissionGroup)).toMatchObject(
     result.permissionGroup

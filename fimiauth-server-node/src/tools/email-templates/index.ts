@@ -7,7 +7,6 @@ import {
 } from '../../resources/config.js';
 import {
   renderCollaborationRequestMedia,
-  renderCollaborationRequestMedia,
   renderCollaborationRequestResponseMedia,
   renderCollaborationRequestRevokedMedia,
   renderNewSignupsOnWaitlistMedia,

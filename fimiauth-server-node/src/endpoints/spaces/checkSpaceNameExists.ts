@@ -9,7 +9,7 @@ export async function checkSpaceNameExists(
 ) {
   const itemExists = await kSemanticModels
     .space()
-    .existsByName(workspaceId, name, opts);
+    .existsByName({spaceId: workspaceId, name}, opts);
 
   if (itemExists) {
     throw new ResourceExistsError('Space exists');

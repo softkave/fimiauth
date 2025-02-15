@@ -27,9 +27,7 @@ const getWorkspaceSpaces: GetWorkspaceSpacesEndpoint = async reqData => {
   const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
   const q = await getWorkspaceSpacesQuery(agent, workspace);
   applyDefaultEndpointPaginationOptions(data);
-  const items = await kSemanticModels
-    .space()
-    .getManyByWorkspaceAndIdList(q, data);
+  const items = await kSemanticModels.space().getManyBySpaceAndIdList(q, data);
 
   return {
     page: getEndpointPageFromInput(data),

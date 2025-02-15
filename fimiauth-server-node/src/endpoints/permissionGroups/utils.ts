@@ -55,7 +55,6 @@ export async function checkPermissionGroupAuthorization(
   const workspace = await checkWorkspaceExists(permissionGroup.workspaceId);
   await checkAuthorizationWithAgent({
     agent,
-    workspace,
     opts,
     workspaceId: workspace.resourceId,
     spaceId: permissionGroup.spaceId,

@@ -25,6 +25,7 @@ const permissionItemFields = getFields<PublicPermissionItem>({
   targetType: true,
   action: true,
   access: true,
+  containerId: true,
 });
 
 export const permissionItemExtractor = makeExtract(permissionItemFields);

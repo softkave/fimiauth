@@ -25,7 +25,6 @@ const deletePermissionItems: DeletePermissionItemsEndpoint = async reqData => {
   await checkAuthorizationWithAgent({
     agent,
     workspaceId,
-    workspace,
     spaceId: data.spaceId ?? workspace.resourceId,
     target: {
       targetId: workspaceId,

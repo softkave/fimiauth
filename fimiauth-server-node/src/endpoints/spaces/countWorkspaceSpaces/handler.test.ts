@@ -1,7 +1,7 @@
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
 import RequestData from '../../RequestData.js';
-import {generateAndInsertPermissionGroupListForTest} from '../../testUtils/generate/permissionGroup.js';
+import {generateAndInsertSpaceListForTest} from '../../testUtils/generate/space.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
@@ -9,8 +9,8 @@ import {
   initTests,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
-import countWorkspacePermissionGroups from './handler.js';
-import {CountWorkspacePermissionGroupsEndpointParams} from './types.js';
+import countWorkspaceSpaces from './handler.js';
+import {CountWorkspaceSpacesEndpointParams} from './types.js';
 
 beforeAll(async () => {
   await initTests();
@@ -20,21 +20,24 @@ afterAll(async () => {
   await completeTests();
 });
 
-describe('countWorkspacePermissionGroups', () => {
+describe('countWorkspaceSpaces', () => {
   test('count', async () => {
     const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
-    await generateAndInsertPermissionGroupListForTest(15, {
-      workspaceId: workspace.resourceId,
+    await generateAndInsertSpaceListForTest({
+      count: 15,
+      seed: {
+        workspaceId: workspace.resourceId,
+      },
     });
-    const count = await kSemanticModels.permissionGroup().countByQuery({
+    const count = await kSemanticModels.space().countByQuery({
       workspaceId: workspace.resourceId,
     });
     const reqData =
-      RequestData.fromExpressRequest<CountWorkspacePermissionGroupsEndpointParams>(
+      RequestData.fromExpressRequest<CountWorkspaceSpacesEndpointParams>(
         mockExpressRequestWithAgentToken(agentToken),
         {workspaceId: workspace.resourceId}
       );
-    const result = await countWorkspacePermissionGroups(reqData);
+    const result = await countWorkspaceSpaces(reqData);
     assertEndpointResultOk(result);
     expect(result.count).toBe(count);
   });

@@ -4,7 +4,6 @@ import {checkAuthorization} from '../../../contexts/authorizationChecks/checkAut
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
 import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import RequestData from '../../RequestData.js';
-import {generateAndInsertTestFolders} from '../../testUtils/generate/folder.js';
 import {expectErrorThrown} from '../../testUtils/helpers/error.js';
 import {expectEntityHasPermissionsTargetingId} from '../../testUtils/helpers/permissionItem.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';

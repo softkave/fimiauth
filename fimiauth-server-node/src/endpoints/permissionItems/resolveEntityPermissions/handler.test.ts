@@ -1,21 +1,20 @@
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
 import {makeKey} from '../../../utils/fns.js';
-import {makeUserSessionAgent} from '../../../utils/sessionUtils.js';
 import {
   assignPgListToIdList,
   toAssignedPgListInput,
 } from '../../permissionGroups/testUtils.js';
 import RequestData from '../../RequestData.js';
-import {generateAndInsertTestFiles} from '../../testUtils/generate/file.js';
 import {generateAndInsertPermissionGroupListForTest} from '../../testUtils/generate/permissionGroup.js';
+import {generateAndInsertSpaceListForTest} from '../../testUtils/generate/space.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
   generateWorkspaceAndSessionAgent,
   initTests,
-  insertFolderForTest,
   insertPermissionItemsForTest,
+  insertSpaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import {kDefaultAdminPermissionGroupName} from '../../workspaces/addWorkspace/utils.js';
@@ -39,14 +38,17 @@ afterAll(async () => {
 
 describe('resolveEntityPermissions', () => {
   test('correct results returned', async () => {
-    const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
+    const {workspace, sessionAgent, agentToken} =
+      await generateWorkspaceAndSessionAgent();
     const [[pg01, pg02, pg03, pg04, pg05], [file01]] = await Promise.all([
       generateAndInsertPermissionGroupListForTest(/** count */ 5, {
         workspaceId: workspace.resourceId,
       }),
-      generateAndInsertTestFiles(/** count */ 1, {
-        workspaceId: workspace.resourceId,
-        parentId: null,
+      generateAndInsertSpaceListForTest({
+        count: 1,
+        seed: {
+          workspaceId: workspace.resourceId,
+        },
       }),
     ]);
 
@@ -80,7 +82,6 @@ describe('resolveEntityPermissions', () => {
     ]);
 
     // Assign pg01 to another to grant it it's permissions
-    const sessionAgent = makeUserSessionAgent(rawUser, agentToken);
     await assignPgListToIdList(
       sessionAgent,
       workspace.resourceId,
@@ -169,7 +170,10 @@ describe('resolveEntityPermissions', () => {
 
   test('combination of wildcard and appliesTo', async () => {
     const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
-    const {folder} = await insertFolderForTest(agentToken, workspace);
+    const {rawSpace: folder} = await insertSpaceForTest({
+      agentToken,
+      workspaceId: workspace.resourceId,
+    });
     const adminPg = await kSemanticModels
       .permissionGroup()
       .assertGetOneByQuery({
@@ -186,7 +190,7 @@ describe('resolveEntityPermissions', () => {
             {
               action: 'readFolder',
               targetId: folder.resourceId,
-              entityId: [adminPg.resourceId],
+              entityId: adminPg.resourceId,
             },
           ],
         }
@@ -219,7 +223,6 @@ function indexResolvedPermissions(item: ResolvedEntityPermissionItem) {
 function indexResolvedPermissionItemTarget(
   item: ResolvedEntityPermissionItemTarget
 ) {
-  const targetIdentifier =
-    item.filepath || item.folderpath || item.targetId || item.workspaceRootname;
+  const targetIdentifier = item.targetId;
   return targetIdentifier;
 }

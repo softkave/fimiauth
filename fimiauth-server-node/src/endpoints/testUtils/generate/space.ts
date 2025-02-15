@@ -21,6 +21,9 @@ export function generateSpaceForTest(seed: Partial<Space>) {
     description: faker.lorem.sentence(),
     workspaceId,
     spaceId: workspaceId,
+    publicPermissionGroupId: getNewIdForResource(
+      kFimidaraResourceType.PermissionGroup
+    ),
     ...seed,
   });
 

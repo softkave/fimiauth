@@ -1,19 +1,13 @@
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
-import {populateAssignedTags} from '../../assignedItems/getAssignedItems.js';
 import EndpointReusableQueries from '../../queries.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   generateWorkspaceAndSessionAgent,
   initTests,
-  insertPermissionGroupForTest,
+  insertSpaceForTest,
 } from '../../testUtils/testUtils.js';
-import {permissionGroupExtractor} from '../utils.js';
-
-/**
- * TODO:
- * [Low] - Test that hanlder fails if permissionGroup exists
- */
+import {spaceExtractor} from '../utils.js';
 
 beforeAll(async () => {
   await initTests();
@@ -23,21 +17,18 @@ afterAll(async () => {
   await completeTests();
 });
 
-describe('addPermissionGroup', () => {
-  test('permissionGroup permissions group added', async () => {
+describe('addSpace', () => {
+  test('space permissions group added', async () => {
     const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
-    const {permissionGroup: permissionGroup} =
-      await insertPermissionGroupForTest(agentToken, workspace.resourceId);
-    const savedPermissionGroup = await populateAssignedTags(
-      workspace.resourceId,
-      await kSemanticModels
-        .permissionGroup()
-        .assertGetOneByQuery(
-          EndpointReusableQueries.getByResourceId(permissionGroup.resourceId)
-        )
-    );
-    expect(permissionGroupExtractor(savedPermissionGroup)).toMatchObject(
-      permissionGroup
-    );
+    const {space} = await insertSpaceForTest({
+      agentToken,
+      workspaceId: workspace.resourceId,
+    });
+    const savedSpace = await kSemanticModels
+      .space()
+      .assertGetOneByQuery(
+        EndpointReusableQueries.getByResourceId(space.resourceId)
+      );
+    expect(spaceExtractor(savedSpace)).toMatchObject(space);
   });
 });

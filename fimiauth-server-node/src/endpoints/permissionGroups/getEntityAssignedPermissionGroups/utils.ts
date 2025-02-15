@@ -18,7 +18,6 @@ export async function checkReadEntityAssignedPermissionGroups(params: {
   } else {
     await checkAuthorizationWithAgent({
       agent,
-      workspace,
       opts,
       workspaceId: workspace.resourceId,
       spaceId,

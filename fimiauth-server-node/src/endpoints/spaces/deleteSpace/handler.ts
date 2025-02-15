@@ -29,6 +29,7 @@ const deleteSpace: DeleteSpaceEndpoint = async reqData => {
     agent,
     workspaceId: workspace.resourceId,
     resources: [space],
+    spaceId: space.workspaceId,
   });
   appAssert(job, new ServerError(), 'Could not create delete space job');
 

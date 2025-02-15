@@ -1,3 +1,4 @@
+import {PublicCollaborator} from '../../definitions/collaborator.js';
 import {
   FimidaraPublicResourceType,
   FimidaraResourceType,
@@ -6,24 +7,14 @@ import {
   PublicResourceWrapper,
   ResourceWrapper,
 } from '../../definitions/system.js';
-import {PublicCollaborator} from '../../definitions/user.js';
 import {ServerError} from '../../utils/errors.js';
 import {AnyFn} from '../../utils/types.js';
 import {agentTokenExtractor} from '../agentTokens/utils.js';
 import {collaborationRequestForWorkspaceExtractor} from '../collaborationRequests/utils.js';
 import {collaboratorExtractor} from '../collaborators/utils.js';
 import {resourceExtractor} from '../extractors.js';
-import {
-  fileBackendConfigExtractor,
-  fileBackendMountExtractor,
-  resolvedEntryExtractor,
-} from '../fileBackends/utils.js';
-import {fileExtractor, presignedPathExtractor} from '../files/utils.js';
-import {folderExtractor} from '../folders/utils.js';
 import {permissionGroupExtractor} from '../permissionGroups/utils.js';
-import {permissionItemExtractor} from '../permissionItems/utils.js';
-import {tagExtractor} from '../tags/utils.js';
-import {usageRecordExtractor} from '../usageRecords/utils.js';
+import {spaceExtractor} from '../spaces/utils.js';
 import {workspaceExtractor} from '../workspaces/utils.js';
 
 const kResourceTypeToExtractorMap: Record<
@@ -42,21 +33,14 @@ const kResourceTypeToExtractorMap: Record<
   [kFimidaraResourceType.emailBlocklist]: resourceExtractor,
   [kFimidaraResourceType.appShard]: resourceExtractor,
   [kFimidaraResourceType.jobHistory]: resourceExtractor,
-  [kFimidaraResourceType.PresignedPath]: presignedPathExtractor,
   [kFimidaraResourceType.Workspace]: workspaceExtractor,
   [kFimidaraResourceType.CollaborationRequest]:
     collaborationRequestForWorkspaceExtractor,
   [kFimidaraResourceType.AgentToken]: agentTokenExtractor,
   [kFimidaraResourceType.PermissionGroup]: permissionGroupExtractor,
-  [kFimidaraResourceType.PermissionItem]: permissionItemExtractor,
-  [kFimidaraResourceType.Folder]: folderExtractor,
-  [kFimidaraResourceType.File]: fileExtractor,
-  [kFimidaraResourceType.User]: collaboratorExtractor,
-  [kFimidaraResourceType.Tag]: tagExtractor,
-  [kFimidaraResourceType.UsageRecord]: usageRecordExtractor,
-  [kFimidaraResourceType.FileBackendConfig]: fileBackendConfigExtractor,
-  [kFimidaraResourceType.FileBackendMount]: fileBackendMountExtractor,
-  [kFimidaraResourceType.ResolvedMountEntry]: resolvedEntryExtractor,
+  [kFimidaraResourceType.Space]: spaceExtractor,
+  [kFimidaraResourceType.PermissionItem]: resourceExtractor,
+  [kFimidaraResourceType.Collaborator]: collaboratorExtractor,
 };
 
 export function getPublicResource(

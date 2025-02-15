@@ -8,11 +8,11 @@ import {countUserWorkspacesJoiSchema} from './validation.js';
 
 const countUserWorkspaces: CountUserWorkspacesEndpoint = async reqData => {
   const data = validate(reqData.data, countUserWorkspacesJoiSchema);
-  const systemAgent = await kUtilsInjectables.session().getSystemAgent(reqData);
+  await kUtilsInjectables.session().getSystemAgent(reqData);
 
   const count = await kSemanticModels
     .agentToken()
-    .countManyByUserId(systemAgent.agentId, data.userId);
+    .countManyByUserId(data.userId);
 
   return {count};
 };

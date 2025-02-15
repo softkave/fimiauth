@@ -14,8 +14,8 @@ const deleteWorkspace: DeleteWorkspaceEndpoint = async reqData => {
     .session()
     .getAgentFromReq(
       reqData,
-      kSessionUtils.permittedAgentTypes.user,
-      kSessionUtils.accessScopes.user
+      kSessionUtils.permittedAgentTypes.api,
+      kSessionUtils.accessScopes.api
     );
   const {workspace} = await checkWorkspaceAuthorization02(
     agent,
@@ -26,6 +26,7 @@ const deleteWorkspace: DeleteWorkspaceEndpoint = async reqData => {
   const [job] = await beginDeleteWorkspace({
     agent,
     workspaceId: workspace.resourceId,
+    spaceId: workspace.spaceId,
     resources: [workspace],
   });
   appAssert(job, 'Could not create delete workspace job');

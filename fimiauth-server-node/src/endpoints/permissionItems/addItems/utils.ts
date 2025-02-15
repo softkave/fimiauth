@@ -27,12 +27,10 @@ export const INTERNAL_addPermissionItems = async (
       workspaceId: workspace.resourceId,
       spaceId: data.spaceId ?? workspace.resourceId,
       seed: {
-        targetType: item.targetType ?? '',
-        containerId: item.containerId ?? data.spaceId ?? workspace.resourceId,
+        containerId: item.containerId ?? [data.spaceId ?? workspace.resourceId],
         targetId: item.targetId,
         action: item.action,
         entityId: item.entityId,
-        entityType: item.entityType,
         access: item.access,
       },
     });

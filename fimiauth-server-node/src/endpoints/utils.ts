@@ -2,8 +2,8 @@ import {Express, Request, Response} from 'express';
 import {compact, isString} from 'lodash-es';
 import {AnyObject} from 'softkave-js-utils';
 import {
-  ResolvedTargetChildrenAccessCheck,
   kResolvedAuthCheckAccess,
+  ResolvedAuthCheckAccessCheck,
 } from '../contexts/authorizationChecks/checkAuthorizaton.js';
 import {DataQuery} from '../contexts/data/types.js';
 import {kUtilsInjectables} from '../contexts/injection/injectables.js';
@@ -26,11 +26,11 @@ import {
 } from './errors.js';
 import {
   Endpoint,
-  ExportedHttpEndpointWithMddocDefinition,
   ExportedHttpEndpoint_Cleanup,
   ExportedHttpEndpoint_GetDataFromReqFn,
   ExportedHttpEndpoint_HandleErrorFn,
   ExportedHttpEndpoint_HandleResponse,
+  ExportedHttpEndpointWithMddocDefinition,
 } from './types.js';
 
 export function extractExternalEndpointError(
@@ -194,19 +194,17 @@ export function endpointDecodeURIComponent(component?: unknown) {
 
 export function getSpaceResourceListQuery00(
   spaceId: string,
-  report: ResolvedTargetChildrenAccessCheck
+  report: ResolvedAuthCheckAccessCheck
 ) {
   if (report.access === kResolvedAuthCheckAccess.full) {
     return {
       spaceId,
-      excludeResourceIdList: report.partialDenyIds?.length
-        ? report.partialDenyIds
-        : undefined,
     };
   } else if (report.access === kResolvedAuthCheckAccess.partial) {
     return {
       spaceId,
-      resourceIdList: report.partialAllowIds,
+      resourceIdList: report.allowedTargetIds,
+      excludeResourceIdList: report.deniedTargetIds,
     };
   }
 
@@ -215,7 +213,7 @@ export function getSpaceResourceListQuery00(
 
 export function getSpaceResourceListQuery01(
   spaceId: string,
-  report: ResolvedTargetChildrenAccessCheck
+  report: ResolvedAuthCheckAccessCheck
 ): DataQuery<WorkspaceResource> {
   const query = getSpaceResourceListQuery00(spaceId, report);
   return {
