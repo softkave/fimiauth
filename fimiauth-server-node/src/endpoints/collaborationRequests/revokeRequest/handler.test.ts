@@ -1,3 +1,4 @@
+import {faker} from '@faker-js/faker';
 import {afterAll, beforeAll, expect, test} from 'vitest';
 import {DataQuery} from '../../../contexts/data/types.js';
 import {
@@ -18,7 +19,6 @@ import {
   generateWorkspaceAndSessionAgent,
   initTests,
   insertRequestForTest,
-  insertUserForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import {collaborationRequestForUserExtractor} from '../utils.js';
@@ -35,11 +35,11 @@ afterAll(async () => {
 
 test('collaboration request revoked', async () => {
   const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
-  const {user: user02} = await insertUserForTest();
+  const email = faker.internet.email();
   const {request: request01} = await insertRequestForTest(
     agentToken,
     workspace.resourceId,
-    {recipientEmail: user02.email}
+    {recipientEmail: email}
   );
   const reqData =
     RequestData.fromExpressRequest<RevokeCollaborationRequestEndpointParams>(
@@ -74,7 +74,7 @@ test('collaboration request revoked', async () => {
     params: {
       $objMatch: {
         type: kEmailJobType.collaborationRequestRevoked,
-        emailAddress: {$all: [user02.email]},
+        emailAddress: {$all: [email]},
         params: {$objMatch: {requestId: request01.resourceId}},
       },
     },

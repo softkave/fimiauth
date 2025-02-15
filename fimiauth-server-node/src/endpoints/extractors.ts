@@ -37,6 +37,7 @@ export const workspaceResourceFields: ExtractFieldsFrom<PublicWorkspaceResource>
     createdBy: agentExtractor,
     lastUpdatedBy: agentExtractor,
     providedResourceId: true,
+    spaceId: true,
   };
 
 export const resourceExtractor = makeExtract(

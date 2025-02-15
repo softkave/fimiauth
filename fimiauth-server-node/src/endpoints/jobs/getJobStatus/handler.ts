@@ -3,14 +3,9 @@ import {
   kSemanticModels,
   kUtilsInjectables,
 } from '../../../contexts/injection/injectables.js';
-import {
-  ResourceWrapper,
-  kFimidaraResourceType,
-} from '../../../definitions/system.js';
 import {appAssert} from '../../../utils/assertion.js';
 import {kReuseableErrors} from '../../../utils/reusableErrors.js';
 import {validate} from '../../../utils/validate.js';
-import {checkResourcesBelongsToWorkspace} from '../../resources/containerCheckFns.js';
 import {GetJobStatusEndpoint} from './types.js';
 import {getJobStatusJoiSchema} from './validation.js';
 
@@ -32,13 +27,8 @@ const getJobStatus: GetJobStatusEndpoint = async reqData => {
     'Attempt to retrieve an internal job'
   );
 
-  const resource: ResourceWrapper = {
-    resourceId: agent.agentId,
-    resource: agent.agentToken,
-    resourceType: kFimidaraResourceType.AgentToken,
-  };
-
-  checkResourcesBelongsToWorkspace(job.workspaceId, [resource], () =>
+  appAssert(
+    agent.agentToken.spaceId === job.spaceId,
     kReuseableErrors.job.notFound()
   );
 

@@ -105,7 +105,7 @@ export interface SemanticBaseProviderType<TResource extends Resource> {
 }
 
 export type SemanticWorkspaceResourceProviderBaseType = Resource & {
-  workspaceId?: string | null;
+  spaceId?: string | null;
   providedResourceId?: string | null;
   name?: string;
 };
@@ -163,7 +163,7 @@ export interface SemanticWorkspaceResourceProviderType<
   ): Promise<number>;
 }
 
-export interface SemanticProviderUtils {
+export interface ISemanticProviderUtils {
   useTxnId(txn: unknown): string | undefined;
   withTxn<TResult>(
     fn: AnyFn<[SemanticProviderMutationParams], Promise<TResult>>,

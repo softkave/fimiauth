@@ -8,6 +8,7 @@ import {
 import {kFimidaraResourceType} from '../../../definitions/system.js';
 import {appAssert} from '../../../utils/assertion.js';
 import RequestData from '../../RequestData.js';
+import {generateAndInsertCollaboratorListForTest} from '../../testUtils/generate/collaborator.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
@@ -34,10 +35,20 @@ afterAll(async () => {
 describe('removeCollaborator', () => {
   test('collaborator removed', async () => {
     const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
+    const [collaborator] = await generateAndInsertCollaboratorListForTest(
+      1,
+      () => ({
+        workspaceId: workspace.resourceId,
+      })
+    );
+
     const reqData =
       RequestData.fromExpressRequest<RemoveCollaboratorEndpointParams>(
         mockExpressRequestWithAgentToken(agentToken),
-        {workspaceId: workspace.resourceId, collaboratorId: user.resourceId}
+        {
+          workspaceId: workspace.resourceId,
+          collaboratorId: collaborator.resourceId,
+        }
       );
 
     const result = await removeCollaborator(reqData);
@@ -49,22 +60,14 @@ describe('removeCollaborator', () => {
       resourceId: result.jobId,
       params: {
         $objMatch: {
-          type: kFimidaraResourceType.User,
-          isRemoveCollaborator: true,
+          type: kFimidaraResourceType.Collaborator,
         },
       },
     })) as Job<DeleteResourceJobParams>;
     expect(job).toBeTruthy();
     expect(job?.params).toMatchObject({
-      resourceId: user.resourceId,
+      resourceId: collaborator.resourceId,
       workspaceId: workspace.resourceId,
     });
-
-    const dbItem = await kSemanticModels.assignedItem().getOneByQuery({
-      assignedItemId: workspace.resourceId,
-      assigneeId: user.resourceId,
-      isDeleted: true,
-    });
-    expect(dbItem).toBeTruthy();
   });
 });

@@ -24,7 +24,6 @@ const removeCollaborator: RemoveCollaboratorEndpoint = async reqData => {
   const workspace = await checkWorkspaceExists(workspaceId);
   await checkAuthorizationWithAgent({
     agent,
-    workspace,
     workspaceId: workspace.resourceId,
     spaceId: data.spaceId ?? workspace.spaceId,
     target: {
@@ -43,6 +42,7 @@ const removeCollaborator: RemoveCollaboratorEndpoint = async reqData => {
   const [job] = await beginDeleteCollaborator({
     agent,
     workspaceId,
+    spaceId: data.spaceId ?? workspace.spaceId,
     resources: [collaborator],
   });
 

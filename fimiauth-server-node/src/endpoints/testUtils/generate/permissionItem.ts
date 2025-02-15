@@ -34,7 +34,7 @@ export function generatePermissionItemForTest(
     spaceId,
     lastUpdatedAt: createdAt,
     lastUpdatedBy: createdBy,
-    containerId: workspaceId,
+    containerId: [workspaceId],
     resourceId: getNewIdForResource(kFimidaraResourceType.PermissionItem),
     entityId: createdBy.agentId,
     entityType: seed.entityId

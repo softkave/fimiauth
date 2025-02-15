@@ -60,7 +60,7 @@ const updateAgentToken: UpdateAgentTokenEndpoint = async reqData => {
       isNameChanged &&
         tokenUpdate.name &&
         checkAgentTokenNameAvailable({
-          spaceId: data.spaceId ?? token.spaceId,
+          spaceId: data.spaceId ?? token.spaceId ?? token.workspaceId,
           name: tokenUpdate.name,
           opts,
         }),

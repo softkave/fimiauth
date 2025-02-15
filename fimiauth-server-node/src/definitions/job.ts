@@ -12,7 +12,6 @@ export const kJobType = {
    * there's a job created for each input item */
   deletePermissionItem: 'deletePermissionItem',
   email: 'email',
-  newSignupsOnWaitlist: 'newSignupsOnWaitlist',
   /** Primarily used for testing. A job that does nothing. */
   noop: 'noop',
   /** Primarily used for testing. A job that will always fail! */

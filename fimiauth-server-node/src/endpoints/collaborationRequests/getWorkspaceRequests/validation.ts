@@ -7,7 +7,10 @@ import {
 } from './types.js';
 
 export const getWorkspaceCollaborationRequestsBaseJoiSchemaParts: JoiSchemaParts<GetWorkspaceCollaborationRequestsEndpointParamsBase> =
-  endpointValidationSchemas.optionalWorkspaceIdParts;
+  {
+    ...endpointValidationSchemas.optionalWorkspaceIdParts,
+    email: Joi.string().email().optional(),
+  };
 
 export const getWorkspaceCollaborationRequestsJoiSchema =
   Joi.object<GetWorkspaceCollaborationRequestsEndpointParams>()

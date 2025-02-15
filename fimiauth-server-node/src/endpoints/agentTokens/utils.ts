@@ -43,7 +43,7 @@ export async function checkAgentTokenAuthorization(params: {
     agent,
     opts,
     workspaceId: token.workspaceId,
-    spaceId: token.spaceId,
+    spaceId: token.spaceId ?? token.workspaceId,
     target: {action, targetId: token.resourceId},
   });
 

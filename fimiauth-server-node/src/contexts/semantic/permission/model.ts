@@ -20,7 +20,7 @@ import {getResourceTypeFromId} from '../../../utils/resource.js';
 import {kReuseableErrors} from '../../../utils/reusableErrors.js';
 import {DataQuery, LiteralDataQuery} from '../../data/types.js';
 import {kSemanticModels} from '../../injection/injectables.js';
-import {addIsDeletedIntoQuery} from '../DataSemanticDataAccessBaseProvider.js';
+import {addIsDeletedIntoQuery} from '../SemanticBaseProvider.js';
 import {
   SemanticProviderOpParams,
   SemanticProviderQueryListParams,
@@ -33,7 +33,7 @@ import {
   SemanticPermissionProviderType_GetPermissionItemsProps,
 } from './types.js';
 
-export class DataSemanticPermission implements SemanticPermissionProviderType {
+export class SemanticPermission implements SemanticPermissionProviderType {
   async getEntityInheritanceMap(
     props: {entityId: string; spaceId: string; fetchDeep?: boolean | undefined},
     options?: SemanticProviderOpParams | undefined

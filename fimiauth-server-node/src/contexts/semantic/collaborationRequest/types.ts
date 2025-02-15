@@ -7,7 +7,7 @@ import {
 } from '../types.js';
 
 export interface SemanticCollaborationRequestProviderFilter {
-  workspaceId: string;
+  spaceId: string;
   resourceIdList?: string[];
   excludeResourceIdList?: string[];
   email?: string;
@@ -16,17 +16,17 @@ export interface SemanticCollaborationRequestProviderFilter {
 export interface SemanticCollaborationRequestProvider
   extends SemanticWorkspaceResourceProviderType<CollaborationRequest> {
   getManyByEmail(
-    workspaceId: string,
+    spaceId: string,
     email: string,
     options?: SemanticProviderQueryListParams<CollaborationRequest>
   ): Promise<CollaborationRequest[]>;
   getOneByEmail(
-    workspaceId: string,
+    spaceId: string,
     email: string,
     opts?: SemanticProviderQueryParams<CollaborationRequest>
   ): Promise<CollaborationRequest | null>;
   countByEmail(
-    workspaceId: string,
+    spaceId: string,
     email: string,
     opts?: SemanticProviderOpParams
   ): Promise<number>;

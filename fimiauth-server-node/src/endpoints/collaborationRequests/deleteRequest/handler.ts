@@ -28,6 +28,7 @@ const deleteCollaborationRequest: DeleteCollaborationRequestEndpoint =
     const [job] = await beginDeleteCollaborationRequest({
       agent,
       workspaceId: request.workspaceId,
+      spaceId: request.spaceId ?? request.workspaceId,
       resources: [request],
     });
 

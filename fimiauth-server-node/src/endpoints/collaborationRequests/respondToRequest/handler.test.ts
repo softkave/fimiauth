@@ -1,3 +1,4 @@
+import {faker} from '@faker-js/faker';
 import {afterAll, beforeAll, expect, test} from 'vitest';
 import {DataQuery} from '../../../contexts/data/types.js';
 import {
@@ -19,7 +20,6 @@ import {
   generateWorkspaceAndSessionAgent,
   initTests,
   insertRequestForTest,
-  insertUserForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
 import {collaborationRequestForUserExtractor} from '../utils.js';
@@ -41,16 +41,16 @@ afterAll(async () => {
 
 test('collaboration request declined', async () => {
   const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
-  const {user: user02, userToken: user02Token} = await insertUserForTest();
+  const email = faker.internet.email();
   const {request: request01} = await insertRequestForTest(
     agentToken,
     workspace.resourceId,
-    {recipientEmail: user02.email}
+    {recipientEmail: email}
   );
 
   const reqData =
     RequestData.fromExpressRequest<RespondToCollaborationRequestEndpointParams>(
-      mockExpressRequestWithAgentToken(user02Token),
+      mockExpressRequestWithAgentToken(agentToken),
       {
         requestId: request01.resourceId,
         response: kCollaborationRequestStatusTypeMap.Accepted,
@@ -87,8 +87,7 @@ test('collaboration request declined', async () => {
     params: {
       $objMatch: {
         type: kEmailJobType.collaborationRequestResponse,
-        emailAddress: {$all: [user.email]},
-        userId: {$all: [user.resourceId]},
+        emailAddress: {$all: [email]},
         params: {$objMatch: {requestId: request01.resourceId}},
       },
     },

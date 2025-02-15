@@ -3,16 +3,18 @@ import {TokenAccessScope} from '../../../definitions/system.js';
 import {AgentTokenQueries} from '../../../endpoints/agentTokens/queries.js';
 import {kSystemSessionAgent} from '../../../utils/agent.js';
 import {DataQuery} from '../../data/types.js';
-import {addIsDeletedIntoQuery} from '../DataSemanticDataAccessBaseProvider.js';
-import {DataSemanticWorkspaceResourceProvider} from '../DataSemanticDataAccessWorkspaceResourceProvider.js';
+import {addIsDeletedIntoQuery} from '../SemanticBaseProvider.js';
+import {SemanticWorkspaceResourceProvider} from '../SemanticWorkspaceResourceProvider.js';
 import {
   SemanticProviderMutationParams,
+  SemanticProviderOpParams,
+  SemanticProviderQueryListParams,
   SemanticProviderQueryParams,
 } from '../types.js';
 import {SemanticAgentTokenProvider} from './types.js';
 
-export class DataSemanticAgentToken
-  extends DataSemanticWorkspaceResourceProvider<AgentToken>
+export class SemanticAgentToken
+  extends SemanticWorkspaceResourceProvider<AgentToken>
   implements SemanticAgentTokenProvider
 {
   async softDeleteAgentTokens(
@@ -43,5 +45,27 @@ export class DataSemanticAgentToken
       opts?.includeDeleted || false
     );
     return await this.data.getOneByQuery(query, opts);
+  }
+
+  async getManyByUserId(
+    userId: string,
+    opts?: SemanticProviderQueryListParams<AgentToken> | undefined
+  ): Promise<AgentToken[]> {
+    const query = addIsDeletedIntoQuery<DataQuery<AgentToken>>(
+      {forEntityId: userId},
+      opts?.includeDeleted || false
+    );
+    return await this.data.getManyByQuery(query, opts);
+  }
+
+  async countManyByUserId(
+    userId: string,
+    opts?: SemanticProviderOpParams | undefined
+  ): Promise<number> {
+    const query = addIsDeletedIntoQuery<DataQuery<AgentToken>>(
+      {forEntityId: userId},
+      opts?.includeDeleted || false
+    );
+    return await this.data.countByQuery(query, opts);
   }
 }

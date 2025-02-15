@@ -25,7 +25,6 @@ const countWorkspaceCollaborators: CountWorkspaceCollaboratorsEndpoint =
     const {workspace} = await getWorkspaceFromEndpointInput(agent, data);
     await checkAuthorizationWithAgent({
       agent,
-      workspace,
       workspaceId: workspace.resourceId,
       spaceId: data.spaceId ?? workspace.spaceId,
       target: {
@@ -42,7 +41,7 @@ const countWorkspaceCollaborators: CountWorkspaceCollaboratorsEndpoint =
 
     const count = await kSemanticModels
       .collaborator()
-      .countManyByWorkspaceAndIdList(q);
+      .countManyBySpaceAndIdList(q);
 
     return {count};
   };

@@ -1,4 +1,4 @@
-import {AgentToken, AgentToken} from '../../definitions/agentToken.js';
+import {AgentToken} from '../../definitions/agentToken.js';
 import {App, AppShard} from '../../definitions/app.js';
 import {AssignedItem} from '../../definitions/assignedItem.js';
 import {CollaborationRequest} from '../../definitions/collaborationRequest.js';

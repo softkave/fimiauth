@@ -17,7 +17,6 @@ import {
 import {container} from 'tsyringe';
 import {getAgentTokenModel} from '../../db/agentToken.js';
 import {getAppMongoModel, getAppShardMongoModel} from '../../db/app.js';
-import {getAppRuntimeStateModel} from '../../db/appRuntimeState.js';
 import {getAssignedItemModel} from '../../db/assignedItem.js';
 import {getCollaborationRequestModel} from '../../db/collaborationRequest.js';
 import {getCollaboratorModel} from '../../db/collaborator.js';
@@ -32,6 +31,7 @@ import {getJobModel} from '../../db/job.js';
 import {getJobHistoryMongoModel} from '../../db/jobHistory.js';
 import {getPermissionGroupModel} from '../../db/permissionGroup.js';
 import {getPermissionItemModel} from '../../db/permissionItem.js';
+import {getSpaceModel} from '../../db/space.js';
 import {getWorkspaceModel} from '../../db/workspace.js';
 import {kAppPresetShards, kAppType} from '../../definitions/app.js';
 import {kFimidaraResourceType} from '../../definitions/system.js';
@@ -62,7 +62,6 @@ import {MongoDataProviderUtils} from '../data/MongoDataProviderUtils.js';
 import {
   AgentTokenMongoDataProvider,
   AppMongoDataProvider,
-  AppRuntimeStateMongoDataProvider,
   AppShardMongoDataProvider,
   AssignedItemMongoDataProvider,
   CollaborationRequestMongoDataProvider,
@@ -79,7 +78,6 @@ import {
 import {
   AgentTokenDataProvider,
   AppDataProvider,
-  AppRuntimeStateDataProvider,
   AppShardDataProvider,
   AssignedItemDataProvider,
   CollaborationRequestDataProvider,
@@ -108,13 +106,13 @@ import {getRedlockContext} from '../redlock/utils.js';
 import {IServerRuntimeState} from '../runtime.js';
 import {SecretsManagerProvider} from '../secrets/types.js';
 import {getSecretsProvider} from '../secrets/utils.js';
-import {DataSemanticAgentToken} from '../semantic/agentToken/model.js';
+import {SemanticAgentToken} from '../semantic/agentToken/model.js';
 import {SemanticAgentTokenProvider} from '../semantic/agentToken/types.js';
 import {SemanticAppShardProviderImpl} from '../semantic/app/SemanticAppShardProviderImpl.js';
 import {SemanticAppShardProvider} from '../semantic/app/types.js';
-import {DataSemanticAssignedItem} from '../semantic/assignedItem/model.js';
+import {SemanticAssignedItem} from '../semantic/assignedItem/model.js';
 import {SemanticAssignedItemProvider} from '../semantic/assignedItem/types.js';
-import {DataSemanticCollaborationRequest} from '../semantic/collaborationRequest/model.js';
+import {SemanticCollaborationRequest} from '../semantic/collaborationRequest/model.js';
 import {SemanticCollaborationRequestProvider} from '../semantic/collaborationRequest/types.js';
 import {SemanticEmailBlocklistProviderImpl} from '../semantic/email/SemanticEmailBlocklistImpl.js';
 import {SemanticEmailMessageProviderImpl} from '../semantic/email/SemanticEmailMessageImpl.js';
@@ -122,35 +120,32 @@ import {
   SemanticEmailBlocklistProvider,
   SemanticEmailMessageProvider,
 } from '../semantic/email/types.js';
-import {DataSemanticJob} from '../semantic/job/model.js';
+import {SemanticJob} from '../semantic/job/model.js';
 import {SemanticJobProvider} from '../semantic/job/types.js';
-import {DataSemanticJobHistory} from '../semantic/jobHistory/model.js';
+import {SemanticJobHistory} from '../semantic/jobHistory/model.js';
 import {SemanticJobHistoryProvider} from '../semantic/jobHistory/types.js';
 import {
-  DataSemanticApp,
-  DataSemanticCollaborator,
-  DataSemanticPermissionGroup,
-  DataSemanticSpace,
+  SemanticApp,
+  SemanticCollaborator,
+  SemanticPermissionGroup,
+  SemanticSpace,
 } from '../semantic/models.js';
-import {DataSemanticPermission} from '../semantic/permission/model.js';
+import {SemanticPermission} from '../semantic/permission/model.js';
 import {SemanticPermissionProviderType} from '../semantic/permission/types.js';
-import {DataSemanticPermissionItem} from '../semantic/permissionItem/model.js';
+import {SemanticPermissionItem} from '../semantic/permissionItem/model.js';
 import {SemanticPermissionItemProviderType} from '../semantic/permissionItem/types.js';
 import {
+  ISemanticProviderUtils,
   SemanticAppProvider,
   SemanticCollaboratorProvider,
   SemanticPermissionGroupProviderType,
-  SemanticProviderUtils,
   SemanticSpaceProvider,
 } from '../semantic/types.js';
-import {DataSemanticProviderUtils} from '../semantic/utils.js';
-import {DataSemanticWorkspace} from '../semantic/workspace/model.js';
+import {SemanticProviderUtils} from '../semantic/utils.js';
+import {SemanticWorkspace} from '../semantic/workspace/model.js';
 import {SemanticWorkspaceProviderType} from '../semantic/workspace/types.js';
-import {UsageProvider} from '../usage/UsageProvider.js';
-import {IUsageContext} from '../usage/types.js';
 import {kDataModels, kUtilsInjectables} from './injectables.js';
 import {kInjectionKeys} from './keys.js';
-import {getSpaceModel} from '../../db/space.js';
 
 function registerToken(
   token: string,
@@ -200,7 +195,7 @@ export const kRegisterSemanticModels = {
     registerToken(kInjectionKeys.semantic.collaborator, item),
   space: (item: SemanticSpaceProvider) =>
     registerToken(kInjectionKeys.semantic.space, item),
-  utils: (item: SemanticProviderUtils) =>
+  utils: (item: ISemanticProviderUtils) =>
     registerToken(kInjectionKeys.semantic.utils, item),
 };
 
@@ -218,8 +213,6 @@ export const kRegisterDataModels = {
   collaborationRequest: (item: CollaborationRequestDataProvider) =>
     registerToken(kInjectionKeys.data.collaborationRequest, item),
   job: (item: JobDataProvider) => registerToken(kInjectionKeys.data.job, item),
-  appRuntimeState: (item: AppRuntimeStateDataProvider) =>
-    registerToken(kInjectionKeys.data.appRuntimeState, item),
   app: (item: AppDataProvider) => registerToken(kInjectionKeys.data.app, item),
   emailMessage: (item: EmailMessageDataProvider) =>
     registerToken(kInjectionKeys.data.emailMessage, item),
@@ -276,7 +269,6 @@ export const kRegisterUtilsInjectables = {
   ioredis: (item: [Redis, ...Redis[]]) =>
     registerToken(kInjectionKeys.ioredis, item),
   dset: (item: IDSetContext) => registerToken(kInjectionKeys.dset, item),
-  usage: (item: IUsageContext) => registerToken(kInjectionKeys.usage, item),
 };
 
 export function registerDataModelInjectables() {
@@ -299,9 +291,6 @@ export function registerDataModelInjectables() {
     new AssignedItemMongoDataProvider(getAssignedItemModel(connection))
   );
   kRegisterDataModels.job(new JobMongoDataProvider(getJobModel(connection)));
-  kRegisterDataModels.appRuntimeState(
-    new AppRuntimeStateMongoDataProvider(getAppRuntimeStateModel(connection))
-  );
   kRegisterDataModels.collaborationRequest(
     new CollaborationRequestMongoDataProvider(
       getCollaborationRequestModel(connection)
@@ -333,38 +322,38 @@ export function registerDataModelInjectables() {
 
 export function registerSemanticModelInjectables() {
   kRegisterSemanticModels.agentToken(
-    new DataSemanticAgentToken(kDataModels.agentToken(), assertAgentToken)
+    new SemanticAgentToken(kDataModels.agentToken(), assertAgentToken)
   );
   kRegisterSemanticModels.workspace(
-    new DataSemanticWorkspace(kDataModels.workspace(), assertWorkspace)
+    new SemanticWorkspace(kDataModels.workspace(), assertWorkspace)
   );
   kRegisterSemanticModels.collaborationRequest(
-    new DataSemanticCollaborationRequest(
+    new SemanticCollaborationRequest(
       kDataModels.collaborationRequest(),
       assertCollaborationRequest
     )
   );
-  kRegisterSemanticModels.permissions(new DataSemanticPermission());
+  kRegisterSemanticModels.permissions(new SemanticPermission());
   kRegisterSemanticModels.permissionGroup(
-    new DataSemanticPermissionGroup(
+    new SemanticPermissionGroup(
       kDataModels.permissionGroup(),
       assertPermissionGroup
     )
   );
   kRegisterSemanticModels.permissionItem(
-    new DataSemanticPermissionItem(
+    new SemanticPermissionItem(
       kDataModels.permissionItem(),
       assertPermissionItem
     )
   );
   kRegisterSemanticModels.assignedItem(
-    new DataSemanticAssignedItem(kDataModels.assignedItem(), assertNotFound)
+    new SemanticAssignedItem(kDataModels.assignedItem(), assertNotFound)
   );
   kRegisterSemanticModels.job(
-    new DataSemanticJob(kDataModels.job(), assertNotFound)
+    new SemanticJob(kDataModels.job(), assertNotFound)
   );
   kRegisterSemanticModels.app(
-    new DataSemanticApp(kDataModels.app(), assertNotFound)
+    new SemanticApp(kDataModels.app(), assertNotFound)
   );
   kRegisterSemanticModels.emailMessage(
     new SemanticEmailMessageProviderImpl(
@@ -382,15 +371,15 @@ export function registerSemanticModelInjectables() {
     new SemanticAppShardProviderImpl(kDataModels.appShard(), assertNotFound)
   );
   kRegisterSemanticModels.jobHistory(
-    new DataSemanticJobHistory(kDataModels.jobHistory(), assertNotFound)
+    new SemanticJobHistory(kDataModels.jobHistory(), assertNotFound)
   );
   kRegisterSemanticModels.collaborator(
-    new DataSemanticCollaborator(kDataModels.collaborator(), assertNotFound)
+    new SemanticCollaborator(kDataModels.collaborator(), assertNotFound)
   );
   kRegisterSemanticModels.space(
-    new DataSemanticSpace(kDataModels.space(), assertNotFound)
+    new SemanticSpace(kDataModels.space(), assertNotFound)
   );
-  kRegisterSemanticModels.utils(new DataSemanticProviderUtils());
+  kRegisterSemanticModels.utils(new SemanticProviderUtils());
 }
 
 export async function registerUtilsInjectables(
@@ -461,7 +450,6 @@ export async function registerUtilsInjectables(
   kRegisterUtilsInjectables.cache(await getCacheContext(suppliedConfig));
   kRegisterUtilsInjectables.redlock(await getRedlockContext(suppliedConfig));
   kRegisterUtilsInjectables.dset(await getDSetContext(suppliedConfig));
-  kRegisterUtilsInjectables.usage(new UsageProvider());
 }
 
 export async function registerInjectables(

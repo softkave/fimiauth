@@ -22,7 +22,6 @@ import {ICacheContext} from '../cache/types.js';
 import {
   AgentTokenDataProvider,
   AppDataProvider,
-  AppRuntimeStateDataProvider,
   AppShardDataProvider,
   AssignedItemDataProvider,
   CollaborationRequestDataProvider,
@@ -57,14 +56,13 @@ import {SemanticJobHistoryProvider} from '../semantic/jobHistory/types.js';
 import {SemanticPermissionProviderType} from '../semantic/permission/types.js';
 import {SemanticPermissionItemProviderType} from '../semantic/permissionItem/types.js';
 import {
+  ISemanticProviderUtils,
   SemanticAppProvider,
   SemanticCollaboratorProvider,
   SemanticPermissionGroupProviderType,
-  SemanticProviderUtils,
   SemanticSpaceProvider,
 } from '../semantic/types.js';
 import {SemanticWorkspaceProviderType} from '../semantic/workspace/types.js';
-import {IUsageContext} from '../usage/types.js';
 import {kInjectionKeys} from './keys.js';
 
 export const kSemanticModels = {
@@ -123,7 +121,7 @@ export const kSemanticModels = {
   space: () =>
     container.resolve<SemanticSpaceProvider>(kInjectionKeys.semantic.space),
   utils: () =>
-    container.resolve<SemanticProviderUtils>(kInjectionKeys.semantic.utils),
+    container.resolve<ISemanticProviderUtils>(kInjectionKeys.semantic.utils),
 };
 
 export const kDataModels = {
@@ -144,10 +142,6 @@ export const kDataModels = {
       kInjectionKeys.data.assignedItem
     ),
   job: () => container.resolve<JobDataProvider>(kInjectionKeys.data.job),
-  appRuntimeState: () =>
-    container.resolve<AppRuntimeStateDataProvider>(
-      kInjectionKeys.data.appRuntimeState
-    ),
   collaborationRequest: () =>
     container.resolve<CollaborationRequestDataProvider>(
       kInjectionKeys.data.collaborationRequest
@@ -209,5 +203,4 @@ export const kUtilsInjectables = {
     ),
   ioredis: () => container.resolve<[Redis, ...Redis[]]>(kInjectionKeys.ioredis),
   dset: () => container.resolve<IDSetContext>(kInjectionKeys.dset),
-  usage: () => container.resolve<IUsageContext>(kInjectionKeys.usage),
 };

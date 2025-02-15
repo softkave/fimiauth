@@ -1,16 +1,16 @@
 import {PermissionItem} from '../../../definitions/permissionItem.js';
 import {toCompactArray} from '../../../utils/fns.js';
 import {DataQuery} from '../../data/types.js';
-import {addIsDeletedIntoQuery} from '../DataSemanticDataAccessBaseProvider.js';
-import {DataSemanticWorkspaceResourceProvider} from '../DataSemanticDataAccessWorkspaceResourceProvider.js';
+import {addIsDeletedIntoQuery} from '../SemanticBaseProvider.js';
+import {SemanticWorkspaceResourceProvider} from '../SemanticWorkspaceResourceProvider.js';
 import {
   SemanticProviderMutationParams,
   SemanticProviderQueryListParams,
 } from '../types.js';
 import {SemanticPermissionItemProviderType} from './types.js';
 
-export class DataSemanticPermissionItem
-  extends DataSemanticWorkspaceResourceProvider<PermissionItem>
+export class SemanticPermissionItem
+  extends SemanticWorkspaceResourceProvider<PermissionItem>
   implements SemanticPermissionItemProviderType
 {
   async deleteManyByEntityId(

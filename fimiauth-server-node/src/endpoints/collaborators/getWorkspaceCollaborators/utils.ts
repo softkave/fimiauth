@@ -1,4 +1,4 @@
-import {resolveTargetChildrenAccessCheckWithAgent} from '../../../contexts/authorizationChecks/checkAuthorizaton.js';
+import {checkAuthorizationWithAgent} from '../../../contexts/authorizationChecks/checkAuthorizaton.js';
 import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {SessionAgent} from '../../../definitions/system.js';
 import {Workspace} from '../../../definitions/workspace.js';
@@ -9,16 +9,15 @@ export async function getWorkspaceCollaboratorsQuery(
   workspace: Workspace,
   spaceId: string
 ) {
-  const report = await resolveTargetChildrenAccessCheckWithAgent({
+  const report = await checkAuthorizationWithAgent({
     agent,
-    workspace,
-    spaceId,
     workspaceId: workspace.resourceId,
+    spaceId,
     target: {
       action: kFimidaraPermissionActions.readCollaborator,
       targetId: workspace.resourceId,
     },
   });
 
-  return getSpaceResourceListQuery00(workspace, report);
+  return getSpaceResourceListQuery00(spaceId, report);
 }

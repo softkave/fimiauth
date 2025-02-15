@@ -33,8 +33,14 @@ describe('queueJobs', () => {
       params: {id: internalParamId02},
       shard: getNewId(),
     });
+    const spaceId = getNewIdForResource(kFimidaraResourceType.Space);
 
-    const jobs = await queueJobs(workspaceId, parentJobId, [input01, input02]);
+    const jobs = await queueJobs({
+      workspaceId,
+      parentJobId,
+      jobsInput: [input01, input02],
+      spaceId,
+    });
     const dbJobs = await kSemanticModels.job().getManyByQuery({
       $or: [
         {
@@ -59,12 +65,24 @@ describe('queueJobs', () => {
     const workspaceId = getNewIdForResource(kFimidaraResourceType.Workspace);
     const parentJobId = getNewIdForResource(kFimidaraResourceType.Job);
     const input01 = generateJobInput({params: {id: internalParamId}});
+    const spaceId = getNewIdForResource(kFimidaraResourceType.Space);
 
     // First add should add job to DB
-    const jobs01 = await queueJobs(workspaceId, parentJobId, [input01]);
+    const jobs01 = await queueJobs({
+      workspaceId,
+      parentJobId,
+      jobsInput: [input01],
+      spaceId,
+    });
     // Second add should not add anything to DB
-    const jobs02 = await queueJobs(workspaceId, parentJobId, [input01], {
-      jobsToReturn: 'new',
+    const jobs02 = await queueJobs({
+      workspaceId,
+      parentJobId,
+      jobsInput: [input01],
+      spaceId,
+      insertOptions: {
+        jobsToReturn: 'new',
+      },
     });
     const dbJobs = await kSemanticModels.job().getManyByQuery({
       params: {$objMatch: {id: internalParamId}},
@@ -83,8 +101,13 @@ describe('queueJobs', () => {
       workspaceId,
     });
     const input01 = generateJobInput({params: {id: internalParamId}});
-
-    const jobs = await queueJobs(workspaceId, parentJob.resourceId, [input01]);
+    const spaceId = getNewIdForResource(kFimidaraResourceType.Space);
+    const jobs = await queueJobs({
+      workspaceId,
+      parentJobId: parentJob.resourceId,
+      jobsInput: [input01],
+      spaceId,
+    });
     const dbJobs = await kSemanticModels.job().getManyByQuery({
       params: {$objMatch: {id: internalParamId}},
       resourceId: {$in: extractResourceIdList(jobs)},
@@ -101,6 +124,7 @@ describe('queueJobs', () => {
   test('queueJobs adds jobs with different parents but same params', async () => {
     const internalParamId = getNewId();
     const workspaceId = getNewIdForResource(kFimidaraResourceType.Workspace);
+    const spaceId = getNewIdForResource(kFimidaraResourceType.Space);
     const [parentJob] = await generateAndInsertJobListForTest(/** count */ 1, {
       workspaceId,
     });
@@ -114,15 +138,19 @@ describe('queueJobs', () => {
     });
 
     // First add should add job to DB
-    const jobs01 = await queueJobs(workspaceId, parentJob.resourceId, [
-      input01,
-    ]);
-    // Second add should also add job to DB
-    const jobs02 = await queueJobs(
+    const jobs01 = await queueJobs({
       workspaceId,
-      /** parent job ID */ undefined,
-      [input02]
-    );
+      parentJobId: parentJob.resourceId,
+      jobsInput: [input01],
+      spaceId,
+    });
+    // Second add should also add job to DB
+    const jobs02 = await queueJobs({
+      workspaceId,
+      parentJobId: undefined,
+      jobsInput: [input02],
+      spaceId,
+    });
     const dbJobs = await kSemanticModels.job().getManyByQuery({
       params: {$objMatch: {id: internalParamId}},
     });
@@ -135,11 +163,18 @@ describe('queueJobs', () => {
   test('queueJobs with seed', async () => {
     const internalParamId = getNewId();
     const workspaceId = getNewIdForResource(kFimidaraResourceType.Workspace);
+    const spaceId = getNewIdForResource(kFimidaraResourceType.Space);
     const input01 = generateJobInput({params: {id: internalParamId}});
     const jobId = getNewIdForResource(kFimidaraResourceType.Job);
 
-    await queueJobs(workspaceId, undefined, [input01], {
-      seed: {resourceId: jobId},
+    await queueJobs({
+      workspaceId,
+      parentJobId: undefined,
+      jobsInput: [input01],
+      insertOptions: {
+        seed: {resourceId: jobId},
+      },
+      spaceId,
     });
 
     const dbJob = await kSemanticModels.job().getOneByQuery({

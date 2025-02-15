@@ -18,8 +18,8 @@ export function generateCollaborationRequestForTest(
 ) {
   const createdAt = getTimestamp();
   const createdBy: Agent = {
-    agentId: getNewIdForResource(kFimidaraResourceType.User),
-    agentType: kFimidaraResourceType.User,
+    agentId: getNewIdForResource(kFimidaraResourceType.AgentToken),
+    agentType: kFimidaraResourceType.AgentToken,
     agentTokenId: getNewIdForResource(kFimidaraResourceType.AgentToken),
   };
   const item: CollaborationRequest = {
@@ -35,6 +35,8 @@ export function generateCollaborationRequestForTest(
     status: kCollaborationRequestStatusTypeMap.Pending,
     statusDate: getTimestamp(),
     isDeleted: false,
+    permissionGroupIds: [],
+    spaceId: getNewIdForResource(kFimidaraResourceType.Space),
     ...seed,
   };
   return item;

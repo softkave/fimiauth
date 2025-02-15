@@ -1,4 +1,4 @@
-import {resolveTargetChildrenAccessCheckWithAgent} from '../../../contexts/authorizationChecks/checkAuthorizaton.js';
+import {checkAuthorizationWithAgent} from '../../../contexts/authorizationChecks/checkAuthorizaton.js';
 import {SemanticCollaborationRequestProviderFilter} from '../../../contexts/semantic/collaborationRequest/types.js';
 import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import {SessionAgent} from '../../../definitions/system.js';
@@ -11,20 +11,18 @@ export async function getWorkspaceCollaborationRequestsQuery(
   spaceId: string,
   email?: string
 ) {
-  const permissionsSummaryReport =
-    await resolveTargetChildrenAccessCheckWithAgent({
-      agent,
-      workspaceId: workspace.resourceId,
-      workspace: workspace,
-      spaceId,
-      target: {
-        targetId: workspace.resourceId,
-        action: kFimidaraPermissionActions.readCollaborationRequest,
-      },
-    });
+  const permissionsSummaryReport = await checkAuthorizationWithAgent({
+    agent,
+    workspaceId: workspace.resourceId,
+    spaceId,
+    target: {
+      targetId: workspace.resourceId,
+      action: kFimidaraPermissionActions.readCollaborationRequest,
+    },
+  });
 
   const q: SemanticCollaborationRequestProviderFilter =
-    getSpaceResourceListQuery00(workspace, permissionsSummaryReport);
+    getSpaceResourceListQuery00(spaceId, permissionsSummaryReport);
 
   if (email) {
     q.email = email;

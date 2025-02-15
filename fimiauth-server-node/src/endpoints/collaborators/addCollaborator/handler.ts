@@ -30,7 +30,6 @@ const addCollaborator: AddCollaboratorEndpoint = async reqData => {
   const workspace = await checkWorkspaceExists(workspaceId);
   await checkAuthorizationWithAgent({
     agent,
-    workspace,
     workspaceId: workspace.resourceId,
     spaceId: data.spaceId ?? workspace.spaceId,
     target: {
@@ -42,7 +41,13 @@ const addCollaborator: AddCollaboratorEndpoint = async reqData => {
   const collaborator = await kSemanticModels.utils().withTxn(async opts => {
     const existingCollaborator = await kSemanticModels
       .collaborator()
-      .getByProvidedId(workspace.resourceId, data.providedResourceId, opts);
+      .getByProvidedId(
+        {
+          spaceId: data.spaceId ?? workspace.spaceId,
+          providedId: data.providedResourceId,
+        },
+        opts
+      );
 
     if (existingCollaborator) {
       throw new ResourceExistsError('Collaborator already exists');

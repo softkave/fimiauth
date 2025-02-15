@@ -14,9 +14,10 @@ export async function getCollaborator(params: {
       .collaborator()
       .getOneById(params.collaboratorId);
   } else if (params.providedResourceId) {
-    collaborator = await kSemanticModels
-      .collaborator()
-      .getByProvidedId(params.spaceId, params.providedResourceId);
+    collaborator = await kSemanticModels.collaborator().getByProvidedId({
+      spaceId: params.spaceId,
+      providedId: params.providedResourceId,
+    });
   } else {
     throw new InvalidRequestError(
       'Either collaboratorId or providedResourceId must be provided'

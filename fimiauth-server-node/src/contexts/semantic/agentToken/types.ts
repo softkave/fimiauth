@@ -21,12 +21,10 @@ export interface SemanticAgentTokenProvider
     opts?: SemanticProviderQueryParams<AgentToken>
   ): Promise<AgentToken | null>;
   getManyByUserId(
-    systemAgentId: string,
     userId: string,
     opts?: SemanticProviderQueryListParams<AgentToken>
   ): Promise<AgentToken[]>;
   countManyByUserId(
-    systemAgentId: string,
     userId: string,
     opts?: SemanticProviderOpParams
   ): Promise<number>;

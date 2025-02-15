@@ -1,23 +1,57 @@
+import {getNewId} from 'softkave-js-utils';
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
-import {Agent} from '../../../definitions/system.js';
-import {assignWorkspaceToUser} from '../../assignedItems/addAssignedItems.js';
-import {generateAndInsertUserListForTest} from './user.js';
+import {Collaborator} from '../../../definitions/collaborator.js';
+import {Agent, kFimidaraResourceType} from '../../../definitions/system.js';
+import {getTimestamp} from '../../../utils/dateFns.js';
+import {getNewIdForResource} from '../../../utils/resource.js';
+import {
+  GeneratePartialTestDataFn,
+  defaultGeneratePartialTestDataFn,
+  generateTestList,
+} from './utils.js';
+
+export function generateCollaboratorForTest(seed: Partial<Collaborator> = {}) {
+  const createdAt = getTimestamp();
+  const createdBy: Agent = {
+    agentId: getNewIdForResource(kFimidaraResourceType.AgentToken),
+    agentType: kFimidaraResourceType.AgentToken,
+    agentTokenId: getNewIdForResource(kFimidaraResourceType.AgentToken),
+  };
+  const item: Collaborator = {
+    createdAt,
+    createdBy,
+    lastUpdatedAt: createdAt,
+    lastUpdatedBy: createdBy,
+    resourceId: getNewIdForResource(kFimidaraResourceType.Collaborator),
+    workspaceId: getNewIdForResource(kFimidaraResourceType.Workspace),
+    isDeleted: false,
+    spaceId: getNewIdForResource(kFimidaraResourceType.Space),
+    providedResourceId: getNewId(),
+    ...seed,
+  };
+  return item;
+}
+
+export function generateCollaboratorListForTest(
+  count = 20,
+  genPartial: GeneratePartialTestDataFn<Collaborator> = defaultGeneratePartialTestDataFn
+) {
+  return generateTestList(
+    () => generateCollaboratorForTest(),
+    count,
+    genPartial
+  );
+}
 
 export async function generateAndInsertCollaboratorListForTest(
-  agent: Agent,
-  workspaceId: string,
-  count = 20
+  count = 20,
+  genPartial: GeneratePartialTestDataFn<Collaborator> = defaultGeneratePartialTestDataFn
 ) {
-  const users = await generateAndInsertUserListForTest(count);
+  const items = generateCollaboratorListForTest(count, genPartial);
   await kSemanticModels
     .utils()
-    .withTxn(opts =>
-      Promise.all(
-        users.map(user =>
-          assignWorkspaceToUser(agent, workspaceId, user.resourceId, opts)
-        )
-      )
+    .withTxn(async opts =>
+      kSemanticModels.collaborator().insertItem(items, opts)
     );
-
-  return users;
+  return items;
 }

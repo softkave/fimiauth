@@ -6,12 +6,10 @@ import {completeJob} from './completeJob.js';
 import {runDeletePermissionItemsJob} from './runners/runDeletePermissionItemsJob.js';
 import {runDeleteResourceJob} from './runners/runDeleteResourceJob/runDeleteResourceJob.js';
 import {runEmailJob} from './runners/runEmailJob/runEmailJob.js';
-import {runNewSignupsOnWaitlistJob} from './runners/runNewSignupsOnWaitlistJob.js';
 
 const kJobTypeToHandlerMap: Record<JobType, AnyFn<[Job], Promise<void>>> = {
   [kJobType.deleteResource]: runDeleteResourceJob,
   [kJobType.deletePermissionItem]: runDeletePermissionItemsJob,
-  [kJobType.newSignupsOnWaitlist]: runNewSignupsOnWaitlistJob,
   [kJobType.email]: runEmailJob,
   [kJobType.noop]: noopAsync,
   [kJobType.fail]: async () => {

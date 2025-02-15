@@ -55,7 +55,6 @@ export async function checkCollaborationRequestAuthorization(
     opts,
     workspaceId: workspace.resourceId,
     spaceId: workspace.spaceId,
-    workspace: workspace,
     target: {action, targetId: request.resourceId},
   });
 

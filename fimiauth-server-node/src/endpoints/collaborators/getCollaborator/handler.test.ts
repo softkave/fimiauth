@@ -1,7 +1,6 @@
 import {afterAll, beforeAll, expect, test} from 'vitest';
-import {kSemanticModels} from '../../../contexts/injection/injectables.js';
 import RequestData from '../../RequestData.js';
-import {populateUserWorkspaces} from '../../assignedItems/getAssignedItems.js';
+import {generateAndInsertCollaboratorListForTest} from '../../testUtils/generate/collaborator.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
@@ -23,21 +22,21 @@ afterAll(async () => {
 
 test('collaborator returned', async () => {
   const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
-  const reqData = RequestData.fromExpressRequest<GetCollaboratorEndpointParams>(
-    mockExpressRequestWithAgentToken(agentToken),
-    {workspaceId: workspace.resourceId, collaboratorId: user.resourceId}
+  const [collaborator] = await generateAndInsertCollaboratorListForTest(
+    1,
+    () => ({
+      workspaceId: workspace.resourceId,
+    })
   );
 
+  const reqData = RequestData.fromExpressRequest<GetCollaboratorEndpointParams>(
+    mockExpressRequestWithAgentToken(agentToken),
+    {workspaceId: workspace.resourceId, collaboratorId: collaborator.resourceId}
+  );
   const result = await getCollaborator(reqData);
   assertEndpointResultOk(result);
+
   expect(result.collaborator).toMatchObject(
-    collaboratorExtractor(
-      await populateUserWorkspaces(
-        await kSemanticModels
-          .user()
-          .assertGetOneByQuery({resourceId: user.resourceId})
-      ),
-      workspace.resourceId
-    )
+    collaboratorExtractor(collaborator)
   );
 });

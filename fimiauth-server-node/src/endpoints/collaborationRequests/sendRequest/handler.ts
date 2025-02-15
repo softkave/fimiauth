@@ -41,7 +41,6 @@ const sendCollaborationRequest: SendCollaborationRequestEndpoint =
       agent,
       workspaceId: workspace.resourceId,
       spaceId: data.spaceId ?? workspace.spaceId,
-      workspace: workspace,
       target: {
         targetId: workspace.resourceId,
         action: kFimidaraPermissionActions.addCollaborator,
@@ -52,7 +51,10 @@ const sendCollaborationRequest: SendCollaborationRequestEndpoint =
       const [existingRequest] = await kSemanticModels
         .collaborationRequest()
         .getManyByFilter(
-          {workspaceId: workspace.resourceId, email: data.recipientEmail},
+          {
+            spaceId: data.spaceId ?? workspace.spaceId,
+            email: data.recipientEmail,
+          },
           opts
         );
 

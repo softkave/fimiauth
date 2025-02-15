@@ -19,7 +19,6 @@ import {
   generateWorkspaceAndSessionAgent,
   initTests,
   insertRequestForTest,
-  insertUserForTest,
 } from '../../testUtils/testUtils.js';
 import {CollaborationRequestInput} from './types.js';
 
@@ -34,9 +33,9 @@ afterAll(async () => {
 describe('sendCollaborationRequest', () => {
   test('collaboration request sent', async () => {
     const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
-    const {user: user02} = await insertUserForTest();
+    const email = faker.internet.email();
     const requestInput: CollaborationRequestInput = {
-      recipientEmail: user02.email,
+      recipientEmail: email,
       message: faker.lorem.paragraph(),
       expires: getTimestamp(add(Date.now(), {days: 1})),
     };
@@ -69,8 +68,7 @@ describe('sendCollaborationRequest', () => {
       params: {
         $objMatch: {
           type: kEmailJobType.collaborationRequest,
-          emailAddress: {$all: [user02.email]},
-          userId: {$all: [user02.resourceId]},
+          emailAddress: {$all: [email]},
           params: {$objMatch: {requestId: request01.resourceId}},
         },
       },

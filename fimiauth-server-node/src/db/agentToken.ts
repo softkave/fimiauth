@@ -1,9 +1,10 @@
+import {omit} from 'lodash-es';
 import {Connection, Document, Model, Schema} from 'mongoose';
 import {AgentToken} from '../definitions/agentToken.js';
 import {ensureMongoTypeFields, workspaceResourceSchema} from './utils.js';
 
 const agentTokenSchema = ensureMongoTypeFields<AgentToken>({
-  ...workspaceResourceSchema,
+  ...omit(workspaceResourceSchema, ['spaceId']),
   name: {type: String, index: true},
   forEntityId: {type: String, index: true},
   entityType: {type: String, index: true},
@@ -15,6 +16,7 @@ const agentTokenSchema = ensureMongoTypeFields<AgentToken>({
   scope: {type: [String], index: true},
   shouldRefresh: {type: Boolean},
   refreshDuration: {type: Number},
+  spaceId: {type: String, index: true},
 });
 
 export type AgentTokenDocument = Document<AgentToken>;

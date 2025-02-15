@@ -32,7 +32,6 @@ const getWorkspaceCollaborators: GetWorkspaceCollaboratorsEndpoint =
     const workspace = await checkWorkspaceExists(workspaceId);
     await checkAuthorizationWithAgent({
       agent,
-      workspace,
       workspaceId: workspace.resourceId,
       spaceId: data.spaceId ?? workspace.spaceId,
       target: {
@@ -50,7 +49,7 @@ const getWorkspaceCollaborators: GetWorkspaceCollaboratorsEndpoint =
     applyDefaultEndpointPaginationOptions(data);
     const collaborators = await kSemanticModels
       .collaborator()
-      .getManyByWorkspaceAndIdList(q, data);
+      .getManyBySpaceAndIdList(q, data);
 
     return {
       page: getEndpointPageFromInput(data),

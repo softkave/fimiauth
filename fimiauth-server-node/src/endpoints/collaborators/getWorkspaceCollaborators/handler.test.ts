@@ -5,9 +5,7 @@ import {
 } from 'softkave-js-utils';
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
-import {kSystemSessionAgent} from '../../../utils/agent.js';
 import RequestData from '../../RequestData.js';
-import {populateUserWorkspaces} from '../../assignedItems/getAssignedItems.js';
 import AssignedItemQueries from '../../assignedItems/queries.js';
 import {generateAndInsertCollaboratorListForTest} from '../../testUtils/generate/collaborator.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
@@ -17,7 +15,6 @@ import {
   initTests,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
-import {collaboratorExtractor} from '../utils.js';
 import getWorkspaceCollaborators from './handler.js';
 import {GetWorkspaceCollaboratorsEndpointParams} from './types.js';
 
@@ -37,6 +34,12 @@ afterAll(async () => {
 describe('getWorkspaceCollaborators', () => {
   test('workspace collaborators returned', async () => {
     const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
+    const collaborators = await generateAndInsertCollaboratorListForTest(
+      15,
+      () => ({
+        workspaceId: workspace.resourceId,
+      })
+    );
 
     const reqData =
       RequestData.fromExpressRequest<GetWorkspaceCollaboratorsEndpointParams>(
@@ -44,15 +47,10 @@ describe('getWorkspaceCollaborators', () => {
         {workspaceId: workspace.resourceId}
       );
     const result = await getWorkspaceCollaborators(reqData);
-
     assertEndpointResultOk(result);
-    const updatedUser = await populateUserWorkspaces(
-      await kSemanticModels
-        .user()
-        .assertGetOneByQuery({resourceId: user.resourceId})
-    );
-    expect(result.collaborators).toContainEqual(
-      collaboratorExtractor(updatedUser, workspace.resourceId)
+
+    expect(result.collaborators.map(c => c.resourceId)).toEqual(
+      collaborators.map(c => c.resourceId)
     );
   });
 
@@ -60,11 +58,11 @@ describe('getWorkspaceCollaborators', () => {
     const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
     const seedCount = 15;
     const seedUsers = await generateAndInsertCollaboratorListForTest(
-      kSystemSessionAgent,
-      workspace.resourceId,
-      seedCount
+      seedCount,
+      () => ({
+        workspaceId: workspace.resourceId,
+      })
     );
-    seedUsers.push(rawUser);
     const count = await kSemanticModels
       .assignedItem()
       .countByQuery(
