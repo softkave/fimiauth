@@ -5,14 +5,15 @@ import {ResourceExistsError} from '../errors.js';
 export async function checkPermissionGroupNameAvailable(params: {
   spaceId: string;
   name: string;
+  resourceId?: string;
   opts?: SemanticProviderOpParams;
 }) {
-  const {spaceId, name, opts} = params;
-  const itemExists = await kSemanticModels
+  const {spaceId, name, opts, resourceId} = params;
+  const item = await kSemanticModels
     .permissionGroup()
-    .existsByName({spaceId, name}, opts);
+    .getByName({spaceId, name}, {...opts, projection: {resourceId: true}});
 
-  if (itemExists) {
+  if (item && item.resourceId !== resourceId) {
     throw new ResourceExistsError('Permission group exists');
   }
 }

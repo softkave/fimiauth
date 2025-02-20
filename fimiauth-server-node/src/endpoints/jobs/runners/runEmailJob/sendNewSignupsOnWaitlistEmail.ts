@@ -22,12 +22,10 @@ export async function sendNewSignupsOnWaitlistEmail(
   const {upgradeWaitlistLink} = kUtilsInjectables.suppliedConfig();
   assert(upgradeWaitlistLink, 'upgradeWaitlistLink not present');
 
-  const {user, base, source} = await getBaseEmailTemplateProps(params);
+  const {base, source} = await getBaseEmailTemplateProps(params);
   const emailProps: NewSignupsOnWaitlistEmailProps = {
     ...base,
-    firstName: user?.firstName,
     count: params.params.count,
-    upgradeWaitlistURL: upgradeWaitlistLink,
   };
 
   const html = newSignupsOnWaitlistEmailHTML(emailProps);

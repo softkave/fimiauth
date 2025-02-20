@@ -4,6 +4,7 @@ import {checkAuthorization} from '../../../contexts/authorizationChecks/checkAut
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
 import {kFimidaraPermissionActions} from '../../../definitions/permissionItem.js';
 import RequestData from '../../RequestData.js';
+import {generateAndInsertSpaceListForTest} from '../../testUtils/generate/space.js';
 import {expectErrorThrown} from '../../testUtils/helpers/error.js';
 import {expectEntityHasPermissionsTargetingId} from '../../testUtils/helpers/permissionItem.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
@@ -50,27 +51,31 @@ describe('addItems', () => {
     const subsetWorkspaceActions = faker.helpers.arrayElements(
       actionsWithoutWildcard
     );
-    const completeWorkspaceActionsInputItems = actionsWithoutWildcard.map(
-      (action): PermissionItemInput => ({
-        action,
-        access: grantAccess,
-        targetId: workspace.resourceId,
-        entityId: [pg01.resourceId, pg02.resourceId],
-      })
-    );
-    const subsetWorkspaceActionsInputItems = subsetWorkspaceActions.map(
-      (action): PermissionItemInput => ({
-        action,
-        access: grantAccess,
-        targetId: workspace.resourceId,
-        entityId: [
+    const completeWorkspaceActionsInputItems = actionsWithoutWildcard
+      .map((action): PermissionItemInput[] =>
+        [pg01.resourceId, pg02.resourceId].map(entityId => ({
+          action,
+          access: grantAccess,
+          targetId: workspace.resourceId,
+          entityId,
+        }))
+      )
+      .flat();
+    const subsetWorkspaceActionsInputItems = subsetWorkspaceActions
+      .map((action): PermissionItemInput[] =>
+        [
           pg01.resourceId,
           pg02.resourceId,
           pg03.resourceId,
           pg04.resourceId,
-        ],
-      })
-    );
+        ].map(entityId => ({
+          action,
+          access: grantAccess,
+          targetId: workspace.resourceId,
+          entityId,
+        }))
+      )
+      .flat();
 
     const reqData =
       RequestData.fromExpressRequest<AddPermissionItemsEndpointParams>(
@@ -108,8 +113,8 @@ describe('addItems', () => {
 
     async function randomCheckAuth() {
       await checkAuthorization({
-        workspace,
         workspaceId: workspace.resourceId,
+        spaceId: workspace.spaceId,
         target: {
           entityId: faker.helpers.arrayElement([
             pg01.resourceId,
@@ -120,8 +125,8 @@ describe('addItems', () => {
         },
       });
       await checkAuthorization({
-        workspace,
         workspaceId: workspace.resourceId,
+        spaceId: workspace.spaceId,
         target: {
           entityId: faker.helpers.arrayElement([
             pg01.resourceId,
@@ -236,25 +241,29 @@ describe('addItems', () => {
 
   test('correct targetParentId added', async () => {
     const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
-    const [folder01] = await generateAndInsertTestFolders(1, {
-      workspaceId: workspace.resourceId,
-      parentId: null,
+    const [folder01] = await generateAndInsertSpaceListForTest({
+      count: 1,
+      seed: {
+        workspaceId: workspace.resourceId,
+      },
     });
-    const [folder02] = await generateAndInsertTestFolders(1, {
-      workspaceId: workspace.resourceId,
-      parentId: folder01.resourceId,
+    const [folder02] = await generateAndInsertSpaceListForTest({
+      count: 1,
+      seed: {
+        workspaceId: workspace.resourceId,
+      },
     });
     const itemsInput: PermissionItemInput[] = [
       {
         access: true,
-        action: kFimidaraPermissionActions.readFile,
-        entityId: user.resourceId,
+        action: kFimidaraPermissionActions.readSpace,
+        entityId: agentToken.resourceId,
         targetId: folder01.resourceId,
       },
       {
         access: true,
-        action: kFimidaraPermissionActions.readFile,
-        entityId: user.resourceId,
+        action: kFimidaraPermissionActions.readSpace,
+        entityId: agentToken.resourceId,
         targetId: folder02.resourceId,
       },
     ];
@@ -270,7 +279,7 @@ describe('addItems', () => {
     const pItems = await kSemanticModels
       .permissionItem()
       .getManyByQuery(
-        PermissionItemQueries.getByPermissionEntity(user.resourceId)
+        PermissionItemQueries.getByPermissionEntity(agentToken.resourceId)
       );
     const pItemFolder01 = pItems.find(
       item => item.targetId === folder01.resourceId

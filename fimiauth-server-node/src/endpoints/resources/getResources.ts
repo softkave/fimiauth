@@ -1,5 +1,8 @@
 import {get, mapKeys} from 'lodash-es';
-import {checkAuthorizationWithAgent} from '../../contexts/authorizationChecks/checkAuthorizaton.js';
+import {
+  checkAuthorizationWithAgent,
+  kResolvedAuthCheckAccess,
+} from '../../contexts/authorizationChecks/checkAuthorizaton.js';
 import {kSemanticModels} from '../../contexts/injection/injectables.js';
 import {SemanticProviderOpParams} from '../../contexts/semantic/types.js';
 import {FimidaraPermissionAction} from '../../definitions/permissionItem.js';
@@ -32,16 +35,6 @@ type InputsWithIdGroupedByType = PartialRecord<
   FimidaraResourceType,
   Record</** resource ID */ string, FimidaraPermissionAction>
 >;
-
-type FilePathsMap = PartialRecord<
-  /** filepath or folderpath */ string,
-  FimidaraPermissionAction
->;
-
-interface WorkspaceRootnameWithAction {
-  workspaceRootname: string;
-  action: FimidaraPermissionAction;
-}
 
 export interface GetResourcesOptions {
   inputResources: Array<FetchResourceItem>;
@@ -278,8 +271,8 @@ async function authCheckResources(params: {
     )
   );
 
-  const permitted = resources.filter((resource, index) =>
-    results[index].every(check => check.hasAccess)
+  const permitted = resources.filter(
+    (resource, index) => results[index].access === kResolvedAuthCheckAccess.full
   );
   return permitted;
 }

@@ -49,17 +49,21 @@ export async function grantPermission(
   targetIdList: string[],
   action: FimidaraPermissionAction
 ) {
-  await addPermissionItems(
-    RequestData.fromExpressRequest<AddPermissionItemsEndpointParams>(req, {
-      workspaceId,
-      items: [
-        {
-          action,
-          targetId: targetIdList,
-          access: true,
-          entityId: agentId,
-        },
-      ],
-    })
+  await Promise.all(
+    targetIdList.map(targetId =>
+      addPermissionItems(
+        RequestData.fromExpressRequest<AddPermissionItemsEndpointParams>(req, {
+          workspaceId,
+          items: [
+            {
+              action,
+              targetId,
+              access: true,
+              entityId: agentId,
+            },
+          ],
+        })
+      )
+    )
   );
 }

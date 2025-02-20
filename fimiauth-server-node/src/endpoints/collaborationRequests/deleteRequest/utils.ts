@@ -32,6 +32,7 @@ export async function beginDeleteCollaborationRequest(props: {
             idempotencyToken: Date.now().toString(),
             params: {
               workspaceId,
+              spaceId,
               resourceId: resource.resourceId,
               type: kFimidaraResourceType.CollaborationRequest,
             },

@@ -10,13 +10,13 @@ import {
   initTests,
   insertWorkspaceForTest,
 } from '../../testUtils/testUtils.js';
-import {WorkspaceExistsError} from '../errors.js';
 import {assertWorkspace, workspaceExtractor} from '../utils.js';
 import {AddWorkspaceEndpointParams} from './types.js';
 import {
   kDefaultAdminPermissionGroupName,
   kDefaultPublicPermissionGroupName,
 } from './utils.js';
+import {ResourceExistsError} from '../../errors.js';
 
 beforeAll(async () => {
   await initTests();
@@ -81,6 +81,6 @@ describe('addWorkspace', () => {
       await insertWorkspaceForTest({
         name: workspace.name,
       });
-    }, [WorkspaceExistsError.name]);
+    }, [ResourceExistsError.name]);
   });
 });

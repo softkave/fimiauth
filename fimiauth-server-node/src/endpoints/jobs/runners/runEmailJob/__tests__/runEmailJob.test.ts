@@ -1,5 +1,6 @@
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 
+import {faker} from '@faker-js/faker';
 import {
   EmailProviderSendEmailResult,
   IEmailProviderContext,
@@ -22,7 +23,6 @@ import {
 import {kFimidaraConfigEmailProvider} from '../../../../../resources/config.js';
 import {kSystemSessionAgent} from '../../../../../utils/agent.js';
 import {generateAndInsertCollaborationRequestListForTest} from '../../../../testUtils/generate/collaborationRequest.js';
-import {generateAndInsertUserListForTest} from '../../../../testUtils/generate/user.js';
 import {generateAndInsertWorkspaceListForTest} from '../../../../testUtils/generate/workspace.js';
 import {completeTests} from '../../../../testUtils/helpers/testFns.js';
 import {initTests} from '../../../../testUtils/testUtils.js';
@@ -40,41 +40,42 @@ afterAll(async () => {
 
 describe('runEmailJob', () => {
   test('updates blocklist', async () => {
-    const [[user], [workspace]] = await Promise.all([
-      generateAndInsertUserListForTest(1),
+    const email = faker.internet.email();
+    const [[workspace]] = await Promise.all([
       generateAndInsertWorkspaceListForTest(1),
     ]);
     const [request] = await generateAndInsertCollaborationRequestListForTest(
       1,
       () => ({
-        recipientEmail: user.email,
+        recipientEmail: email,
         workspaceId: workspace.resourceId,
         workspaceName: workspace.name,
       })
     );
-    const [job] = await queueJobs<EmailJobParams>(
-      workspace.resourceId,
-      /** parent job ID */ undefined,
-      [
+    const [job] = await queueJobs<EmailJobParams>({
+      workspaceId: workspace.resourceId,
+      spaceId: workspace.spaceId,
+      parentJobId: undefined,
+      jobsInput: [
         {
           createdBy: kSystemSessionAgent,
           type: kJobType.email,
           params: {
-            emailAddress: [user.email],
-            userId: [user.resourceId],
+            emailAddress: [email],
+            userId: [],
             type: kEmailJobType.collaborationRequestResponse,
             params: {requestId: request.resourceId},
           },
           idempotencyToken: Date.now().toString(),
         },
-      ]
-    );
+      ],
+    });
 
     await runEmailJob(job);
     await kUtilsInjectables.promises().flush();
 
     const blocklistItem = await kSemanticModels.emailBlocklist().getOneByQuery({
-      emailAddress: user.email,
+      emailAddress: email,
       reason: kEmailBlocklistReason.bounce,
       trail: {
         $objMatch: {
@@ -87,35 +88,36 @@ describe('runEmailJob', () => {
   });
 
   test('updates job meta', async () => {
-    const [[user], [workspace]] = await Promise.all([
-      generateAndInsertUserListForTest(1),
+    const email = faker.internet.email();
+    const [[workspace]] = await Promise.all([
       generateAndInsertWorkspaceListForTest(1),
     ]);
     const [request] = await generateAndInsertCollaborationRequestListForTest(
       1,
       () => ({
-        recipientEmail: user.email,
+        recipientEmail: email,
         workspaceId: workspace.resourceId,
         workspaceName: workspace.name,
       })
     );
-    const [job] = await queueJobs<EmailJobParams>(
-      workspace.resourceId,
-      /** parent job ID */ undefined,
-      [
+    const [job] = await queueJobs<EmailJobParams>({
+      workspaceId: workspace.resourceId,
+      spaceId: workspace.spaceId,
+      parentJobId: undefined,
+      jobsInput: [
         {
           createdBy: kSystemSessionAgent,
           type: kJobType.email,
           params: {
-            emailAddress: [user.email],
-            userId: [user.resourceId],
+            emailAddress: [email],
+            userId: [],
             type: kEmailJobType.collaborationRequestResponse,
             params: {requestId: request.resourceId},
           },
           idempotencyToken: Date.now().toString(),
         },
-      ]
-    );
+      ],
+    });
 
     await runEmailJob(job);
     await kUtilsInjectables.promises().flush();

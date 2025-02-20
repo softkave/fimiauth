@@ -7,8 +7,6 @@ import {
   getGreetingText,
   getHeaderHTML,
   getHeaderText,
-  getLoginSectionHTML,
-  getLoginSectionText,
 } from './helpers.js';
 import {BaseEmailTemplateProps} from './types.js';
 
@@ -23,7 +21,6 @@ export const kNewSignupsOnWaitlistEmailArtifacts = {
 
 export interface NewSignupsOnWaitlistEmailProps extends BaseEmailTemplateProps {
   count: number;
-  upgradeWaitlistURL: string;
 }
 
 export function newSignupsOnWaitlistEmailHTML(
@@ -45,12 +42,8 @@ export function newSignupsOnWaitlistEmailHTML(
     <div class="${emailStylingHelpers.classNamePrefix}-content-center">
       ${getGreetingHTML(props)}
       <p>${kNewSignupsOnWaitlistEmailArtifacts.message(props.count)}</p>
-      <p><a href="${props.upgradeWaitlistURL}">${
-        props.upgradeWaitlistURL
-      }</a></p>
     </div>
   </div>
-  ${getLoginSectionHTML(props)}
   ${getFooterHTML()}
 </body>
 </html>
@@ -66,8 +59,6 @@ export function newSignupsOnWaitlistEmailText(
 ${emailHelperChars.emDash}
 ${getGreetingText(props)}
 ${kNewSignupsOnWaitlistEmailArtifacts.message(props.count)}
-${props.upgradeWaitlistURL}
-${getLoginSectionText(props)}
 `;
 
   return text;

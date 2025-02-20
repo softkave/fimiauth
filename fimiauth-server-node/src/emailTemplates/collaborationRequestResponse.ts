@@ -8,8 +8,6 @@ import {
   getGreetingText,
   getHeaderHTML,
   getHeaderText,
-  getLoginSectionHTML,
-  getLoginSectionText,
 } from './helpers.js';
 import {BaseEmailTemplateProps} from './types.js';
 
@@ -54,7 +52,6 @@ export function collaborationRequestResponseEmailHTML(
       ${kCollaborationRequestResponseArtifacts.message(props)}
       </p>
     `)}
-  ${getLoginSectionHTML(props)}
   ${getFooterHTML()}
 </body>
 </html>
@@ -69,7 +66,6 @@ export function collaborationRequestResponseEmailText(
 ${emailHelperChars.emDash}
 ${getGreetingText(props)}
 ${kCollaborationRequestResponseArtifacts.message(props)}
-${getLoginSectionText(props)}
 `;
 
   return txt;

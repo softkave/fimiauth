@@ -21,8 +21,6 @@ import {AnyFn} from '../../../../utils/types.js';
 import {sendCollaborationRequestEmail} from './sendCollaborationRequestEmail.js';
 import {sendCollaborationRequestResponseEmail} from './sendCollaborationRequestResponseEmail.js';
 import {sendCollaborationRequestRevokedEmail} from './sendCollaborationRequestRevokedEmail.js';
-import {sendConfirmEmailAddressEmail} from './sendConfirmEmailAddressEmail.js';
-import {sendForgotPasswordEmail} from './sendForgotPasswordEmail.js';
 import {sendNewSignupsOnWaitlistEmail} from './sendNewSignupsOnWaitlistEmail.js';
 import {sendUserUpgradedFromWaitlistEmail} from './sendUserUpgradedFromWaitlistEmail.js';
 
@@ -40,8 +38,6 @@ const kEmailJobTypeToHandlerMap: Record<
     sendCollaborationRequestResponseEmail,
   [kEmailJobType.collaborationRequestRevoked]:
     sendCollaborationRequestRevokedEmail,
-  [kEmailJobType.confirmEmailAddress]: sendConfirmEmailAddressEmail,
-  [kEmailJobType.forgotPassword]: sendForgotPasswordEmail,
   [kEmailJobType.upgradedFromWaitlist]: sendUserUpgradedFromWaitlistEmail,
   [kEmailJobType.newSignupsOnWaitlist]: sendNewSignupsOnWaitlistEmail,
 };

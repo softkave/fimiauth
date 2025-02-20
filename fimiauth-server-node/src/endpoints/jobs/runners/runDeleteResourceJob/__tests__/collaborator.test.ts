@@ -1,17 +1,14 @@
-import assert from 'assert';
 import {flatten} from 'lodash-es';
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import {kSemanticModels} from '../../../../../contexts/injection/injectables.js';
+import {Collaborator} from '../../../../../definitions/collaborator.js';
 import {kFimidaraResourceType} from '../../../../../definitions/system.js';
-import {User} from '../../../../../definitions/user.js';
-import {kSystemSessionAgent} from '../../../../../utils/agent.js';
 import {extractResourceIdList} from '../../../../../utils/fns.js';
 import {getNewIdForResource} from '../../../../../utils/resource.js';
-import {assignWorkspaceToUser} from '../../../../assignedItems/addAssignedItems.js';
 import {generateAndInsertCollaboratorListForTest} from '../../../../testUtils/generate/collaborator.js';
-import {generateAndInsertTestFiles} from '../../../../testUtils/generate/file.js';
 import {generateAndInsertAssignedItemListForTest} from '../../../../testUtils/generate/permissionGroup.js';
 import {generateAndInsertPermissionItemListForTest} from '../../../../testUtils/generate/permissionItem.js';
+import {generateAndInsertSpaceListForTest} from '../../../../testUtils/generate/space.js';
 import {completeTests} from '../../../../testUtils/helpers/testFns.js';
 import {initTests} from '../../../../testUtils/testUtils.js';
 import {deleteCollaboratorCascadeEntry} from '../collaborator.js';
@@ -31,80 +28,61 @@ afterAll(async () => {
   await completeTests();
 });
 
-const collaboratorGenerateTypeChildren: GenerateTypeChildrenDefinition<User> = {
-  ...noopGenerateTypeChildren,
-  [kFimidaraResourceType.PermissionItem]: generatePermissionItemsAsChildren,
-  [kFimidaraResourceType.AssignedItem]: async ({resource, workspaceId}) =>
-    flatten(
-      await Promise.all([
-        generateAndInsertAssignedItemListForTest(2, {
-          workspaceId,
-          assigneeId: resource.resourceId,
-        }),
-      ])
-    ),
-};
+const collaboratorGenerateTypeChildren: GenerateTypeChildrenDefinition<Collaborator> =
+  {
+    ...noopGenerateTypeChildren,
+    [kFimidaraResourceType.PermissionItem]: generatePermissionItemsAsChildren,
+    [kFimidaraResourceType.AssignedItem]: async ({resource, workspaceId}) =>
+      flatten(
+        await Promise.all([
+          generateAndInsertAssignedItemListForTest(2, {
+            workspaceId,
+            assigneeId: resource.resourceId,
+          }),
+        ])
+      ),
+  };
 
-const genResourceFn: GenerateResourceFn<User> = async ({workspaceId}) => {
+const genResourceFn: GenerateResourceFn<Collaborator> = async ({
+  workspaceId,
+}) => {
   const [collaborator] = await generateAndInsertCollaboratorListForTest(
-    kSystemSessionAgent,
-    workspaceId,
-    /** count */ 1
+    1,
+    () => ({
+      workspaceId,
+    })
   );
   return collaborator;
 };
 
-async function findWorkspaceCollaboratorAssignedItem(
-  id: string,
-  workspaceId: string
-) {
-  const assignedItems = await kSemanticModels
-    .assignedItem()
-    .getUserWorkspaces(id);
-  return assignedItems.find(item => item.workspaceId === workspaceId);
-}
-
 async function generateNonWorkspaceResources(id: string) {
   const otherWorkspaceId = getNewIdForResource(kFimidaraResourceType.Workspace);
-  const [pItems, files] = await Promise.all([
+  const [pItems, spaces] = await Promise.all([
     generateAndInsertPermissionItemListForTest(2, {entityId: id}),
-    generateAndInsertTestFiles(2, {
-      workspaceId: otherWorkspaceId,
-      parentId: null,
+    generateAndInsertSpaceListForTest({
+      count: 2,
+      seed: {
+        workspaceId: otherWorkspaceId,
+      },
     }),
-    kSemanticModels
-      .utils()
-      .withTxn(opts =>
-        assignWorkspaceToUser(kSystemSessionAgent, otherWorkspaceId, id, opts)
-      ),
   ]);
 
-  const assignedItem = findWorkspaceCollaboratorAssignedItem(
-    id,
-    otherWorkspaceId
-  );
-  assert(assignedItem);
-
-  return {assignedItem, pItems, files, otherWorkspaceId};
+  return {pItems, spaces, otherWorkspaceId};
 }
 
 async function expectNonWorkspaceUserResourcesRemain(
-  id: string,
-
   resources: Awaited<ReturnType<typeof generateNonWorkspaceResources>>
 ) {
-  const {pItems, files, otherWorkspaceId} = resources;
-  const [dbAssignedItem, dbPItems, dbFiles] = await Promise.all([
-    findWorkspaceCollaboratorAssignedItem(id, otherWorkspaceId),
+  const {pItems, spaces} = resources;
+  const [dbPItems, dbSpaces] = await Promise.all([
     kSemanticModels
       .permissionItem()
       .getManyByIdList(extractResourceIdList(pItems)),
-    kSemanticModels.file().getManyByIdList(extractResourceIdList(files)),
+    kSemanticModels.space().getManyByIdList(extractResourceIdList(spaces)),
   ]);
 
-  expect(dbAssignedItem).toBeTruthy();
-  expect(dbFiles.length).toBeGreaterThan(0);
   expect(dbPItems.length).toBeGreaterThan(0);
+  expect(dbSpaces.length).toBeGreaterThan(0);
 }
 
 describe('runDeleteResourceJob, agent token', () => {
@@ -120,28 +98,16 @@ describe('runDeleteResourceJob, agent token', () => {
       genWorkspaceFn: () => Promise.resolve(workspaceId),
       genChildrenDef: collaboratorGenerateTypeChildren,
       deleteCascadeDef: deleteCollaboratorCascadeEntry,
-      type: kFimidaraResourceType.User,
-      // getResourceFn: async () => {
-      //   const assignedItems = await kSemanticModels
-      //     .assignedItem()
-      //     .getUserWorkspaces(collaborator.resourceId);
-      //   return assignedItems.find(item => item.workspaceId === workspaceId);
-      // },
+      type: kFimidaraResourceType.Collaborator,
     });
 
-    await expectNonWorkspaceUserResourcesRemain(
-      collaborator.resourceId,
-      nonWorkspaceResources
-    );
+    await expectNonWorkspaceUserResourcesRemain(nonWorkspaceResources);
 
     const dbUser = await kSemanticModels
-      .user()
+      .collaborator()
       .getOneById(collaborator.resourceId);
     expect(dbUser).toBeTruthy();
 
-    await expectNonWorkspaceUserResourcesRemain(
-      collaborator.resourceId,
-      nonWorkspaceResources
-    );
+    await expectNonWorkspaceUserResourcesRemain(nonWorkspaceResources);
   });
 });

@@ -119,7 +119,7 @@ export interface SemanticWorkspaceResourceProviderType<
   ): Promise<TResource | null>;
   existsByName(
     params: {spaceId: string; name: string},
-    opts?: SemanticProviderOpParams
+    opts?: SemanticProviderQueryParams<TResource>
   ): Promise<boolean>;
   getByProvidedId(
     params: {spaceId: string; providedId: string},
@@ -131,7 +131,7 @@ export interface SemanticWorkspaceResourceProviderType<
   ): Promise<TResource | null>;
   existsByProvidedId(
     params: {spaceId: string; providedId: string},
-    opts?: SemanticProviderOpParams
+    opts?: SemanticProviderQueryParams<TResource>
   ): Promise<boolean>;
   getManyBySpaceId(
     params: {spaceId: string},

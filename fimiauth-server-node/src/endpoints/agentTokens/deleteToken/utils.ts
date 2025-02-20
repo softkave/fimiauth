@@ -32,6 +32,7 @@ export async function beginDeleteAgentToken(props: {
             idempotencyToken: Date.now().toString(),
             params: {
               workspaceId,
+              spaceId,
               resourceId: resource.resourceId,
               type: kFimidaraResourceType.AgentToken,
             },

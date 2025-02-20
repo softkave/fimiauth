@@ -10,7 +10,10 @@ import {
   kFimidaraResourceType,
 } from '../../../definitions/system.js';
 import {Workspace} from '../../../definitions/workspace.js';
-import {newWorkspaceResource} from '../../../utils/resource.js';
+import {
+  newWorkspaceResource,
+  tryGetResourceTypeFromId,
+} from '../../../utils/resource.js';
 import {AddPermissionItemsEndpointParams} from './types.js';
 
 export const INTERNAL_addPermissionItems = async (
@@ -21,17 +24,23 @@ export const INTERNAL_addPermissionItems = async (
 ) => {
   const entityIds = uniq(data.items.map(item => item.entityId));
   const inputItems: PermissionItem[] = data.items.map(item => {
+    const targetType = tryGetResourceTypeFromId(item.targetId) ?? null;
+    const entityType = tryGetResourceTypeFromId(item.entityId) ?? null;
     return newWorkspaceResource({
       agent,
       type: kFimidaraResourceType.PermissionItem,
       workspaceId: workspace.resourceId,
       spaceId: data.spaceId ?? workspace.resourceId,
       seed: {
-        containerId: item.containerId ?? [data.spaceId ?? workspace.resourceId],
+        containerId: item.containerId
+          ? [item.containerId]
+          : [data.spaceId ?? workspace.resourceId],
         targetId: item.targetId,
         action: item.action,
         entityId: item.entityId,
         access: item.access,
+        entityType,
+        targetType,
       },
     });
   });

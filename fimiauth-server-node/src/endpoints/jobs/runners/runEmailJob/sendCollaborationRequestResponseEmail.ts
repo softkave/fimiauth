@@ -1,3 +1,4 @@
+import {first} from 'lodash-es';
 import {
   kSemanticModels,
   kUtilsInjectables,
@@ -21,17 +22,13 @@ export async function sendCollaborationRequestResponseEmail(
     params.type === kEmailJobType.collaborationRequestResponse,
     `Email job type is not ${kEmailJobType.collaborationRequestResponse}`
   );
-  const [{user, base, source}, request] = await Promise.all([
+  const [{base, source}, request] = await Promise.all([
     getBaseEmailTemplateProps(params),
     kSemanticModels.collaborationRequest().getOneById(params.params.requestId),
   ]);
 
   if (!request) {
     throw new Error(`Collaboration request not found for job ${jobId}`);
-  }
-
-  if (!user) {
-    throw new Error(`User not found for job ${jobId}`);
   }
 
   const workspace = await kSemanticModels
@@ -42,9 +39,14 @@ export async function sendCollaborationRequestResponseEmail(
     throw new Error(`Workspace not found for job ${jobId}`);
   }
 
+  const emailAddress = first(params.emailAddress);
+  if (!emailAddress) {
+    throw new Error(`Email address not found for job ${jobId}`);
+  }
+
   const emailProps: CollaborationRequestResponseEmailProps = {
     ...base,
-    recipientEmail: user.email,
+    recipientEmail: emailAddress,
     response: request.status as CollaborationRequestResponse,
     workspaceName: workspace.name,
   };

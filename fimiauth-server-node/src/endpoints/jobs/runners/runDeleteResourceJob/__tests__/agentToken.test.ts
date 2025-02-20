@@ -3,7 +3,6 @@ import {afterAll, beforeAll, describe, test} from 'vitest';
 import {AgentToken} from '../../../../../definitions/agentToken.js';
 import {kFimidaraResourceType} from '../../../../../definitions/system.js';
 import {generateAndInsertAgentTokenListForTest} from '../../../../testUtils/generate/agentToken.js';
-import {generateAndInsertTestPresignedPathList} from '../../../../testUtils/generate/file.js';
 import {generateAndInsertAssignedItemListForTest} from '../../../../testUtils/generate/permissionGroup.js';
 import {completeTests} from '../../../../testUtils/helpers/testFns.js';
 import {initTests} from '../../../../testUtils/testUtils.js';
@@ -34,15 +33,6 @@ const agentTokenGenerateTypeChildren: GenerateTypeChildrenDefinition<AgentToken>
           generateAndInsertAssignedItemListForTest(2, {
             workspaceId,
             assigneeId: resource.resourceId,
-          }),
-        ])
-      ),
-    [kFimidaraResourceType.PresignedPath]: async ({resource, workspaceId}) =>
-      flatten(
-        await Promise.all([
-          generateAndInsertTestPresignedPathList(2, {
-            workspaceId,
-            issuerAgentTokenId: resource.resourceId,
           }),
         ])
       ),

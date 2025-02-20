@@ -79,6 +79,7 @@ async function getArtifactsAndQueueDeleteJobs(
         const params: DeleteResourceJobParams = {
           type,
           workspaceId,
+          spaceId: args.spaceId,
           resourceId: artifact.resourceId,
         };
 

@@ -21,8 +21,8 @@ export async function sendCollaborationRequestEmail(
     params.type === kEmailJobType.collaborationRequest,
     `Email job type is not ${kEmailJobType.collaborationRequest}`
   );
-  const {user, base, source} = await getBaseEmailTemplateProps(params);
-  const recipientEmail = user?.email || first(params.emailAddress);
+  const {base, source} = await getBaseEmailTemplateProps(params);
+  const recipientEmail = first(params.emailAddress);
 
   if (!recipientEmail) {
     throw new Error(`No recipient email for job ${jobId}`);
@@ -46,7 +46,6 @@ export async function sendCollaborationRequestEmail(
 
   const emailProps: CollaborationRequestEmailProps = {
     ...base,
-    isRecipientAUser: !!user,
     workspaceName: workspace.name,
     expires: request.expiresAt,
     message: request.message,

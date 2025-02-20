@@ -32,10 +32,6 @@ export interface SemanticAssignedItemProvider
     assignedItemId: string | string[];
     options?: SemanticProviderQueryListParams<AssignedItem>;
   }): Promise<AssignedItem[]>;
-  getUserWorkspaces(params: {
-    assigneeId: string;
-    options?: SemanticProviderQueryListParams<AssignedItem>;
-  }): Promise<AssignedItem[]>;
   deleteByAssigned(params: {
     spaceId: string;
     assignedId: string | string[];

@@ -16,10 +16,9 @@ import {kSystemSessionAgent} from '../../../../utils/agent.js';
 import {extractResourceIdList} from '../../../../utils/fns.js';
 import {getNewId} from '../../../../utils/resource.js';
 import {DeletePermissionItemInput} from '../../../permissionItems/deleteItems/types.js';
-import {generateAndInsertTestFiles} from '../../../testUtils/generate/file.js';
-import {generateAndInsertTestFolders} from '../../../testUtils/generate/folder.js';
 import {generateAndInsertPermissionGroupListForTest} from '../../../testUtils/generate/permissionGroup.js';
 import {generateAndInsertPermissionItemListForTest} from '../../../testUtils/generate/permissionItem.js';
+import {generateAndInsertSpaceListForTest} from '../../../testUtils/generate/space.js';
 import {generateAndInsertWorkspaceListForTest} from '../../../testUtils/generate/workspace.js';
 import {completeTests} from '../../../testUtils/helpers/testFns.js';
 import {initTests} from '../../../testUtils/testUtils.js';
@@ -43,13 +42,17 @@ describe('runDeletePermissionItemsJob', () => {
       generateAndInsertPermissionGroupListForTest(2, {
         workspaceId: workspace.resourceId,
       }),
-      generateAndInsertTestFiles(1, {
-        workspaceId: workspace.resourceId,
-        parentId: null,
+      generateAndInsertSpaceListForTest({
+        count: 1,
+        seed: {
+          workspaceId: workspace.resourceId,
+        },
       }),
-      generateAndInsertTestFolders(1, {
-        workspaceId: workspace.resourceId,
-        parentId: null,
+      generateAndInsertSpaceListForTest({
+        count: 1,
+        seed: {
+          workspaceId: workspace.resourceId,
+        },
       }),
     ]);
     const pgItems = flatten(
@@ -77,19 +80,20 @@ describe('runDeletePermissionItemsJob', () => {
       )
     );
     const shard = getNewId();
-    const [job] = await queueJobs<DeletePermissionItemInput>(
-      workspace.resourceId,
-      /** parent job ID */ undefined,
-      [
+    const [job] = await queueJobs<DeletePermissionItemInput>({
+      workspaceId: workspace.resourceId,
+      spaceId: workspace.spaceId,
+      parentJobId: undefined,
+      jobsInput: [
         {
           shard,
           createdBy: kSystemSessionAgent,
           type: kJobType.deletePermissionItem,
-          params: {entityId: extractResourceIdList(pgL)},
+          params: {entityId: extractResourceIdList(pgL)[0]},
           idempotencyToken: Date.now().toString(),
         },
-      ]
-    );
+      ],
+    });
 
     await runDeletePermissionItemsJob(job);
     await kUtilsInjectables.promises().flush();

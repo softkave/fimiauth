@@ -95,6 +95,33 @@ function generateCollaboratorPermissions(
   return permissionItems;
 }
 
+export function generateDefaultPublicPermissionGroup(params: {
+  agent: Agent;
+  workspace: Workspace;
+  seed?: Partial<PermissionGroup>;
+}) {
+  const {agent, workspace, seed} = params;
+  const createdAt = getTimestamp();
+  const publicPermissionGroup: PermissionGroup = {
+    ...seed,
+    createdAt,
+    lastUpdatedAt: createdAt,
+    lastUpdatedBy: agent,
+    resourceId: getNewIdForResource(kFimidaraResourceType.PermissionGroup),
+    workspaceId: workspace.resourceId,
+    createdBy: agent,
+    name: kDefaultPublicPermissionGroupName,
+    description:
+      'Auto-generated permission group for public/anonymous users. ' +
+      'Assign permissions to this group for resource/actions you want to be publicly accessible',
+    isDeleted: false,
+    spaceId: workspace.spaceId,
+    ...seed,
+  };
+
+  return publicPermissionGroup;
+}
+
 export function generateDefaultWorkspacePermissionGroups(
   agent: Agent,
   workspace: Workspace
@@ -113,20 +140,13 @@ export function generateDefaultWorkspacePermissionGroups(
     isDeleted: false,
     spaceId: workspace.spaceId,
   };
-  const publicPermissionGroup: PermissionGroup = {
-    createdAt,
-    lastUpdatedAt: createdAt,
-    lastUpdatedBy: agent,
-    resourceId: getNewIdForResource(kFimidaraResourceType.PermissionGroup),
-    workspaceId: workspace.resourceId,
-    createdBy: agent,
-    name: kDefaultPublicPermissionGroupName,
-    description:
-      'Auto-generated permission group for public/anonymous users. ' +
-      'Assign permissions to this group for resource/actions you want to be publicly accessible',
-    isDeleted: false,
-    spaceId: workspace.spaceId,
-  };
+  const publicPermissionGroup = generateDefaultPublicPermissionGroup({
+    agent,
+    workspace,
+    seed: {
+      createdAt,
+    },
+  });
   const collaboratorPermissionGroup: PermissionGroup = {
     createdAt,
     lastUpdatedAt: createdAt,

@@ -1,16 +1,18 @@
 import {kSemanticModels} from '../../contexts/injection/injectables.js';
 import {SemanticProviderOpParams} from '../../contexts/semantic/types.js';
-import {WorkspaceExistsError} from './errors.js';
+import {ResourceExistsError} from '../errors.js';
 
-export async function checkWorkspaceNameExists(
-  name: string,
-  opts?: SemanticProviderOpParams
-) {
-  const workspaceExists = await kSemanticModels
+export async function checkWorkspaceNameExists(params: {
+  name: string;
+  resourceId?: string;
+  opts?: SemanticProviderOpParams;
+}) {
+  const {name, opts, resourceId} = params;
+  const workspace = await kSemanticModels
     .workspace()
-    .workspaceExistsByName(name, opts);
+    .getWorkspaceByName(name, {...opts, projection: {resourceId: true}});
 
-  if (workspaceExists) {
-    throw new WorkspaceExistsError();
+  if (workspace && workspace.resourceId !== resourceId) {
+    throw new ResourceExistsError('Workspace exists');
   }
 }

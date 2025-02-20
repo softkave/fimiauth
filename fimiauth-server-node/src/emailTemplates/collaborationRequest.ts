@@ -13,7 +13,6 @@ import {BaseEmailTemplateProps} from './types.js';
 
 export interface CollaborationRequestEmailProps extends BaseEmailTemplateProps {
   workspaceName: string;
-  isRecipientAUser: boolean;
   message?: string;
   expires?: number;
 }
@@ -49,14 +48,6 @@ export function collaborationRequestEmailHTML(
         ? `<p>Expires: <br />${formatDateTime(props.expires)}</p>`
         : ''
     }
-    <p>
-      To respond to this request,
-      ${
-        props.isRecipientAUser
-          ? `<a href="${props.loginLink}">Login to your account here</a>`
-          : `<a href="${props.signupLink}">Signup here</a>`
-      }
-    </p>
     `)}
   ${getFooterHTML()}
 </body>
@@ -67,13 +58,7 @@ export function collaborationRequestEmailHTML(
 export function collaborationRequestEmailText(
   props: CollaborationRequestEmailProps
 ) {
-  let linkText = '';
   const title = kCollaborationRequestEmailArtifacts.title(props.workspaceName);
-  if (props.isRecipientAUser) {
-    linkText = `Login to your account here - ${props.loginLink}`;
-  } else {
-    linkText = `Create an account here - ${props.signupLink}`;
-  }
 
   const txt = `${getHeaderText(title)}
 ${emailHelperChars.emDash}
@@ -81,8 +66,6 @@ ${getGreetingText(props)}
 You have a new collaboration request from ${props.workspaceName}.
 ${props.message ? `Message: ${props.message}` : ''}
 ${props.expires ? `Expires: ${formatDateTime(props.expires)}` : ''}
-${emailHelperChars.emDash}
-To respond to this request, ${linkText}
   `;
 
   return txt;

@@ -127,6 +127,7 @@ const processPermissionItems: PaginatedFetchProcessFn<
         idempotencyToken: Date.now().toString(),
         params: {
           workspaceId: args.workspaceId,
+          spaceId: args.spaceId,
           resourceId: item.resourceId,
           type: kFimidaraResourceType.PermissionItem,
         },

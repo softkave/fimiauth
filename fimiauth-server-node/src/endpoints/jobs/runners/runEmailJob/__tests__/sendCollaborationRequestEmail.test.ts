@@ -1,3 +1,4 @@
+import {faker} from '@faker-js/faker';
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import {IEmailProviderContext} from '../../../../../contexts/email/types.js';
 import {kUtilsInjectables} from '../../../../../contexts/injection/injectables.js';
@@ -8,7 +9,6 @@ import {kCollaborationRequestEmailArtifacts} from '../../../../../emailTemplates
 import {getNewIdForResource} from '../../../../../utils/resource.js';
 import MockTestEmailProviderContext from '../../../../testUtils/context/email/MockTestEmailProviderContext.js';
 import {generateAndInsertCollaborationRequestListForTest} from '../../../../testUtils/generate/collaborationRequest.js';
-import {generateAndInsertUserListForTest} from '../../../../testUtils/generate/user.js';
 import {generateAndInsertWorkspaceListForTest} from '../../../../testUtils/generate/workspace.js';
 import {completeTests} from '../../../../testUtils/helpers/testFns.js';
 import {initTests} from '../../../../testUtils/testUtils.js';
@@ -24,14 +24,14 @@ afterAll(async () => {
 
 describe('sendCollaborationRequestEmail', () => {
   test('sendEmail called', async () => {
-    const [[user], [workspace]] = await Promise.all([
-      generateAndInsertUserListForTest(1),
+    const email = faker.internet.email();
+    const [[workspace]] = await Promise.all([
       generateAndInsertWorkspaceListForTest(1),
     ]);
     const [request] = await generateAndInsertCollaborationRequestListForTest(
       1,
       () => ({
-        recipientEmail: user.email,
+        recipientEmail: email,
         workspaceId: workspace.resourceId,
         workspaceName: workspace.name,
       })
@@ -42,8 +42,8 @@ describe('sendCollaborationRequestEmail', () => {
     await sendCollaborationRequestEmail(
       getNewIdForResource(kFimidaraResourceType.Job),
       {
-        emailAddress: [user.email],
-        userId: [user.resourceId],
+        emailAddress: [email],
+        userId: [],
         type: kEmailJobType.collaborationRequest,
         params: {requestId: request.resourceId},
       }
@@ -55,7 +55,7 @@ describe('sendCollaborationRequestEmail', () => {
     const params = call[0];
     expect(params.body.html).toBeTruthy();
     expect(params.body.text).toBeTruthy();
-    expect(params.destination).toEqual([user.email]);
+    expect(params.destination).toEqual([email]);
     expect(params.subject).toBe(
       kCollaborationRequestEmailArtifacts.title(workspace.name)
     );

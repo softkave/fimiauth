@@ -8,9 +8,11 @@ import {DeleteResourceCascadeEntry, DeleteResourceFn} from './types.js';
 
 const deleteResourceFn: DeleteResourceFn = ({args, helpers}) =>
   helpers.withTxn(opts =>
-    kSemanticModels
-      .assignedItem()
-      .deleteByAssignee(args.workspaceId, args.resourceId, opts)
+    kSemanticModels.assignedItem().deleteByAssignee({
+      spaceId: args.spaceId,
+      assigneeItemId: args.resourceId,
+      opts,
+    })
   );
 
 export const deleteCollaboratorCascadeEntry: DeleteResourceCascadeEntry = {

@@ -8,6 +8,7 @@ const jobHistorySchema = ensureMongoTypeFields<JobHistory>({
   workspaceId: {type: String, index: true},
   status: {type: String},
   runnerId: {type: String},
+  spaceId: {type: String, index: true},
 });
 
 export type JobHistoryDocument = Document<JobHistory>;

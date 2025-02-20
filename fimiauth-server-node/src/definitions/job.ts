@@ -1,7 +1,6 @@
-import {AnyFn, AnyObject, OmitFrom, PartialRecord} from 'softkave-js-utils';
+import {AnyFn, AnyObject, PartialRecord} from 'softkave-js-utils';
 import {ValueOf} from 'type-fest';
 import {NewSignupsOnWaitlistEmailProps} from '../emailTemplates/newSignupsOnWaitlist.js';
-import {BaseEmailTemplateProps} from '../emailTemplates/types.js';
 import {FimidaraConfigEmailProvider} from '../resources/config.js';
 import {AppShardId} from './app.js';
 import {Agent, FimidaraResourceType, Resource} from './system.js';
@@ -90,6 +89,7 @@ export interface Job<
 
 export type DeleteResourceCascadeFnDefaultArgs = {
   workspaceId: string;
+  spaceId: string;
   resourceId: string;
 };
 
@@ -153,10 +153,7 @@ export type EmailJobParams = {
   | {type: typeof kEmailJobType.upgradedFromWaitlist}
   | {
       type: typeof kEmailJobType.newSignupsOnWaitlist;
-      params: OmitFrom<
-        NewSignupsOnWaitlistEmailProps,
-        keyof BaseEmailTemplateProps | 'upgradeWaitlistURL'
-      >;
+      params: NewSignupsOnWaitlistEmailProps;
     }
 );
 // | {

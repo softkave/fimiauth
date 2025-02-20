@@ -2,20 +2,14 @@ import {FimidaraPermissionAction} from '../../../definitions/permissionItem.js';
 import {Endpoint, EndpointOptionalWorkspaceIDParam} from '../../types.js';
 import {PermissionItemInputTarget} from '../types.js';
 
-export type ResolveEntityPermissionItemInputTarget = PermissionItemInputTarget;
-
 export interface ResolveEntityPermissionItemInput
   extends PermissionItemInputTarget {
   action: FimidaraPermissionAction;
-  entityId: string;
-}
-
-export interface ResolvedEntityPermissionItemTarget {
-  targetId?: string;
+  entityId: string | string[];
 }
 
 export interface ResolvedEntityPermissionItem {
-  target: ResolvedEntityPermissionItemTarget;
+  targetId: string;
   action: FimidaraPermissionAction;
   entityId: string;
   access: boolean;

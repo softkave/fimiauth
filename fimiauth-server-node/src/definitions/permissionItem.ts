@@ -45,10 +45,10 @@ export type FimidaraPermissionTargetType = FimidaraResourceType | (string & {});
 
 export interface PermissionItem extends WorkspaceResource {
   entityId: string;
-  entityType: FimidaraPermissionEntityType;
+  entityType: FimidaraPermissionEntityType | (string & {}) | null;
   containerId?: string[];
   targetId: string;
-  targetType: FimidaraPermissionTargetType;
+  targetType: FimidaraPermissionTargetType | (string & {}) | null;
   access: boolean;
   action: FimidaraPermissionAction;
 }

@@ -20,13 +20,15 @@ import {convertToArray} from '../../../utils/fns.js';
 import {indexArray} from '../../../utils/indexArray.js';
 import {InvalidRequestError} from '../../errors.js';
 import {getPermissionItemTargets} from '../getPermissionItemTargets.js';
-import {PermissionItemInputTarget} from '../types.js';
+import {
+  PermissionItemInputTarget,
+  ResolvedEntityPermissionItemTarget,
+} from '../types.js';
 import {getPermissionItemEntities} from '../utils.js';
 import {
   ResolveEntityPermissionItemInput,
   ResolveEntityPermissionsEndpointParams,
   ResolvedEntityPermissionItem,
-  ResolvedEntityPermissionItemTarget,
 } from './types.js';
 
 type ResolvedTargetItem = ResourceWrapper & ResolvedEntityPermissionItemTarget;
@@ -183,7 +185,7 @@ export const INTERNAL_resolveEntityPermissions = async (
         access: checkResult.access === kResolvedAuthCheckAccess.full,
         action: nextItem.action,
         entityId: nextItem.entity.resourceId,
-        target: nextItem.resolvedTarget,
+        targetId: nextItem.target.resourceId,
         permittingEntityId: nextItem.entity.resourceId,
         permittingTargetId: nextItem.target.resourceId,
       };

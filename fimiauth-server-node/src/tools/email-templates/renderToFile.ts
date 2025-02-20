@@ -50,9 +50,6 @@ async function writeToFile(filename: string, htmlText: string, text: string) {
 export async function renderCollaborationRequestMedia() {
   const props: CollaborationRequestEmailProps = {
     workspaceName: 'Fimidara',
-    isRecipientAUser: true,
-    loginLink: 'https://fimidara.com/accounts/signup',
-    signupLink: 'https://fimidara.com/accounts/login',
     expires: getTimestamp(),
     message:
       'Test collaboration request message. ' +
@@ -69,8 +66,6 @@ export async function renderCollaborationRequestMedia() {
 export async function renderCollaborationRequestRevokedMedia() {
   const props: CollaborationRequestRevokedEmailProps = {
     workspaceName: 'Fimidara',
-    signupLink: 'https://fimidara.com/accounts/signup',
-    loginLink: 'https://fimidara.com/accounts/login',
     firstName: 'Abayomi',
   };
 
@@ -83,8 +78,6 @@ export async function renderCollaborationRequestRevokedMedia() {
 export async function renderCollaborationRequestResponseMedia() {
   const props: CollaborationRequestResponseEmailProps = {
     workspaceName: 'Fimidara',
-    signupLink: 'https://fimidara.com/accounts/signup',
-    loginLink: 'https://fimidara.com/accounts/login',
     recipientEmail: faker.internet.email(),
     response: kCollaborationRequestStatusTypeMap.Accepted,
     firstName: 'Abayomi',
@@ -98,8 +91,6 @@ export async function renderCollaborationRequestResponseMedia() {
 // Upgraded from waitlist
 export async function renderUpgradedFromWaitlistMedia() {
   const props: UpgradedFromWaitlistEmailProps = {
-    signupLink: 'https://fimidara.com/accounts/signup',
-    loginLink: 'https://fimidara.com/accounts/login',
     firstName: 'Abayomi',
   };
 
@@ -113,9 +104,6 @@ export async function renderNewSignupsOnWaitlistMedia() {
   const props: NewSignupsOnWaitlistEmailProps = {
     count: 5,
     firstName: 'Abayomi',
-    loginLink: 'https://fimidara.com/accounts/login',
-    signupLink: 'https://fimidara.com/accounts/signup',
-    upgradeWaitlistURL: 'https://fimidara.com/internals/waitlist',
   };
 
   const renderedHTML = newSignupsOnWaitlistEmailHTML(props);

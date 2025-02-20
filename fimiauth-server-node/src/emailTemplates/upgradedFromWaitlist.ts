@@ -8,8 +8,6 @@ import {
   getGreetingText,
   getHeaderHTML,
   getHeaderText,
-  getLoginSectionHTML,
-  getLoginSectionText,
 } from './helpers.js';
 import {BaseEmailTemplateProps} from './types.js';
 
@@ -22,7 +20,7 @@ export const kUpgradeFromWaitlistEmailArtifacts = {
 };
 
 export interface UpgradedFromWaitlistEmailProps extends BaseEmailTemplateProps {
-  firstName: string;
+  firstName?: string;
 }
 
 export function upgradedFromWaitlistEmailHTML(
@@ -44,7 +42,6 @@ export function upgradedFromWaitlistEmailHTML(
       <p>${kUpgradeFromWaitlistEmailArtifacts.message()}</p>
     </div>
   </div>
-  ${getLoginSectionHTML(props)}
   ${getFooterHTML()}
 </body>
 </html>
@@ -58,7 +55,6 @@ export function upgradedFromWaitlistEmailText(
 ${emailHelperChars.emDash}
 ${getGreetingText(props)}
 ${kUpgradeFromWaitlistEmailArtifacts.message()}
-${getLoginSectionText(props)}
 `;
 
   return text;

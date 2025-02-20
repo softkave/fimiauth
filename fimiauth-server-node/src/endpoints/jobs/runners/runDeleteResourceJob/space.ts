@@ -1,3 +1,4 @@
+import {uniqBy} from 'lodash-es';
 import {kSemanticModels} from '../../../../contexts/injection/injectables.js';
 import {kFimidaraResourceType} from '../../../../definitions/system.js';
 import {
@@ -10,15 +11,28 @@ import {
   DeleteResourceFn,
   DeleteResourceGetArtifactsToDeleteFns,
 } from './types.js';
+import {getResourcePermissionItemArtifacts} from './utils.js';
 
 const getArtifacts: DeleteResourceGetArtifactsToDeleteFns = {
   ...genericGetArtifacts,
   [kFimidaraResourceType.Space]: ({args, opts}) =>
     kSemanticModels.space().getManyBySpaceId({spaceId: args.spaceId}, opts),
-  [kFimidaraResourceType.PermissionItem]: ({args, opts}) =>
-    kSemanticModels
-      .permissionItem()
-      .getManyBySpaceId({spaceId: args.spaceId}, opts),
+  [kFimidaraResourceType.PermissionItem]: async params => {
+    const {args, opts} = params;
+    const [spaceOwnedPermissions, spacePermissionItems] = await Promise.all([
+      kSemanticModels
+        .permissionItem()
+        .getManyBySpaceId({spaceId: args.spaceId}, opts),
+      getResourcePermissionItemArtifacts(params),
+    ]);
+
+    const permissionItemsToDelete = uniqBy(
+      [...spaceOwnedPermissions, ...spacePermissionItems],
+      'resourceId'
+    );
+
+    return permissionItemsToDelete;
+  },
 };
 
 const deleteArtifacts: DeleteResourceDeleteArtifactsFns = {
@@ -37,12 +51,7 @@ const deleteArtifacts: DeleteResourceDeleteArtifactsFns = {
   [kFimidaraResourceType.Workspace]: null,
   [kFimidaraResourceType.emailBlocklist]: null,
   [kFimidaraResourceType.appShard]: null,
-  [kFimidaraResourceType.emailMessage]: ({args, helpers}) =>
-    helpers.withTxn(opts =>
-      kSemanticModels
-        .emailMessage()
-        .deleteManyBySpaceId({spaceId: args.spaceId}, opts)
-    ),
+  [kFimidaraResourceType.emailMessage]: null,
   [kFimidaraResourceType.CollaborationRequest]: ({args, helpers}) =>
     helpers.withTxn(opts =>
       kSemanticModels
@@ -90,7 +99,7 @@ const deleteResourceFn: DeleteResourceFn = ({args, helpers}) =>
     kSemanticModels.workspace().deleteOneById(args.resourceId, opts)
   );
 
-export const deleteWorkspaceCascadeEntry: DeleteResourceCascadeEntry = {
+export const deleteSpaceCascadeEntry: DeleteResourceCascadeEntry = {
   deleteResourceFn,
   getArtifactsToDelete: getArtifacts,
   deleteArtifacts: deleteArtifacts,

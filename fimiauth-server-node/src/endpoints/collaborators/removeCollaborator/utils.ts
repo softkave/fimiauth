@@ -32,6 +32,7 @@ export async function beginDeleteCollaborator(props: {
             idempotencyToken: Date.now().toString(),
             params: {
               workspaceId,
+              spaceId,
               resourceId: resource.resourceId,
               type: kFimidaraResourceType.Collaborator,
             },

@@ -4,23 +4,13 @@ import {kFimidaraResourceType} from '../../../../../definitions/system.js';
 import {Workspace} from '../../../../../definitions/workspace.js';
 import {generateAndInsertAgentTokenListForTest} from '../../../../testUtils/generate/agentToken.js';
 import {generateAndInsertCollaborationRequestListForTest} from '../../../../testUtils/generate/collaborationRequest.js';
-import {
-  generateAndInsertTestFiles,
-  generateAndInsertTestPresignedPathList,
-} from '../../../../testUtils/generate/file.js';
-import {
-  generateAndInsertFileBackendConfigListForTest,
-  generateAndInsertFileBackendMountListForTest,
-  generateAndInsertResolvedMountEntryListForTest,
-} from '../../../../testUtils/generate/fileBackend.js';
-import {generateAndInsertTestFolders} from '../../../../testUtils/generate/folder.js';
+import {generateAndInsertCollaboratorListForTest} from '../../../../testUtils/generate/collaborator.js';
 import {
   generateAndInsertAssignedItemListForTest,
   generateAndInsertPermissionGroupListForTest,
 } from '../../../../testUtils/generate/permissionGroup.js';
 import {generateAndInsertPermissionItemListForTest} from '../../../../testUtils/generate/permissionItem.js';
-import {generateAndInsertTagListForTest} from '../../../../testUtils/generate/tag.js';
-import {generateAndInsertUsageRecordList} from '../../../../testUtils/generate/usageRecord.js';
+import {generateAndInsertSpaceListForTest} from '../../../../testUtils/generate/space.js';
 import {generateAndInsertWorkspaceListForTest} from '../../../../testUtils/generate/workspace.js';
 import {completeTests} from '../../../../testUtils/helpers/testFns.js';
 import {initTests} from '../../../../testUtils/testUtils.js';
@@ -69,54 +59,25 @@ const workspaceGenerateTypeChildren: GenerateTypeChildrenDefinition<Workspace> =
           generateAndInsertPermissionItemListForTest(2, {workspaceId}),
         ])
       ),
-    [kFimidaraResourceType.Folder]: async ({workspaceId}) =>
+    [kFimidaraResourceType.Space]: async ({workspaceId}) =>
       flatten(
         await Promise.all([
-          generateAndInsertTestFolders(2, {workspaceId, parentId: null}),
+          generateAndInsertSpaceListForTest({
+            count: 2,
+            seed: {workspaceId},
+          }),
         ])
       ),
-    [kFimidaraResourceType.File]: async ({workspaceId}) =>
+    [kFimidaraResourceType.Collaborator]: async ({workspaceId}) =>
       flatten(
         await Promise.all([
-          generateAndInsertTestFiles(2, {workspaceId, parentId: null}),
+          generateAndInsertCollaboratorListForTest(2, () => ({workspaceId})),
         ])
-      ),
-    [kFimidaraResourceType.Tag]: async ({workspaceId}) =>
-      flatten(
-        await Promise.all([generateAndInsertTagListForTest(2, {workspaceId})])
       ),
     [kFimidaraResourceType.AssignedItem]: async ({workspaceId}) =>
       flatten(
         await Promise.all([
           generateAndInsertAssignedItemListForTest(2, {workspaceId}),
-        ])
-      ),
-    [kFimidaraResourceType.UsageRecord]: async ({workspaceId}) =>
-      flatten(
-        await Promise.all([generateAndInsertUsageRecordList(2, {workspaceId})])
-      ),
-    [kFimidaraResourceType.PresignedPath]: async ({workspaceId}) =>
-      flatten(
-        await Promise.all([
-          generateAndInsertTestPresignedPathList(2, {workspaceId}),
-        ])
-      ),
-    [kFimidaraResourceType.FileBackendMount]: async ({workspaceId}) =>
-      flatten(
-        await Promise.all([
-          generateAndInsertFileBackendMountListForTest(2, {workspaceId}),
-        ])
-      ),
-    [kFimidaraResourceType.FileBackendConfig]: async ({workspaceId}) =>
-      flatten(
-        await Promise.all([
-          generateAndInsertFileBackendConfigListForTest(2, {workspaceId}),
-        ])
-      ),
-    [kFimidaraResourceType.ResolvedMountEntry]: async ({workspaceId}) =>
-      flatten(
-        await Promise.all([
-          generateAndInsertResolvedMountEntryListForTest(2, {workspaceId}),
         ])
       ),
   };

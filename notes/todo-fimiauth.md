@@ -64,3 +64,5 @@
 - logic around delete space
 - send email if request description changed
 - targetId should be spaceId or workspaceId
+- allow multiple entityIds for permission items api
+- allow multiple targetIds for permission items api

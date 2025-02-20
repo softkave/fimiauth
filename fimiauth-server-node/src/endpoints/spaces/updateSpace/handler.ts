@@ -40,7 +40,12 @@ const updateSpace: UpdateSpaceEndpoint = async reqData => {
     };
 
     if (update.name && update.name !== space.name) {
-      await checkSpaceNameExists(workspace.resourceId, update.name, opts);
+      await checkSpaceNameExists({
+        name: update.name,
+        workspaceId: workspace.resourceId,
+        resourceId: space.resourceId,
+        opts,
+      });
     }
 
     const updatedSpace = await kSemanticModels

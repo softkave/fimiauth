@@ -102,7 +102,6 @@ const kGetResourcesByIdDef: GetResourcesByIdDefinition = {
   [kFimidaraResourceType.All]: () => Promise.resolve([]),
   [kFimidaraResourceType.System]: () => Promise.resolve([]),
   [kFimidaraResourceType.Public]: () => Promise.resolve([]),
-  [kFimidaraResourceType.User]: () => Promise.resolve([]),
   [kFimidaraResourceType.EndpointRequest]: () => Promise.resolve([]),
   [kFimidaraResourceType.App]: () => Promise.resolve([]),
   [kFimidaraResourceType.Job]: () => Promise.resolve([]),
@@ -118,24 +117,12 @@ const kGetResourcesByIdDef: GetResourcesByIdDefinition = {
     kSemanticModels.permissionGroup().getManyByIdList(idList),
   [kFimidaraResourceType.PermissionItem]: ({idList}) =>
     kSemanticModels.permissionItem().getManyByIdList(idList),
-  [kFimidaraResourceType.Folder]: ({idList}) =>
-    kSemanticModels.folder().getManyByIdList(idList),
-  [kFimidaraResourceType.File]: ({idList}) =>
-    kSemanticModels.file().getManyByIdList(idList),
-  [kFimidaraResourceType.Tag]: ({idList}) =>
-    kSemanticModels.tag().getManyByIdList(idList),
+  [kFimidaraResourceType.Space]: ({idList}) =>
+    kSemanticModels.space().getManyByIdList(idList),
+  [kFimidaraResourceType.Collaborator]: ({idList}) =>
+    kSemanticModels.collaborator().getManyByIdList(idList),
   [kFimidaraResourceType.AssignedItem]: ({idList}) =>
     kSemanticModels.assignedItem().getManyByIdList(idList),
-  [kFimidaraResourceType.UsageRecord]: ({idList}) =>
-    kSemanticModels.usageRecord().getManyByIdList(idList),
-  [kFimidaraResourceType.PresignedPath]: ({idList}) =>
-    kSemanticModels.presignedPath().getManyByIdList(idList),
-  [kFimidaraResourceType.FileBackendMount]: ({idList}) =>
-    kSemanticModels.fileBackendMount().getManyByIdList(idList),
-  [kFimidaraResourceType.FileBackendConfig]: ({idList}) =>
-    kSemanticModels.fileBackendConfig().getManyByIdList(idList),
-  [kFimidaraResourceType.ResolvedMountEntry]: ({idList}) =>
-    kSemanticModels.resolvedMountEntry().getManyByIdList(idList),
   [kFimidaraResourceType.emailMessage]: ({idList}) =>
     kSemanticModels.emailMessage().getManyByIdList(idList),
   [kFimidaraResourceType.emailBlocklist]: ({idList}) =>
@@ -223,19 +210,25 @@ export async function testDeleteResourceArtifactsJob<
     forTypes: artifactTypes as FimidaraResourceType[],
   });
 
-  const [job] = await queueJobs<DeleteResourceJobParams>(
+  const [job] = await queueJobs<DeleteResourceJobParams>({
     workspaceId,
-    /** parent job ID */ undefined,
-    [
+    parentJobId: undefined,
+    spaceId: workspaceId,
+    jobsInput: [
       {
         shard,
         createdBy: kSystemSessionAgent,
         type: kJobType.deleteResource,
-        params: {type, workspaceId, resourceId: mainResource.resourceId},
+        params: {
+          type,
+          workspaceId,
+          resourceId: mainResource.resourceId,
+          spaceId: workspaceId,
+        },
         idempotencyToken: Date.now().toString(),
       },
-    ]
-  );
+    ],
+  });
 
   await runDeleteResourceJob(job);
   await kUtilsInjectables.promises().flush();

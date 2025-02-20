@@ -11,6 +11,7 @@ import {PermissionGroup} from './permissionGroups.js';
 import {PermissionItem} from './permissionItem.js';
 import {Space} from './space.js';
 import {Workspace} from './workspace.js';
+import {Collaborator} from './collaborator.js';
 
 export const kCurrentJWTTokenVersion = 1;
 
@@ -231,4 +232,6 @@ export type FimidaraTypeToTSType<T extends FimidaraResourceType> =
                           ? AppShard
                           : T extends typeof kFimidaraResourceType.jobHistory
                             ? JobHistory
-                            : typeof kFimidaraTypeToTSTypeNotFound;
+                            : T extends typeof kFimidaraResourceType.Collaborator
+                              ? Collaborator
+                              : typeof kFimidaraTypeToTSTypeNotFound;

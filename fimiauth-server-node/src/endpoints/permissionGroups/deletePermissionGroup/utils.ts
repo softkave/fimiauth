@@ -32,6 +32,7 @@ export async function beginDeletePermissionGroup(props: {
             idempotencyToken: Date.now().toString(),
             params: {
               workspaceId,
+              spaceId,
               resourceId: resource.resourceId,
               type: kFimidaraResourceType.PermissionGroup,
             },

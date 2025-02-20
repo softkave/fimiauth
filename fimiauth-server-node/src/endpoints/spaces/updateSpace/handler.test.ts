@@ -1,26 +1,26 @@
 import {faker} from '@faker-js/faker';
 import {afterAll, beforeAll, expect, test} from 'vitest';
 import {kSemanticModels} from '../../../contexts/injection/injectables.js';
-import RequestData from '../../RequestData.js';
 import EndpointReusableQueries from '../../queries.js';
+import RequestData from '../../RequestData.js';
+import {
+  UpdateSpaceEndpointParams,
+  UpdateSpaceInput,
+} from '../../spaces/updateSpace/types.js';
+import {spaceExtractor} from '../../spaces/utils.js';
 import {completeTests} from '../../testUtils/helpers/testFns.js';
 import {
   assertEndpointResultOk,
   generateWorkspaceAndSessionAgent,
   initTests,
-  insertPermissionGroupForTest,
+  insertSpaceForTest,
   mockExpressRequestWithAgentToken,
 } from '../../testUtils/testUtils.js';
-import updatePermissionGroup from './handler.js';
-import {
-  UpdatePermissionGroupEndpointParams,
-  UpdatePermissionGroupInput,
-} from './types.js';
-import {permissionGroupExtractor} from '../../permissionGroups/utils.js';
+import updateSpace from './handler.js';
 
 /**
  * TODO:
- * - [Low] Test that hanlder fails if assigned permissionGroups doesn't exist
+ * - [Low] Test that hanlder fails if assigned spaces doesn't exist
  */
 
 beforeAll(async () => {
@@ -31,43 +31,43 @@ afterAll(async () => {
   await completeTests();
 });
 
-test('permissionGroup updated', async () => {
+test('space updated', async () => {
   const {workspace, agentToken} = await generateWorkspaceAndSessionAgent();
-  const {permissionGroup: permissionGroup00} =
-    await insertPermissionGroupForTest(agentToken, workspace.resourceId);
-  await insertPermissionGroupForTest(agentToken, workspace.resourceId);
-  await insertPermissionGroupForTest(agentToken, workspace.resourceId);
+  const {space: space00} = await insertSpaceForTest({
+    agentToken,
+    workspaceId: workspace.resourceId,
+  });
+  await insertSpaceForTest({
+    agentToken,
+    workspaceId: workspace.resourceId,
+  });
+  await insertSpaceForTest({
+    agentToken,
+    workspaceId: workspace.resourceId,
+  });
 
-  const updatePermissionGroupInput: UpdatePermissionGroupInput = {
+  const updateSpaceInput: UpdateSpaceInput = {
     name: faker.lorem.words(2),
     description: faker.lorem.words(10),
   };
-  const reqData =
-    RequestData.fromExpressRequest<UpdatePermissionGroupEndpointParams>(
-      mockExpressRequestWithAgentToken(agentToken),
-      {
-        permissionGroupId: permissionGroup00.resourceId,
-        data: updatePermissionGroupInput,
-      }
-    );
+  const reqData = RequestData.fromExpressRequest<UpdateSpaceEndpointParams>(
+    mockExpressRequestWithAgentToken(agentToken),
+    {
+      spaceId: space00.resourceId,
+      data: updateSpaceInput,
+    }
+  );
 
-  const result = await updatePermissionGroup(reqData);
+  const result = await updateSpace(reqData);
   assertEndpointResultOk(result);
 
-  const updatedPermissionGroup = await populateAssignedTags(
-    workspace.resourceId,
-    await kSemanticModels
-      .permissionGroup()
-      .assertGetOneByQuery(
-        EndpointReusableQueries.getByResourceId(permissionGroup00.resourceId)
-      )
-  );
+  const updatedSpace = await kSemanticModels
+    .space()
+    .assertGetOneByQuery(
+      EndpointReusableQueries.getByResourceId(space00.resourceId)
+    );
 
-  expect(permissionGroupExtractor(updatedPermissionGroup)).toMatchObject(
-    result.permissionGroup
-  );
-  expect(updatedPermissionGroup.name).toEqual(updatePermissionGroupInput.name);
-  expect(updatedPermissionGroup.description).toEqual(
-    updatePermissionGroupInput.description
-  );
+  expect(spaceExtractor(updatedSpace)).toMatchObject(result.space);
+  expect(updatedSpace.name).toEqual(updateSpaceInput.name);
+  expect(updatedSpace.description).toEqual(updateSpaceInput.description);
 });

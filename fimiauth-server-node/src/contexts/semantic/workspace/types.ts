@@ -1,13 +1,13 @@
 import {Workspace} from '../../../definitions/workspace.js';
 import {
-  SemanticProviderOpParams,
+  SemanticProviderQueryParams,
   SemanticWorkspaceResourceProviderType,
 } from '../types.js';
 
 export interface SemanticWorkspaceProviderType
   extends SemanticWorkspaceResourceProviderType<Workspace> {
-  workspaceExistsByName(
+  getWorkspaceByName(
     name: string,
-    opts?: SemanticProviderOpParams
-  ): Promise<boolean>;
+    opts?: SemanticProviderQueryParams<Workspace>
+  ): Promise<Workspace | null>;
 }

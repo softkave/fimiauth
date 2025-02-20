@@ -1,5 +1,4 @@
 import {kUtilsInjectables} from '../contexts/injection/injectables.js';
-import {BaseEmailTemplateProps} from './types.js';
 
 export const emailHelperChars = {emDash: '—'};
 
@@ -87,43 +86,6 @@ export function getDoNotReplyHTML() {
   );
 }
 
-export function getAccountAccessSectionHTML(props: BaseEmailTemplateProps) {
-  const signupContent = props.signupLink
-    ? `<a href="${props.signupLink}">Signup on fimidara here</a>`
-    : '';
-  const loginContent = props.loginLink
-    ? `<a href="${props.loginLink}">Login to fimidara here</a> - OR -<br />`
-    : '';
-
-  return getCenteredContentHTML(`
-    ${signupContent}
-    ${loginContent}
-  `);
-}
-
-export function getAccountAccessSectionText(props: BaseEmailTemplateProps) {
-  return `${emailHelperChars.emDash}
-Login to fimidara here ${emailHelperChars.emDash} ${props.loginLink} ${emailHelperChars.emDash} OR ${emailHelperChars.emDash}
-Signup on fimidara here ${emailHelperChars.emDash} ${props.signupLink}
-`;
-}
-
-export function getLoginSectionHTML(
-  props: Pick<BaseEmailTemplateProps, 'loginLink'>
-) {
-  return getCenteredContentHTML(`
-    <a href="${props.loginLink}">Login to your account here</a>
-  `);
-}
-
-export function getLoginSectionText(
-  props: Pick<BaseEmailTemplateProps, 'loginLink'>
-) {
-  return `—
-Login to your account here ${emailHelperChars.emDash} ${props.loginLink}\n
-`;
-}
-
 export function getHeaderText(title: string) {
   return `${kUtilsInjectables.suppliedConfig().appName} ${
     emailHelperChars.emDash
@@ -131,9 +93,9 @@ export function getHeaderText(title: string) {
 }
 
 export function getGreetingHTML(props: {firstName?: string}) {
-  return props.firstName ? `<p>Hi ${props.firstName},</p>` : '';
+  return props.firstName ? `<p>Hi ${props.firstName},</p>` : '<p>Hi,</p>';
 }
 
 export function getGreetingText(props: {firstName?: string}) {
-  return props.firstName ? `Hi ${props.firstName},` : '';
+  return props.firstName ? `Hi ${props.firstName},` : 'Hi,';
 }

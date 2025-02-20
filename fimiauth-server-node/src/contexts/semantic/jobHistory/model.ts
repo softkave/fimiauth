@@ -4,7 +4,10 @@ import {JobHistory} from '../../../definitions/jobHistory.js';
 import {DataQuery} from '../../data/types.js';
 import {addIsDeletedIntoQuery} from '../SemanticBaseProvider.js';
 import {SemanticWorkspaceResourceProvider} from '../SemanticWorkspaceResourceProvider.js';
-import {SemanticProviderQueryParams} from '../types.js';
+import {
+  SemanticProviderMutationParams,
+  SemanticProviderQueryParams,
+} from '../types.js';
 import {SemanticJobHistoryProvider} from './types.js';
 
 export class SemanticJobHistory
@@ -27,5 +30,17 @@ export class SemanticJobHistory
     });
 
     return first(jobHistoryList) || null;
+  }
+
+  async deleteManyBySpaceId(
+    params: {spaceId: string},
+    opts: SemanticProviderMutationParams
+  ): Promise<void> {
+    const query = addIsDeletedIntoQuery<DataQuery<JobHistory>>(
+      {spaceId: params.spaceId},
+      opts?.includeDeleted || true
+    );
+
+    await this.data.deleteManyByQuery(query as DataQuery<JobHistory>, opts);
   }
 }

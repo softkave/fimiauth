@@ -21,8 +21,8 @@ export async function sendCollaborationRequestRevokedEmail(
     params.type === kEmailJobType.collaborationRequestRevoked,
     `Email job type is not ${kEmailJobType.collaborationRequestRevoked}`
   );
-  const {user, base, source} = await getBaseEmailTemplateProps(params);
-  const recipientEmail = user?.email || first(params.emailAddress);
+  const {base, source} = await getBaseEmailTemplateProps(params);
+  const recipientEmail = first(params.emailAddress);
 
   if (!recipientEmail) {
     throw new Error(`No recipient email for job ${jobId}`);

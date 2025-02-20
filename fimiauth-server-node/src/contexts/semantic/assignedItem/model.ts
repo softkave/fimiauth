@@ -83,18 +83,6 @@ export class SemanticAssignedItem
     return await this.data.getManyByQuery(query, options);
   }
 
-  async getUserWorkspaces(params: {
-    assigneeId: string;
-    options?: SemanticProviderQueryListParams<AssignedItem>;
-  }): Promise<AssignedItem[]> {
-    const {assigneeId, options} = params;
-    const query = addIsDeletedIntoQuery<DataQuery<AssignedItem>>(
-      {assigneeId},
-      options?.includeDeleted || false
-    );
-    return await this.data.getManyByQuery(query, options);
-  }
-
   async deleteByAssigned(params: {
     spaceId: string;
     assignedId: string | string[];

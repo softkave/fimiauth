@@ -23,7 +23,6 @@ import resolveEntityPermissions from './handler.js';
 import {
   ResolveEntityPermissionsEndpointParams,
   ResolvedEntityPermissionItem,
-  ResolvedEntityPermissionItemTarget,
 } from './types.js';
 
 // TODO: test container and target appliesTo
@@ -123,43 +122,43 @@ describe('resolveEntityPermissions', () => {
         entityId: pg01.resourceId,
         action: 'readFile',
         access: true,
-        target: {targetId: workspace.resourceId},
+        targetId: workspace.resourceId,
       }),
       indexResolvedPermissions({
         entityId: pg02.resourceId,
         action: 'readFile',
         access: true,
-        target: {targetId: file01.resourceId},
+        targetId: file01.resourceId,
       }),
       indexResolvedPermissions({
         entityId: pg03.resourceId,
         action: 'readFile',
         access: false,
-        target: {targetId: workspace.resourceId},
+        targetId: workspace.resourceId,
       }),
       indexResolvedPermissions({
         entityId: pg02.resourceId,
         action: 'readFile',
         access: false,
-        target: {targetId: workspace.resourceId},
+        targetId: workspace.resourceId,
       }),
       indexResolvedPermissions({
         entityId: pg04.resourceId,
         action: 'readFile',
         access: true,
-        target: {targetId: workspace.resourceId},
+        targetId: workspace.resourceId,
       }),
       indexResolvedPermissions({
         entityId: pg05.resourceId,
         action: 'readFile',
         access: false,
-        target: {targetId: workspace.resourceId},
+        targetId: workspace.resourceId,
       }),
       indexResolvedPermissions({
         entityId: pg04.resourceId,
         action: 'readFile',
         access: true,
-        target: {targetId: file01.resourceId},
+        targetId: file01.resourceId,
       }),
     ];
 
@@ -203,7 +202,7 @@ describe('resolveEntityPermissions', () => {
         entityId: adminPg.resourceId,
         action: 'readFolder',
         access: true,
-        target: {targetId: folder.resourceId},
+        targetId: folder.resourceId,
       }),
     ];
     const resolved = result.items.map(indexResolvedPermissions);
@@ -212,17 +211,5 @@ describe('resolveEntityPermissions', () => {
 });
 
 function indexResolvedPermissions(item: ResolvedEntityPermissionItem) {
-  return makeKey([
-    item.entityId,
-    indexResolvedPermissionItemTarget(item.target),
-    item.action,
-    item.access,
-  ]);
-}
-
-function indexResolvedPermissionItemTarget(
-  item: ResolvedEntityPermissionItemTarget
-) {
-  const targetIdentifier = item.targetId;
-  return targetIdentifier;
+  return makeKey([item.entityId, item.targetId, item.action, item.access]);
 }

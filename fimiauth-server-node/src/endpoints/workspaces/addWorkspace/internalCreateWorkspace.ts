@@ -18,7 +18,11 @@ const INTERNAL_createWorkspace = async (
   agent: SessionAgent,
   opts: SemanticProviderMutationParams
 ) => {
-  await checkWorkspaceNameExists(data.name, opts);
+  await checkWorkspaceNameExists({
+    name: data.name,
+    resourceId: undefined,
+    opts,
+  });
 
   const createdAt = getTimestamp();
   const id = getNewIdForResource(kFimidaraResourceType.Workspace);

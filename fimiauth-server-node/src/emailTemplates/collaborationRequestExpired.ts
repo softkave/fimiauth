@@ -7,8 +7,6 @@ import {
   getGreetingText,
   getHeaderHTML,
   getHeaderText,
-  getLoginSectionHTML,
-  getLoginSectionText,
 } from './helpers.js';
 import {BaseEmailTemplateProps} from './types.js';
 
@@ -44,7 +42,6 @@ export function collaborationRequestExpiredEmailHTML(
         props.workspaceName
       } has been expired.
     </p>`)}
-  ${getLoginSectionHTML(props)}
   ${getFooterHTML()}
 </body>
 </html>
@@ -61,7 +58,6 @@ ${getGreetingText(props)}
 This is to notify you that the collaboration request sent from ${
     props.workspaceName
   } has been expired.
-  ${getLoginSectionText(props)}
 `;
 
   return txt;

@@ -9,6 +9,7 @@ import {kFimidaraResourceType} from '../../../definitions/system.js';
 import {newWorkspaceResource} from '../../../utils/resource.js';
 import {getWorkspaceIdFromSessionAgent} from '../../../utils/sessionUtils.js';
 import {validate} from '../../../utils/validate.js';
+import {generateDefaultPublicPermissionGroup} from '../../workspaces/addWorkspace/utils.js';
 import {checkWorkspaceExists} from '../../workspaces/utils.js';
 import {checkSpaceNameExists} from '../checkSpaceNameExists.js';
 import {spaceExtractor} from '../utils.js';
@@ -34,16 +35,39 @@ const addSpace: AddSpaceEndpoint = async reqData => {
     spaceId: workspace.resourceId,
   });
 
-  let space = await kSemanticModels.utils().withTxn(async opts => {
-    await checkSpaceNameExists(workspace.resourceId, data.name, opts);
+  const space = await kSemanticModels.utils().withTxn(async opts => {
+    await checkSpaceNameExists({
+      name: data.name,
+      workspaceId: workspace.resourceId,
+      opts,
+    });
+
     const space = newWorkspaceResource<Space>({
       agent,
       type: kFimidaraResourceType.Space,
       workspaceId: workspace.resourceId,
       spaceId: workspace.resourceId,
-      seed: {...data, workspaceId: workspace.resourceId},
+      seed: {
+        ...data,
+        workspaceId: workspace.resourceId,
+        publicPermissionGroupId: '',
+      },
     });
+
+    const publicPermissionGroup = generateDefaultPublicPermissionGroup({
+      agent,
+      workspace,
+      seed: {
+        spaceId: space.resourceId,
+      },
+    });
+
+    space.publicPermissionGroupId = publicPermissionGroup.resourceId;
     await kSemanticModels.space().insertItem(space, opts);
+    await kSemanticModels
+      .permissionGroup()
+      .insertItem([publicPermissionGroup], opts);
+
     return space;
   });
 
